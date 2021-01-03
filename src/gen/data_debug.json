@@ -286,6 +286,100 @@
             }
         ]
     },
+    "res://scene/rigidbody.tscn": {
+        "type": "PackedScene",
+        "ext": {
+            "1": "media/palette.png"
+        },
+        "sub": [
+            {
+                "id": 1,
+                "type": "RectangleShape2D",
+                "extents": {
+                    "x": 364,
+                    "y": 21
+                }
+            },
+            {
+                "id": 2,
+                "type": "RectangleShape2D",
+                "extents": {
+                    "x": 17,
+                    "y": 17
+                }
+            }
+        ],
+        "nodes": [
+            {
+                "type": "Node2D",
+                "name": "node_2d"
+            },
+            {
+                "type": "StaticBody2D",
+                "name": "static_body_2d",
+                "parent": ".",
+                "position": {
+                    "x": 498,
+                    "y": 900
+                },
+                "collision_mask": 0
+            },
+            {
+                "type": "Sprite",
+                "name": "palette",
+                "parent": "static_body_2d",
+                "scale": {
+                    "x": 182,
+                    "y": 9.99996
+                },
+                "texture": [
+                    "@ext#",
+                    "1"
+                ]
+            },
+            {
+                "type": "CollisionShape2D",
+                "name": "collision_shape_2d",
+                "parent": "static_body_2d",
+                "shape": [
+                    "@sub#",
+                    "1"
+                ]
+            },
+            {
+                "type": "RigidBody2D",
+                "name": "rigid_body_2d",
+                "parent": ".",
+                "position": {
+                    "x": 486,
+                    "y": 583
+                },
+                "collision_layer": 2
+            },
+            {
+                "type": "Sprite",
+                "name": "palette",
+                "parent": "rigid_body_2d",
+                "scale": {
+                    "x": 8.5,
+                    "y": 8.5
+                },
+                "texture": [
+                    "@ext#",
+                    "1"
+                ]
+            },
+            {
+                "type": "CollisionShape2D",
+                "name": "collision_shape_2d",
+                "parent": "rigid_body_2d",
+                "shape": [
+                    "@sub#",
+                    "2"
+                ]
+            }
+        ]
+    },
     "res://scene/platformer.tscn": {
         "type": "PackedScene",
         "ext": {

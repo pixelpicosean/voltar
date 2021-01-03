@@ -14,10 +14,11 @@ import {
 import { NOTIFICATION_ENTER_TREE } from "../main/node";
 import { PhysicsMaterial } from "../resources/physics_material";
 
-import { BodyMode, BodyState } from "./const";
+import { BodyMode, BodyState, CCDMode } from "./const";
 import { NOTIFICATION_LOCAL_TRANSFORM_CHANGED } from "./canvas_item";
 import { CollisionObject2D } from "./collision_object_2d";
 import { Node2D } from "./node_2d";
+import { remove_item } from "engine/dep/index";
 
 type CollisionObject2DSW = import("engine/servers/physics_2d/collision_object_2d_sw").CollisionObject2DSW;
 type Physics2DDirectBodyStateSW = import("engine/servers/physics_2d/body_2d_sw").Physics2DDirectBodyStateSW;
@@ -785,3 +786,296 @@ export class KinematicBody2D extends PhysicsBody2D {
     }
 }
 node_class_map['KinematicBody2D'] = GDCLASS(KinematicBody2D, PhysicsBody2D)
+
+class ShapePair {
+    body_shape: number;
+    local_shape: number;
+    tagged: boolean;
+    constructor(p_bs = 0, p_ls = 0) {
+        this.body_shape = p_bs;
+        this.local_shape = p_ls;
+    }
+}
+
+class RigidBody2D$RemoveAction {
+    body_id: Node2D = null;
+    pair: ShapePair = null;
+    reset(): RigidBody2D$RemoveAction {
+        this.body_id = null;
+        this.pair = null;
+        return this;
+    }
+}
+
+class RigidBody2D$BodyState {
+    in_scene: boolean = false;
+    shapes: ShapePair[] = [];
+}
+
+class ContactMonitor {
+    body_map: Map<Node2D, RigidBody2D$BodyState> = new Map;
+
+    reset(): ContactMonitor {
+        this.body_map.clear();
+        return this;
+    }
+
+    static create() {
+        let cm = pool_ContactMonitor.pop();
+        if (!cm) return new ContactMonitor;
+        return cm.reset();
+    }
+    static free(cm: ContactMonitor) {
+        pool_ContactMonitor.push(cm);
+    }
+}
+const pool_ContactMonitor: ContactMonitor[] = [];
+
+class RigidBody2DInOut {
+    id: Node2D;
+    shape = 0;
+    local_shape = 0;
+    reset(): RigidBody2DInOut {
+        this.id = null;
+        this.shape = 0;
+        this.local_shape = 0;
+        return this;
+    }
+}
+const list_RigidBody2DInOut: RigidBody2DInOut[] = Array(16);
+for (let i = 0; i < list_RigidBody2DInOut.length; i++) {
+    list_RigidBody2DInOut[i] = new RigidBody2DInOut;
+}
+function get_RigidBody2DInOutList(amount: number) {
+    // @Incomplete: support more than 16 contacts
+    for (let i = 0; i < amount; i++) {
+        list_RigidBody2DInOut[i].reset();
+    }
+    return list_RigidBody2DInOut;
+}
+
+const list_RigidBody2DRemoveAction: RigidBody2D$RemoveAction[] = Array(16);
+for (let i = 0; i < list_RigidBody2DRemoveAction.length; i++) {
+    list_RigidBody2DRemoveAction[i] = new RigidBody2D$RemoveAction;
+}
+function get_RigidBody2DRemoveActionList(amount: number) {
+    // @Incomplete: support more than 16 contacts
+    for (let i = 0; i < amount; i++) {
+        list_RigidBody2DRemoveAction[i].reset();
+    }
+    return list_RigidBody2DRemoveAction;
+}
+
+export class RigidBody2D extends PhysicsBody2D {
+    get class() { return "RigidBody2D" }
+
+    can_sleep: boolean = true;
+    state: Physics2DDirectBodyStateSW = null;
+    mode: BodyMode = BodyMode.RIGID;
+
+    mass: number = 1;
+    physics_material_override: PhysicsMaterial = null;
+    gravity_scale: number = 1;
+    linear_damp: number = -1;
+    angular_damp: number = -1;
+
+    linear_velocity: Vector2 = new Vector2;
+    angular_velocity: number = 0;
+    sleeping: boolean = false;
+
+    max_contacts_reported: number = 0;
+
+    custom_integrator: boolean = false;
+
+    ccd_mode: CCDMode = CCDMode.DISABLED;
+
+    contact_monitor: ContactMonitor = null;
+
+    constructor() {
+        super(BodyMode.RIGID);
+
+        Physics2DServer.get_singleton().body_set_force_integration_callback(this.rid, this._direct_state_changed, this);
+    }
+    _free() {
+        if (this.contact_monitor) {
+            ContactMonitor.free(this.contact_monitor);
+            this.contact_monitor = null;
+        }
+        super._free();
+    }
+
+    _integrate_forces(state: Physics2DDirectBodyStateSW) { }
+
+    _body_enter_tree(node: Node2D) {
+        let E = this.contact_monitor.body_map.get(node);
+
+        E.in_scene = true;
+        this.emit_signal("body_entered", node);
+
+        for (let s of E.shapes) {
+            this.emit_signal("body_shape_entered", node, s.body_shape, s.local_shape);
+        }
+    }
+
+    _body_exit_tree(node: Node2D) {
+        let E = this.contact_monitor.body_map.get(node);
+
+        E.in_scene = true;
+        this.emit_signal("body_exited", node);
+
+        for (let s of E.shapes) {
+            this.emit_signal("body_shape_exited", node, s.body_shape, s.local_shape);
+        }
+    }
+
+    _body_inout(p_status: number, node: Node2D, p_body_shape: number, p_local_shape: number) {
+        let body_in = p_status === 1;
+
+        let E = this.contact_monitor.body_map.get(node);
+
+        if (body_in) {
+            if (!E) {
+                E = new RigidBody2D$BodyState;
+                this.contact_monitor.body_map.set(node, E);
+                E.in_scene = node && node.is_inside_tree();
+                if (node) {
+                    node.connect("tree_entered", this._body_enter_tree, this);
+                    node.connect("tree_exiting", this._body_exit_tree, this);
+                    if (E.in_scene) {
+                        this.emit_signal("body_entered", node);
+                    }
+                }
+            }
+
+            if (node) {
+                E.shapes.push(new ShapePair(p_body_shape, p_local_shape));
+            }
+
+            if (E.in_scene) {
+                this.emit_signal("body_shape_entered", node, p_body_shape, p_local_shape);
+            }
+        } else {
+            if (node) {
+                for (let i = 0; i < E.shapes.length; i++) {
+                    let s = E.shapes[i];
+
+                    if (s.body_shape === p_body_shape && s.local_shape === p_local_shape) {
+                        remove_item(E.shapes, i);
+                        break;
+                    }
+                }
+
+                let in_scene = E.in_scene;
+
+                if (E.shapes.length === 0) {
+                    if (node) {
+                        node.disconnect("tree_entered", this._body_enter_tree, this);
+                        node.disconnect("tree_exiting", this._body_exit_tree, this);
+                        if (E.in_scene) {
+                            this.emit_signal("body_exited", node);
+                        }
+                    }
+
+                    this.contact_monitor.body_map.delete(node);
+                }
+                if (node && in_scene) {
+                    this.emit_signal("body_shape_exited", node, p_body_shape, p_local_shape);
+                }
+            }
+        }
+    }
+
+    _direct_state_changed(p_state: Physics2DDirectBodyStateSW) {
+        this.state = p_state;
+
+        this.block_transform_notify = true;
+        if (this.mode !== BodyMode.KINEMATIC) {
+            this.set_global_transform(p_state.get_transform());
+        }
+        this.linear_velocity.copy(p_state.get_linear_velocity());
+        this.angular_velocity = p_state.get_angular_velocity();
+        if (this.sleeping !== p_state.is_sleeping()) {
+            this.sleeping = p_state.is_sleeping();
+            this.emit_signal("sleeping_state_changed");
+        }
+        this._integrate_forces(p_state);
+        this.block_transform_notify = false;
+
+        if (this.contact_monitor) {
+            // untag all
+            let rc = 0;
+            for (let [_, bs] of this.contact_monitor.body_map) {
+                for (let s of bs.shapes) {
+                    s.tagged = false;
+                    rc++;
+                }
+            }
+
+            let toadd = get_RigidBody2DInOutList(p_state.get_contact_count());
+            let toadd_count = 0;
+            let toremove = get_RigidBody2DRemoveActionList(rc);
+            let toremove_count = 0;
+
+            // put the ones to add
+
+            for (let i = 0; i < p_state.get_contact_count(); i++) {
+                let obj = p_state.get_contact_collider_id(i);
+                let local_shape = p_state.get_contact_local_shape(i);
+                let shape = p_state.get_contact_collider_shape(i);
+
+                let E = this.contact_monitor.body_map.get(obj);
+                if (!E) {
+                    toadd[toadd_count].local_shape = local_shape;
+                    toadd[toadd_count].id = obj;
+                    toadd[toadd_count].shape = shape;
+                    toadd_count++;
+                    continue;
+                }
+
+                let sp: ShapePair = null;
+                for (let s of E.shapes) {
+                    if (s.body_shape === shape && s.local_shape === local_shape) {
+                        sp = s;
+                        break;
+                    }
+                }
+                if (!sp) {
+                    toadd[toadd_count].local_shape = local_shape;
+                    toadd[toadd_count].id = obj;
+                    toadd[toadd_count].shape = shape;
+                    toadd_count++;
+                    continue;
+                }
+
+                sp.tagged = true;
+            }
+
+            // put the ones to remove
+
+            for (let [id, E] of this.contact_monitor.body_map) {
+                for (let s of E.shapes) {
+                    if (!s.tagged) {
+                        toremove[toremove_count].body_id = id;
+                        toremove[toremove_count].pair = s;
+                        toremove_count++;
+                    }
+                }
+            }
+
+            // process remotions
+
+            for (let i = 0; i < toremove_count; i++) {
+                this._body_inout(0, toremove[i].body_id, toremove[i].pair.body_shape, toremove[i].pair.local_shape);
+            }
+
+            // process additions
+
+            for (let i = 0; i < toadd_count; i++) {
+                this._body_inout(1, toadd[i].id, toadd[i].shape, toadd[i].local_shape);
+            }
+        }
+
+        this.state = null;
+    }
+}
+node_class_map["RigidBody2D"] = GDCLASS(RigidBody2D, PhysicsBody2D);

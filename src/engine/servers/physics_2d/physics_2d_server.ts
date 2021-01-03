@@ -478,7 +478,7 @@ export class Physics2DServer {
             p_body.fi_callback = {
                 id: p_scope,
                 method: p_method,
-                callback_udata: p_params,
+                callback_udata: p_params || Object.create(null),
             }
         }
     }

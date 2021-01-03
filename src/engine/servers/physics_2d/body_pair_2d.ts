@@ -146,6 +146,8 @@ export class BodyPair2DSW extends Constraint2DSW {
         if (B.continuous_cd_mode === CCDMode.CAST_SHAPE) {
             motion_B = B.get_motion();
         }
+        if (!motion_A) motion_A = Vector2.create();
+        if (!motion_B) motion_B = Vector2.create();
 
         let prev_collided = this.collided;
 

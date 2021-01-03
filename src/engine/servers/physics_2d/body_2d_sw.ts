@@ -733,9 +733,9 @@ export class Body2DSW extends CollisionObject2DSW {
                 this.set_force_integration_callback(null, null, null);
             } else {
                 if (this.fi_callback.callback_udata.type) {
-                    this.fi_callback.method.call(obj, vp, 2);
+                    this.fi_callback.method.call(obj, vp[0], vp[1]);
                 } else {
-                    this.fi_callback.method.call(obj, vp, 1);
+                    this.fi_callback.method.call(obj, vp[0]);
                 }
             }
         }
