@@ -7,6 +7,7 @@ import { Rect2 } from 'engine/core/math/rect2';
 import { Basis } from 'engine/core/math/basis';
 import { Transform } from 'engine/core/math/transform';
 import { CameraMatrix } from 'engine/core/math/camera_matrix';
+import { range_sort } from 'engine/core/v_array';
 import { OS } from 'engine/core/os/os';
 
 import {
@@ -355,9 +356,6 @@ class Element_t {
     light_type1 = 0;
     light_mode = 0;
 
-    /**
-     * @param {Element_t} other
-     */
     copy(other: Element_t) {
         this.instance = other.instance;
         this.geometry = other.geometry;
@@ -422,48 +420,27 @@ class RenderList_t {
         return this.elements[this.element_count++];
     }
 
-    /**
-     * @param {boolean} p_alpha
-     */
     sort_by_key(p_alpha: boolean) {
         if (p_alpha) {
-            let list = this.elements.slice(this.max_elements - this.alpha_element_count);
-            list.sort(sort_by_key);
-            for (let i = 0; i < list.length; i++) {
-                this.elements[this.alpha_element_count + i] = list[i];
-            }
+            range_sort(this.elements, this.max_elements - this.alpha_element_count, this.max_elements - 1, sort_by_key);
         } else {
-            this.elements.sort(sort_by_key)
+            range_sort(this.elements, 0, this.element_count - 1, sort_by_key);
         }
     }
 
-    /**
-     * @param {boolean} p_alpha
-     */
     sort_by_depth(p_alpha: boolean) {
         if (p_alpha) {
-            let list = this.elements.slice(this.max_elements - this.alpha_element_count);
-            list.sort(sort_by_depth);
-            for (let i = 0; i < list.length; i++) {
-                this.elements[this.alpha_element_count + i] = list[i];
-            }
+            range_sort(this.elements, this.max_elements - this.alpha_element_count, this.max_elements - 1, sort_by_depth);
         } else {
-            this.elements.sort(sort_by_depth)
+            range_sort(this.elements, 0, this.element_count - 1, sort_by_depth);
         }
     }
 
-    /**
-     * @param {boolean} p_alpha
-     */
     sort_by_reverse_depth_and_priority(p_alpha: boolean) {
         if (p_alpha) {
-            let list = this.elements.slice(this.max_elements - this.alpha_element_count);
-            list.sort(sort_by_reverse_depth_and_priority);
-            for (let i = 0; i < list.length; i++) {
-                this.elements[this.alpha_element_count + i] = list[i];
-            }
+            range_sort(this.elements, this.max_elements - this.alpha_element_count, this.max_elements - 1, sort_by_reverse_depth_and_priority);
         } else {
-            this.elements.sort(sort_by_reverse_depth_and_priority);
+            range_sort(this.elements, 0, this.element_count - 1, sort_by_reverse_depth_and_priority);
         }
     }
 }
@@ -803,6 +780,7 @@ export class RasterizerScene {
 
     current_material_index = 0;
     current_geometry_index = 0;
+    current_light_index = 0;
     current_shader_index = 0;
 
     constructor() {
@@ -910,9 +888,6 @@ export class RasterizerScene {
         return new Environment_t;
     }
 
-    /**
-     * @param {MaterialInstanceConfig} config
-     */
     metarial_instance_create(config: MaterialInstanceConfig) {
         // find base and make a fork
         let base = this.material_base_get(config);
@@ -1582,13 +1557,6 @@ export class RasterizerScene {
         Transform.free(cam_transform);
     }
 
-    /**
-     * @param {LightInstance_t} light_instance
-     * @param {ShadowAtlas_t} p_shadow_atlas
-     * @param {number} p_pass
-     * @param {Instance_t[]} p_cull_result
-     * @param {number} p_cull_count
-     */
     render_shadow(light_instance: LightInstance_t, p_shadow_atlas: ShadowAtlas_t, p_pass: number, p_cull_result: Instance_t[], p_cull_count: number) {
         this.state.render_no_shadows = false;
 
@@ -1762,12 +1730,6 @@ export class RasterizerScene {
         Transform.free(light_transform);
     }
 
-    /**
-     * @param {ShaderMaterial} shader_material
-     * @param {string} vs
-     * @param {string} fs
-     * @param {number} conditions
-     */
     init_shader_material(shader_material: ShaderMaterial, vs: string, fs: string, conditions: number) {
         let vs_code = vs
             // uniform
@@ -1890,16 +1852,11 @@ export class RasterizerScene {
         gl.bindBuffer(gl.ARRAY_BUFFER, null);
     }
 
-    /**
-     * @param {Instance_t[]} p_cull_result
-     * @param {number} p_cull_count
-     * @param {boolean} p_depth_pass
-     * @param {boolean} p_shadow_pass
-     */
     _fill_render_list(p_cull_result: Instance_t[], p_cull_count: number, p_depth_pass: boolean, p_shadow_pass: boolean) {
         this.render_pass++;
         this.current_material_index = 0;
         this.current_geometry_index = 0;
+        this.current_light_index = 0;
         this.current_shader_index = 0;
 
         for (let i = 0; i < p_cull_count; i++) {
@@ -1923,15 +1880,7 @@ export class RasterizerScene {
         }
     }
 
-    /**
-     * @param {Geometry_t} p_geometry
-     * @param {Instance_t} p_instance
-     * @param {number} p_material
-     * @param {boolean} p_depth_pass
-     * @param {boolean} p_shadow_pass
-     */
     _add_geometry(p_geometry: Geometry_t, p_instance: Instance_t, p_material: number, p_depth_pass: boolean, p_shadow_pass: boolean) {
-        /** @type {Material_t} */
         let material: Material_t = null;
 
         if (p_instance.material_override) {
@@ -1959,13 +1908,6 @@ export class RasterizerScene {
         }
     }
 
-    /**
-     * @param {Geometry_t} p_geometry
-     * @param {Instance_t} p_instance
-     * @param {Material_t} p_material
-     * @param {boolean} p_depth_pass
-     * @param {boolean} p_shadow_pass
-     */
     _add_geometry_with_material(p_geometry: Geometry_t, p_instance: Instance_t, p_material: Material_t, p_depth_pass: boolean, p_shadow_pass: boolean) {
         let has_base_alpha = false;
         let has_blend_alpha = false;
@@ -1993,8 +1935,8 @@ export class RasterizerScene {
         e.material = p_material;
         e.instance = p_instance;
         e.use_accum = false;
-        e.front_facing = false;
         e.light_index = MAX_LIGHTS;
+        e.front_facing = false;
 
         if (e.geometry.last_pass !== this.render_pass) {
             e.geometry.last_pass = this.render_pass;
@@ -2085,30 +2027,14 @@ export class RasterizerScene {
         }
     }
 
-    /**
-     * @param {Element_t[]} p_elements
-     * @param {number} p_element_count
-     * @param {Transform} p_view_transform
-     * @param {CameraMatrix} p_projection
-     * @param {ShadowAtlas_t} p_shadow_atlas
-     * @param {Environment_t} p_env
-     * @param {number} p_shadow_bias
-     * @param {number} p_shadow_normal_bias
-     * @param {boolean} p_reverse_cull
-     * @param {boolean} p_alpha_pass
-     * @param {boolean} p_shadow
-     */
     _render_render_list(p_elements: Element_t[], p_element_count: number, p_view_transform: Transform, p_projection: CameraMatrix, p_shadow_atlas: ShadowAtlas_t, p_env: Environment_t, p_shadow_bias: number, p_shadow_normal_bias: number, p_reverse_cull: boolean, p_alpha_pass: boolean, p_shadow: boolean) {
         let view_transform_inverse = p_view_transform.inverse();
         let projection_inverse = p_projection.inverse();
 
         const gl = this.gl;
 
-        /** @type {Material_t} */
         let prev_material: Material_t = null;
-        /** @type {Geometry_t} */
         let prev_geometry: Geometry_t = null;
-        /** @type {Skeleton_t} */
         let prev_skeleton: Skeleton_t = null;
 
         let prev_unshaded = false;
@@ -2118,7 +2044,6 @@ export class RasterizerScene {
         this.set_shader_condition(SHADER_DEF.SHADLESS, false);
 
         let prev_base_pass = false;
-        /** @type {LightInstance_t} */
         let prev_light: LightInstance_t = null;
 
         let prev_blend_mode = -2;
@@ -2170,9 +2095,7 @@ export class RasterizerScene {
             let accum_pass = e.use_accum;
             e.use_accum = true;
 
-            /** @type {LightInstance_t} */
             let light: LightInstance_t = null;
-            /** @type {Texture_t} */
             let lightmap: Texture_t = null;
             let rebind_light = false;
             let rebind_lightmap = false;
@@ -2311,12 +2234,12 @@ export class RasterizerScene {
                 rebind = true;
             }
 
-            if (e.geometry != prev_geometry || skeleton != prev_skeleton) {
+            if (e.geometry !== prev_geometry || skeleton !== prev_skeleton) {
                 this._setup_geometry(e, skeleton);
             }
 
             let shader_rebind = false;
-            if (rebind || material != prev_material) {
+            if (rebind || material !== prev_material) {
                 shader_rebind = this._setup_material(material, p_alpha_pass, skeleton ? skeleton.size * 3 : 0);
             }
 
