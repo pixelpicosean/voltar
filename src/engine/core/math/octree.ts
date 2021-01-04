@@ -78,16 +78,12 @@ class Element<T> {
     }
 }
 
-/** @type {Octant[]} */
 let ot_pool: Octant<any>[] = [];
 function Octant_new() {
     let e = ot_pool.pop();
     if (!e) e = new Octant;
     return e.reset();
 }
-/**
- * @param {Octant} ot
- */
 function Octant_free(ot: Octant<any>) {
     ot_pool.push(ot);
 }
@@ -196,10 +192,6 @@ export class Octree<T> {
         this.unit_size = unit_size;
     }
 
-    /**
-     * @param {T} p_userdata
-     * @param {AABB} p_aabb
-     */
     create(p_userdata: T, p_aabb: AABB, p_subindex = 0, p_pairable = false, p_pairable_type = 0, p_pairable_mask = 1) {
         let e = this.element_map[this.last_element_id++] = Element_new();
 
@@ -224,10 +216,6 @@ export class Octree<T> {
         return this.last_element_id - 1;
     }
 
-    /**
-     * @param {number} p_id
-     * @param {AABB} p_aabb
-     */
     move(p_id: number, p_aabb: AABB) {
         let e = this.element_map[p_id];
 
@@ -325,9 +313,6 @@ export class Octree<T> {
         this._optimize();
     }
 
-    /**
-     * @param {number} p_id
-     */
     erase(p_id: number) {
         let e = this.element_map[p_id];
 
@@ -341,14 +326,6 @@ export class Octree<T> {
         Element_free(e);
     }
 
-    /**
-     * @param {Vector3Like} p_from
-     * @param {Vector3Like} p_to
-     * @param {T[]} p_result_array
-     * @param {number} p_result_max
-     * @param {number[]} [p_subindex_array]
-     * @param {number} [p_mask]
-     */
     cull_segment(p_from: Vector3Like, p_to: Vector3Like, p_result_array: T[], p_result_max: number, p_subindex_array: number[], p_mask: number = 0xFFFFFFFF) {
         if (!this.root) return 0;
 
@@ -364,13 +341,6 @@ export class Octree<T> {
         return result.index;
     }
 
-    /**
-     * @param {AABB} p_aabb
-     * @param {T[]} p_result_array
-     * @param {number} p_result_max
-     * @param {number[]} [p_subindex_array]
-     * @param {number} [p_mask]
-     */
     cull_aabb(p_aabb: AABB, p_result_array: T[], p_result_max: number, p_subindex_array: number[], p_mask: number = 0xFFFFFFFF) {
         if (!this.root) return 0;
 
@@ -385,12 +355,6 @@ export class Octree<T> {
         return result.index;
     }
 
-    /**
-     * @param {Plane[]} p_convex
-     * @param {T[]} p_result_array
-     * @param {number} p_result_max
-     * @param {number} p_mask
-     */
     cull_convex(p_convex: Plane[], p_result_array: T[], p_result_max: number, p_mask: number = 0xFFFFFFFF) {
         if (!this.root || p_convex.length == 0) return 0;
 
@@ -417,8 +381,7 @@ export class Octree<T> {
     }
 
     /**
-     * TODO: load balance value from project settings
-     * @param {number} p_bal
+     * @Incomplete: load balance value from project settings
      */
     set_balance(p_bal: number) {
         let v = clamp(p_bal, 0, 1);
@@ -517,12 +480,6 @@ export class Octree<T> {
         }
     }
 
-    /**
-     * @param {Octant} p_octant
-     * @param {AABB} p_aabb
-     * @param {number} p_result_max
-     * @param {{ array: T[], subindex_array: number[], index: number, mask: number }} result
-     */
     _cull_aabb(p_octant: Octant<T>, p_aabb: AABB, p_result_max: number, result: { array: T[]; subindex_array: number[]; index: number; mask: number; }) {
         if (p_result_max === result.index) return;
 
@@ -645,9 +602,6 @@ export class Octree<T> {
         }
     }
 
-    /**
-     * @param {AABB} p_aabb
-     */
     _ensure_valid_root(p_aabb: AABB) {
         if (!this.root) {
             let base = new AABB().set(
@@ -698,12 +652,6 @@ export class Octree<T> {
         }
     }
 
-
-
-    /**
-     * @param {Element} p_element
-     * @param {Octant} p_octant
-     */
     _insert_element(p_element: Element<T>, p_octant: Octant<T>) {
         let element_size = p_element.aabb.get_longest_axis_size() * 1.01;
 
@@ -845,11 +793,6 @@ export class Octree<T> {
         p_element.octant_owners.clear();
     }
 
-    /**
-     * @param {Element} p_element
-     * @param {Octant} p_octant
-     * @param {Octant} [p_limit]
-     */
     _remove_element_pair_and_remove_empty_octants(p_element: Element<T>, p_octant: Octant<T>, p_limit: Octant<T> = null) {
         let octant_removed = false;
 
@@ -907,9 +850,6 @@ export class Octree<T> {
         return octant_removed;
     }
 
-    /**
-     * @param {PairData} p_pair
-     */
     _pair_check(p_pair: PairData<T>) {
         let intersect = p_pair.A.aabb.intersects_inclusive(p_pair.B.aabb);
 
@@ -930,10 +870,6 @@ export class Octree<T> {
         }
     }
 
-    /**
-     * @param {Element} p_A
-     * @param {Element} p_B
-     */
     _pair_reference(p_A: Element<T>, p_B: Element<T>) {
         if (p_A === p_B || (p_A.userdata === p_B.userdata && p_A.userdata)) {
             return;
@@ -964,10 +900,6 @@ export class Octree<T> {
         }
     }
 
-    /**
-     * @param {Element} p_A
-     * @param {Element} p_B
-     */
     _pair_unreference(p_A: Element<T>, p_B: Element<T>) {
         if (p_A == p_B) return;
 
@@ -998,9 +930,6 @@ export class Octree<T> {
         }
     }
 
-    /**
-     * @param {Element} p_element
-     */
     _element_check_pairs(p_element: Element<T>) {
         let E = p_element.pair_list.front();
         while (E) {
@@ -1009,9 +938,6 @@ export class Octree<T> {
         }
     }
 
-    /**
-     * @param {Octant} p_octant
-     */
     _remove_tree(p_octant: Octant<T>) {
         if (!p_octant) return;
 
@@ -1024,10 +950,6 @@ export class Octree<T> {
         Octant_free(p_octant);
     }
 
-    /**
-     * @param {Element} p_element
-     * @param {Octant} p_octant
-     */
     _pair_element(p_element: Element<T>, p_octant: Octant<T>) {
         let E = p_octant.pairable_elements.front();
         while (E) {
@@ -1060,10 +982,6 @@ export class Octree<T> {
             }
         }
     }
-    /**
-     * @param {Element} p_element
-     * @param {Octant} p_octant
-     */
     _unpair_element(p_element: Element<T>, p_octant: Octant<T>) {
         let E = p_octant.pairable_elements.front();
         while (E) {
@@ -1120,12 +1038,10 @@ export class Octree<T> {
     }
 }
 
-/** @type {Vector3[]} */
 let pool_Vector3: Vector3[] = [];
 
 /**
- * TODO: move `compute_convex_mesh_points` to geometry module
- * @param {Plane[]} planes
+ * @Incomplete: move `compute_convex_mesh_points` to geometry module
  */
 function compute_convex_mesh_points(planes: Plane[]) {
     /** @type {Vector3[]} */
@@ -1160,10 +1076,6 @@ function compute_convex_mesh_points(planes: Plane[]) {
     return points;
 }
 
-/**
- * @param {number} a_id
- * @param {number} b_id
- */
 function create_pair_key(a_id: number, b_id: number) {
     return (a_id <= b_id) ? `${a_id}.${b_id}` : `${b_id}.${a_id}`;
 }

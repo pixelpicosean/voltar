@@ -966,16 +966,7 @@ export class VisualServerScene {
         this._instance_update_list.add(p_instance.update_item);
     }
 
-    /**
-     * @param {Transform} p_cam_transform
-     * @param {CameraMatrix} p_cam_projection
-     * @param {boolean} p_cam_ortho
-     * @param {import('engine/drivers/webgl/rasterizer_scene').Environment_t} p_force_env
-     * @param {number} p_visible_layers
-     * @param {Scenario_t} p_scenario
-     * @param {ShadowAtlas_t} p_shadow_atlas
-     */
-    _prepare_scene(p_cam_transform: Transform, p_cam_projection: CameraMatrix, p_cam_ortho: boolean, p_force_env: import('engine/drivers/webgl/rasterizer_scene').Environment_t, p_visible_layers: number, p_scenario: Scenario_t, p_shadow_atlas: ShadowAtlas_t) {
+    _prepare_scene(p_cam_transform: Transform, p_cam_projection: CameraMatrix, p_cam_ortho: boolean, p_force_env: Environment_t, p_visible_layers: number, p_scenario: Scenario_t, p_shadow_atlas: ShadowAtlas_t) {
         this.render_pass++;
         let camera_layer_mask = p_visible_layers;
 
@@ -1537,17 +1528,8 @@ export class VisualServerScene {
         return animated_material_found;
     }
 
-    /**
-     * @param {Transform} p_cam_transform
-     * @param {CameraMatrix} p_cam_projection
-     * @param {boolean} p_cam_ortho
-     * @param {import('engine/drivers/webgl/rasterizer_scene').Environment_t} p_force_env
-     * @param {Scenario_t} p_scenario
-     * @param {ShadowAtlas_t} p_shadow_atlas
-     */
-    _render_scene(p_cam_transform: Transform, p_cam_projection: CameraMatrix, p_cam_ortho: boolean, p_force_env: import('engine/drivers/webgl/rasterizer_scene').Environment_t, p_scenario: Scenario_t, p_shadow_atlas: ShadowAtlas_t) {
-        /** @type {import('engine/drivers/webgl/rasterizer_scene').Environment_t} */
-        let environment: import('engine/drivers/webgl/rasterizer_scene').Environment_t = null;
+    _render_scene(p_cam_transform: Transform, p_cam_projection: CameraMatrix, p_cam_ortho: boolean, p_force_env: Environment_t, p_scenario: Scenario_t, p_shadow_atlas: ShadowAtlas_t) {
+        let environment: Environment_t = null;
         if (p_force_env) {
             environment = p_force_env;
         } else if (p_scenario.environment) {

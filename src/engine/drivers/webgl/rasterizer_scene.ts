@@ -191,6 +191,16 @@ export class Environment_t {
         for (let k in data) {
             if (this.hasOwnProperty(k)) {
                 let value = data[k];
+
+                switch (k) {
+                    case "sky_custom_fov":
+                    case "canvas_max_layer":
+                    case "bg_mode": {
+                        this[k] = value;
+                        continue;
+                    }
+                }
+
                 if (typeof (value) === "object") {
                     if ("r" in value && "g" in value && "b" in value && "a" in value) {
                         // @ts-ignore
@@ -1397,17 +1407,6 @@ export class RasterizerScene {
         return false;
     }
 
-    /**
-     * @param {Transform} p_cam_transform
-     * @param {CameraMatrix} p_cam_projection
-     * @param {boolean} p_cam_ortho
-     * @param {Instance_t[]} p_cull_result
-     * @param {number} p_cull_count
-     * @param {LightInstance_t[]} p_light_cull_result
-     * @param {number} p_light_cull_count
-     * @param {Environment_t} p_env
-     * @param {ShadowAtlas_t} p_shadow_atlas
-     */
     render_scene(p_cam_transform: Transform, p_cam_projection: CameraMatrix, p_cam_ortho: boolean, p_cull_result: Instance_t[], p_cull_count: number, p_light_cull_result: LightInstance_t[], p_light_cull_count: number, p_env: Environment_t, p_shadow_atlas: ShadowAtlas_t) {
         let cam_transform = p_cam_transform.clone();
 
@@ -1558,7 +1557,7 @@ export class RasterizerScene {
         this.render_list.sort_by_key(false);
         this._render_render_list(this.render_list.elements, this.render_list.element_count, cam_transform, p_cam_projection, p_shadow_atlas, p_env, 0, 0, reverse_cull, false, false);
 
-        if (p_env && p_env.bg_mode == ENV_BG_SKY && (!this.storage.frame.current_rt || !this.storage.frame.current_rt.flags.TRANSPARENT)) {
+        if (p_env && p_env.bg_mode === ENV_BG_SKY && (!this.storage.frame.current_rt || !this.storage.frame.current_rt.flags.TRANSPARENT)) {
             if (sky && sky.panorama) {
                 this._draw_sky(sky, p_cam_projection, cam_transform, false, p_env.sky_custom_fov, p_env.bg_energy[0], p_env.sky_orientation);
             }
