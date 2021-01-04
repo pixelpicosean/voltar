@@ -11364,8 +11364,24 @@
         "sub": [
             {
                 "id": 1,
+                "type": "Environment",
+                "bg_mode": 1,
+                "bg_color": {
+                    "r": 0.45098,
+                    "g": 0.847059,
+                    "b": 0.792157,
+                    "a": 1
+                },
+                "ambient_color": {
+                    "r": 0.564706,
+                    "g": 0.494118,
+                    "b": 0.172549,
+                    "a": 1
+                }
+            },
+            {
+                "id": 2,
                 "type": "Animation",
-                "name": "bounce",
                 "loop": true,
                 "tracks": [
                     {
@@ -11438,7 +11454,7 @@
                 ]
             },
             {
-                "id": 2,
+                "id": 3,
                 "type": "Animation",
                 "length": 8,
                 "loop": true,
@@ -11480,6 +11496,36 @@
             {
                 "type": "Spatial",
                 "name": "demo_3d"
+            },
+            {
+                "type": "WorldEnvironment",
+                "name": "world_environment",
+                "parent": ".",
+                "environment": [
+                    "@sub#",
+                    "1"
+                ]
+            },
+            {
+                "type": "DirectionalLight",
+                "name": "directional_light",
+                "parent": ".",
+                "transform": [
+                    -0.581456,
+                    0.521793,
+                    -0.624213,
+                    5.73417e-8,
+                    0.767244,
+                    0.641356,
+                    0.813578,
+                    0.37292,
+                    -0.446118,
+                    0,
+                    6.76488,
+                    -0.117852
+                ],
+                "shadow_enabled": true,
+                "directional_shadow_mode": 0
             },
             {
                 "name": "pitch",
@@ -11563,7 +11609,7 @@
                 "anims": {
                     "bounce": [
                         "@sub#",
-                        "1"
+                        "2"
                     ]
                 }
             },
@@ -11643,30 +11689,9 @@
                 "anims": {
                     "rotating": [
                         "@sub#",
-                        "2"
+                        "3"
                     ]
                 }
-            },
-            {
-                "type": "DirectionalLight",
-                "name": "directional_light",
-                "parent": ".",
-                "transform": [
-                    -0.581456,
-                    0.521793,
-                    -0.624213,
-                    5.73417e-8,
-                    0.767244,
-                    0.641356,
-                    0.813578,
-                    0.37292,
-                    -0.446118,
-                    0,
-                    6.76488,
-                    -0.117852
-                ],
-                "shadow_enabled": true,
-                "directional_shadow_mode": 0
             }
         ]
     },

@@ -1,12 +1,16 @@
-[gd_scene load_steps=7 format=2]
+[gd_scene load_steps=8 format=2]
 
 [ext_resource path="res://mesh/goal.tscn" type="PackedScene" id=1]
 [ext_resource path="res://mesh/pitch.tscn" type="PackedScene" id=2]
 [ext_resource path="res://mesh/soccer.tscn" type="PackedScene" id=3]
 [ext_resource path="res://mesh/player.tscn" type="PackedScene" id=4]
 
-[sub_resource type="Animation" id=1]
-resource_name = "bounce"
+[sub_resource type="Environment" id=1]
+background_mode = 1
+background_color = Color( 0.45098, 0.847059, 0.792157, 1 )
+ambient_light_color = Color( 0.564706, 0.494118, 0.172549, 1 )
+
+[sub_resource type="Animation" id=2]
 loop = true
 tracks/0/type = "value"
 tracks/0/path = NodePath(".:translation")
@@ -33,7 +37,7 @@ tracks/1/keys = {
 "values": [ Vector3( 0, 0, 0 ), Vector3( 360, 0, 0 ) ]
 }
 
-[sub_resource type="Animation" id=2]
+[sub_resource type="Animation" id=3]
 length = 8.0
 loop = true
 tracks/0/type = "value"
@@ -51,6 +55,14 @@ tracks/0/keys = {
 
 [node name="demo_3d" type="Spatial"]
 
+[node name="world_environment" type="WorldEnvironment" parent="."]
+environment = SubResource( 1 )
+
+[node name="directional_light" type="DirectionalLight" parent="."]
+transform = Transform( -0.581456, 0.521793, -0.624213, 5.73417e-08, 0.767244, 0.641356, 0.813578, 0.37292, -0.446118, 0, 6.76488, -0.117852 )
+shadow_enabled = true
+directional_shadow_mode = 0
+
 [node name="pitch" parent="." instance=ExtResource( 2 )]
 
 [node name="goal_red" parent="." instance=ExtResource( 1 )]
@@ -64,7 +76,7 @@ transform = Transform( 1, 0, 0, 0, 1, -6.51683e-07, 0, 6.51683e-07, 1, 0, 2.9022
 
 [node name="animation_player" type="AnimationPlayer" parent="soccer"]
 autoplay = "bounce"
-anims/bounce = SubResource( 1 )
+anims/bounce = SubResource( 2 )
 
 [node name="player" parent="." instance=ExtResource( 4 )]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -9.7306, 0, 0 )
@@ -79,9 +91,4 @@ transform = Transform( -4.35096e-08, 0.382587, -0.92392, -4.19563e-09, 0.92392, 
 
 [node name="animation_player" type="AnimationPlayer" parent="camera_rig"]
 autoplay = "rotating"
-anims/rotating = SubResource( 2 )
-
-[node name="directional_light" type="DirectionalLight" parent="."]
-transform = Transform( -0.581456, 0.521793, -0.624213, 5.73417e-08, 0.767244, 0.641356, 0.813578, 0.37292, -0.446118, 0, 6.76488, -0.117852 )
-shadow_enabled = true
-directional_shadow_mode = 0
+anims/rotating = SubResource( 3 )
