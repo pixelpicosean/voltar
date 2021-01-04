@@ -2,6 +2,9 @@ import { res_class_map } from "engine/registry";
 import { VSG } from "engine/servers/visual/visual_server_globals";
 import { parse_shader_code } from "engine/drivers/webgl/shader_parser";
 
+type Texture_t = import('engine/drivers/webgl/rasterizer_storage').Texture_t;
+type Material_t = import('engine/drivers/webgl/rasterizer_storage').Material_t;
+
 let mat_uid = 0;
 export class Material {
     get class() { return "Material" }
@@ -10,7 +13,7 @@ export class Material {
 
     name = '';
 
-    material: import('engine/drivers/webgl/rasterizer_storage').Material_t = null;
+    material: Material_t = null;
     next_pass: Material = null;
     render_priority = 0;
 }
@@ -26,8 +29,8 @@ export class ShaderMaterial extends Material {
     uses_screen_texture = false;
     uses_custom_light = false;
 
-    uniforms: { name: string; type: UniformTypes; value?: number[] | import('engine/drivers/webgl/rasterizer_storage').Texture_t; }[] = [];
-    texture_hints: { [name: string]: import('engine/drivers/webgl/rasterizer_storage').Texture_t; } = {};
+    uniforms: { name: string; type: UniformTypes; value?: number[] | Texture_t; }[] = [];
+    texture_hints: { [name: string]: Texture_t; } = {};
 
     vs_code = "";
     vs_uniform_code = "";
@@ -38,9 +41,6 @@ export class ShaderMaterial extends Material {
     lt_code = "";
     global_code = "";
 
-    /**
-     * @param {string} [name]
-     */
     constructor(name?: string) {
         super();
 
@@ -58,9 +58,6 @@ export class ShaderMaterial extends Material {
         return this;
     }
 
-    /**
-     * @param {string} code
-     */
     set_shader(code: string) {
         const parsed_code = parse_shader_code(code);
 
@@ -98,23 +95,12 @@ export const CANVAS_ITEM_SHADER_UNIFORMS = [
 ]
 
 export class SpatialMaterial extends Material {
-    constructor() {
-        super();
-
-        /** @type {import('engine/drivers/webgl/rasterizer_storage').Material_t} */
-        this.material = null;
-    }
-    /**
-     * @param {any} data
-     */
     _load_data(data: any) {
         /** @type {Set<string>} */
         let features: Set<string> = new Set;
 
-        /** @type {{ [name: string]: number[] }} */
-        let params: { [name: string]: number[]; } = {};
-        /** @type {{ [name: string]: import('engine/drivers/webgl/rasterizer_storage').Texture_t }} */
-        let textures: { [name: string]: import('engine/drivers/webgl/rasterizer_storage').Texture_t; } = {};
+        let params: { [name: string]: number[]; } = Object.create(null);
+        let textures: { [name: string]: Texture_t; } = Object.create(null);
 
         for (let k in data) {
             let v = data[k];

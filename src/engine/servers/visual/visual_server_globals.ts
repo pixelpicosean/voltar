@@ -17,6 +17,8 @@ export const VSG = {
 
         use_rgba_3d_shadows: false,
         use_skeleton_software: false,
+
+        vao: false,
     },
 
     storage: null as import('engine/drivers/webgl/rasterizer_storage').RasterizerStorage,

@@ -196,6 +196,15 @@ export class OS {
                 depth_texture = {};
             }
 
+            // VAO
+            let vao = gl.getExtension("OES_vertex_array_object");
+            if (vao) {
+                driver_config.vao = true;
+            } else {
+                // @ts-ignore
+                vao = {};
+            }
+
             // TODO: compressed textures
 
             // TODO: find a way to support sky rendering without `EXT_shader_texture_lod` extension
@@ -205,32 +214,19 @@ export class OS {
 
             this.gl_ext = {
                 /* instancing API */
-
                 VERTEX_ATTRIB_ARRAY_DIVISOR: instancing.VERTEX_ATTRIB_ARRAY_DIVISOR_ANGLE,
-                /**
-                 * @param {number} index
-                 * @param {number} divisor
-                 */
                 vertexAttribDivisor: (index: number, divisor: number) => instancing.vertexAttribDivisorANGLE(index, divisor),
-                /**
-                 * @param {number} mode
-                 * @param {number} first
-                 * @param {number} count
-                 * @param {number} primcount
-                 */
                 drawArraysInstanced: (mode: number, first: number, count: number, primcount: number) => instancing.drawArraysInstancedANGLE(mode, first, count, primcount),
-                /**
-                 * @param {number} mode
-                 * @param {number} count
-                 * @param {number} type
-                 * @param {number} offset
-                 * @param {number} primcount
-                 */
                 drawElementsInstanced: (mode: number, count: number, type: number, offset: number, primcount: number) => instancing.drawElementsInstancedANGLE(mode, count, type, offset, primcount),
 
                 /* depth texture */
-
                 UNSIGNED_INT_24_8: depth_texture.UNSIGNED_INT_24_8_WEBGL,
+
+                /* VAO */
+                createVertexArray: () => vao.createVertexArrayOES(),
+                deleteVertexArray: (arrayObject: WebGLVertexArrayObjectOES) => vao.deleteVertexArrayOES(arrayObject),
+                isVertexArray: (arrayObject: WebGLVertexArrayObjectOES) => vao.isVertexArrayOES(arrayObject),
+                bindVertexArray: (arrayObject: WebGLVertexArrayObjectOES) => vao.bindVertexArrayOES(arrayObject),
             }
             this.gl = gl;
         }

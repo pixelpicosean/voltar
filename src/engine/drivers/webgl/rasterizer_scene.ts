@@ -102,8 +102,8 @@ const INSTANCE_BONE_BASE = 13;
 
 interface MaterialInstanceConfig {
     features: string[];
-    diffuse?: 'burley'|'lambert'|'lambert_wrap'|'oren_nayar'|'toon';
-    specular?: 'schlick_ggx'|'blinn'|'toon'|'phone';
+    diffuse?: 'burley' | 'lambert' | 'lambert_wrap' | 'oren_nayar' | 'toon';
+    specular?: 'schlick_ggx' | 'blinn' | 'toon' | 'phone';
     params: { [name: string]: number[] };
     textures: { [name: string]: Texture_t };
 }
@@ -287,9 +287,9 @@ export class LightInstance_t {
 
 const sort_by_key = (a: Element_t, b: Element_t) => {
     if (a.depth_layer + a.priority === b.depth_layer + b.priority) {
-        return (a.geometry_index + a.light_index*3 + a.skeleton*7 + a.light_type1*6 + a.light_type2*5 + a.light_mode*4 + a.material_index*2)
+        return (a.geometry_index + a.light_index * 3 + a.skeleton * 7 + a.light_type1 * 6 + a.light_type2 * 5 + a.light_mode * 4 + a.material_index * 2)
             -
-            (b.geometry_index + b.light_index*3 + b.skeleton*7 + b.light_type1*6 + b.light_type2*5 + b.light_mode*4 + b.material_index*2)
+            (b.geometry_index + b.light_index * 3 + b.skeleton * 7 + b.light_type1 * 6 + b.light_type2 * 5 + b.light_mode * 4 + b.material_index * 2)
     } else {
         return (a.depth_layer + a.priority) - (b.depth_layer + b.priority);
     }
@@ -459,43 +459,43 @@ class RenderList_t {
 }
 
 const SHADER_DEF = {
-    SHADLESS                  : 1 << 0,
-    BASE_PASS                 : 1 << 1,
+    SHADLESS: 1 << 0,
+    BASE_PASS: 1 << 1,
 
-    ENABLE_TANGENT_INTERP     : 1 << 2,
-    ENABLE_NORMALMAP          : 1 << 3,
-    ENABLE_COLOR_INTERP       : 1 << 4,
-    ENABLE_UV_INTERP          : 1 << 5,
-    ENABLE_UV2_INTERP         : 1 << 6,
-    USE_SKELETON              : 1 << 7,
-    USE_INSTANCING            : 1 << 8,
+    ENABLE_TANGENT_INTERP: 1 << 2,
+    ENABLE_NORMALMAP: 1 << 3,
+    ENABLE_COLOR_INTERP: 1 << 4,
+    ENABLE_UV_INTERP: 1 << 5,
+    ENABLE_UV2_INTERP: 1 << 6,
+    USE_SKELETON: 1 << 7,
+    USE_INSTANCING: 1 << 8,
 
-    USE_LIGHTMAP              : 1 << 9,
-    USE_LIGHTING              : 1 << 10,
+    USE_LIGHTMAP: 1 << 9,
+    USE_LIGHTING: 1 << 10,
 
-    USE_SHADOW                : 1 << 11,
-    USE_SHADOW_TO_OPACITY     : 1 << 12,
+    USE_SHADOW: 1 << 11,
+    USE_SHADOW_TO_OPACITY: 1 << 12,
 
-    USE_DEPTH_PREPASS         : 1 << 13,
-    RENDER_DEPTH              : 1 << 14,
-    USE_RGBA_SHADOWS          : 1 << 15,
+    USE_DEPTH_PREPASS: 1 << 13,
+    RENDER_DEPTH: 1 << 14,
+    USE_RGBA_SHADOWS: 1 << 15,
 
-    LIGHT_MODE_DIRECTIONAL    : 1 << 16,
-    LIGHT_MODE_OMNI           : 1 << 17,
-    LIGHT_MODE_SPOT           : 1 << 18,
+    LIGHT_MODE_DIRECTIONAL: 1 << 16,
+    LIGHT_MODE_OMNI: 1 << 17,
+    LIGHT_MODE_SPOT: 1 << 18,
 
-    DIFFUSE_OREN_NAYAR        : 1 << 19,
-    DIFFUSE_LAMBERT_WRAP      : 1 << 20,
-    DIFFUSE_TOON              : 1 << 21,
-    DIFFUSE_BURLEY            : 1 << 22,
+    DIFFUSE_OREN_NAYAR: 1 << 19,
+    DIFFUSE_LAMBERT_WRAP: 1 << 20,
+    DIFFUSE_TOON: 1 << 21,
+    DIFFUSE_BURLEY: 1 << 22,
 
-    SPECULAR_BLINN            : 1 << 23,
-    SPECULAR_PHONE            : 1 << 24,
-    SPECULAR_TOON             : 1 << 25,
-    SPECULAR_SCHLICK_GGX      : 1 << 26,
+    SPECULAR_BLINN: 1 << 23,
+    SPECULAR_PHONE: 1 << 24,
+    SPECULAR_TOON: 1 << 25,
+    SPECULAR_SCHLICK_GGX: 1 << 26,
 
-    FOG_DEPTH_ENABLED         : 1 << 27,
-    FOG_HEIGHT_ENABLED        : 1 << 28,
+    FOG_DEPTH_ENABLED: 1 << 27,
+    FOG_HEIGHT_ENABLED: 1 << 28,
 
     RENDER_DEPTH_DUAL_PARABOLOID: 1 << 29,
 
@@ -504,20 +504,20 @@ const SHADER_DEF = {
 };
 
 const DEFAULT_SPATIAL_ATTRIBS = [
-    { name: 'position',     loc: 0 },
-    { name: 'normal',       loc: 1 },
-    { name: 'tangent',      loc: 2 },
-    { name: 'color',        loc: 3 },
-    { name: 'uv',           loc: 4 },
-    { name: 'uv2',          loc: 5 },
-    { name: 'bone_ids',     loc: 6 },
+    { name: 'position', loc: 0 },
+    { name: 'normal', loc: 1 },
+    { name: 'tangent', loc: 2 },
+    { name: 'color', loc: 3 },
+    { name: 'uv', loc: 4 },
+    { name: 'uv2', loc: 5 },
+    { name: 'bone_ids', loc: 6 },
     { name: 'bone_weights', loc: 7 },
 
     { name: 'instance_xform_row_0', loc: 8 },
     { name: 'instance_xform_row_1', loc: 9 },
     { name: 'instance_xform_row_2', loc: 10 },
 
-    { name: 'instance_color',       loc: 11 },
+    { name: 'instance_color', loc: 11 },
     { name: 'instance_custom_data', loc: 12 },
 
     { name: 'bone_transform_row_0', loc: 13 },
@@ -555,9 +555,9 @@ const SPATIAL_FEATURES = {
             SPECULAR = m_specular;
         `,
         value: {
-                'm_roughness': [1],
-                'm_specular': [0.5],
-                'm_metallic': [0],
+            'm_roughness': [1],
+            'm_specular': [0.5],
+            'm_metallic': [0],
         },
         texture: {
             // 'lightmap': 'white',
@@ -800,6 +800,7 @@ export class RasterizerScene {
         for (let name in this.state.uniforms) {
             this.state.uniform_states[name] = {
                 value: this.state.uniforms[name],
+                force_locked: false,
                 changed: true,
             };
         }
@@ -818,7 +819,7 @@ export class RasterizerScene {
         {
             /* default material */
             this.default_material = new SpatialMaterial;
-            this.default_material._load_data({ });
+            this.default_material._load_data({});
         }
 
         {
@@ -918,7 +919,7 @@ export class RasterizerScene {
      * @param {MaterialInstanceConfig} config
      */
     material_base_get(config: MaterialInstanceConfig) {
-        config = Object.assign({ }, DEFAULT_MATERIAL_CONFIG, config);
+        config = Object.assign({}, DEFAULT_MATERIAL_CONFIG, config);
         Object.assign(config.params, DEFAULT_MATERIAL_CONFIG.params, config.params);
         Object.assign(config.textures, DEFAULT_MATERIAL_CONFIG.textures, config.textures);
 
@@ -2336,58 +2337,59 @@ export class RasterizerScene {
 
             if (i === 0 || shader_rebind) {
                 if (p_shadow) {
-                    this.set_uniform_n("light_bias",        p_shadow_bias);
-                    this.set_uniform_n("light_normal_bias", p_shadow_normal_bias);
+                    this.set_uniform_n("light_bias", p_shadow_bias, true, true);
+                    this.set_uniform_n("light_normal_bias", p_shadow_normal_bias, true, true);
                     if (this.state.shadow_is_dual_paraboloid) {
-                        this.set_uniform_n("shadow_dual_paraboloid_render_side", this.state.dual_parboloid_direction);
-                        this.set_uniform_n("shadow_dual_paraboloid_render_zfar", this.state.dual_parboloid_zfar);
+                        this.set_uniform_n("shadow_dual_paraboloid_render_side", this.state.dual_parboloid_direction, true, true);
+                        this.set_uniform_n("shadow_dual_paraboloid_render_zfar", this.state.dual_parboloid_zfar, true, true);
                     }
                 } else {
                     if (p_env) {
-                        this.set_uniform_v("bg_energy",         p_env.bg_energy);
-                        this.set_uniform_v("bg_color",          p_env.bg_color);
-                        this.set_uniform_v("ambient_color",     p_env.ambient_color);
-                        this.set_uniform_v("ambient_energy",    p_env.ambient_energy);
+                        this.set_uniform_v("bg_energy", p_env.bg_energy, true, true);
+                        this.set_uniform_v("bg_color", p_env.bg_color, true, true);
+                        this.set_uniform_v("ambient_color", p_env.ambient_color, true, true);
+                        this.set_uniform_v("ambient_energy", p_env.ambient_energy, true, true);
                     } else {
-                        this.set_uniform_n("bg_energy",         1.0);
-                        this.set_uniform_v("bg_color",          this.state.default_bg.as_array());
-                        this.set_uniform_v("ambient_color",     this.state.default_ambient.as_array());
-                        this.set_uniform_n("ambient_energy",    1.0);
+                        this.set_uniform_n("bg_energy", 1.0, true, true);
+                        this.set_uniform_v("bg_color", this.state.default_bg.as_array(), true, true);
+                        this.set_uniform_v("ambient_color", this.state.default_ambient.as_array(), true, true);
+                        this.set_uniform_n("ambient_energy", 1.0, true, true);
                     }
 
                     rebind_light = true;
                     rebind_lightmap = true;
 
                     if (using_fog) {
-                        this.set_uniform_v("fog_color_base", p_env.fog_color);
+                        this.set_uniform_v("fog_color_base", p_env.fog_color, true, true);
                         this.set_uniform_n4(
                             "fog_sun_color_amount",
                             p_env.fog_sun_color[0],
                             p_env.fog_sun_color[1],
                             p_env.fog_sun_color[2],
-                            p_env.fog_sun_amount[0]
+                            p_env.fog_sun_amount[0],
+                            true, true
                         );
 
-                        this.set_uniform_v("fog_transmit_enabled",  p_env.fog_transmit_enabled);
-                        this.set_uniform_v("fog_transmit_curve",    p_env.fog_transmit_curve);
+                        this.set_uniform_v("fog_transmit_enabled", p_env.fog_transmit_enabled, true, true);
+                        this.set_uniform_v("fog_transmit_curve", p_env.fog_transmit_curve, true, true);
 
-                        this.set_uniform_v("fog_depth_begin",       p_env.fog_depth_begin);
-                        this.set_uniform_v("fog_depth_curve",       p_env.fog_depth_curve);
-                        this.set_uniform_n("fog_max_distance",      fog_max_distance);
+                        this.set_uniform_v("fog_depth_begin", p_env.fog_depth_begin, true, true);
+                        this.set_uniform_v("fog_depth_curve", p_env.fog_depth_curve, true, true);
+                        this.set_uniform_n("fog_max_distance", fog_max_distance, true, true);
 
-                        this.set_uniform_v("fog_height_min",        p_env.fog_height_min);
-                        this.set_uniform_v("fog_height_max",        p_env.fog_height_max);
-                        this.set_uniform_v("fog_height_curve",      p_env.fog_height_curve);
+                        this.set_uniform_v("fog_height_min", p_env.fog_height_min, true, true);
+                        this.set_uniform_v("fog_height_max", p_env.fog_height_max, true, true);
+                        this.set_uniform_v("fog_height_curve", p_env.fog_height_curve, true, true);
                     }
                 }
 
-                this.set_uniform_v("CAMERA_MATRIX",           p_view_transform.as_array());
-                this.set_uniform_v("INV_CAMERA_MATRIX",       view_transform_inverse.as_array());
-                this.set_uniform_v("PROJECTION_MATRIX",       p_projection.as_array());
-                this.set_uniform_v("INV_PROJECTION_MATRIX",   projection_inverse.as_array());
-                this.set_uniform_v("TIME",                    this.storage.frame.time);
-                this.set_uniform_v("VIEWPORT_SIZE",           this.state.viewport_size.as_array());
-                this.set_uniform_v("SCREEN_PIXEL_SIZE",       this.state.screen_pixel_size.as_array());
+                this.set_uniform_v("CAMERA_MATRIX", p_view_transform.as_array(), true, true);
+                this.set_uniform_v("INV_CAMERA_MATRIX", view_transform_inverse.as_array(), true, true);
+                this.set_uniform_v("PROJECTION_MATRIX", p_projection.as_array(), true, true);
+                this.set_uniform_v("INV_PROJECTION_MATRIX", projection_inverse.as_array(), true, true);
+                this.set_uniform_v("TIME", this.storage.frame.time, true, true);
+                this.set_uniform_v("VIEWPORT_SIZE", this.state.viewport_size.as_array(), true, true);
+                this.set_uniform_v("SCREEN_PIXEL_SIZE", this.state.screen_pixel_size.as_array(), true, true);
             }
 
             if (rebind_light && light) {
@@ -2395,10 +2397,10 @@ export class RasterizerScene {
             }
 
             if (rebind_lightmap && lightmap) {
-                this.set_uniform_n("lightmap_energy", lightmap_energy);
+                this.set_uniform_n("lightmap_energy", lightmap_energy, true, true);
             }
 
-            this.set_uniform_v("world_matrix", e.instance.transform.as_array());
+            this.set_uniform_v("world_matrix", e.instance.transform.as_array(), true, true);
 
             let mat_uniforms = this.state.current_shader.uniforms;
             for (let name in mat_uniforms) {
@@ -2412,6 +2414,7 @@ export class RasterizerScene {
                 if (!state) {
                     state = uniform_states[name] = {
                         value: material.params[name].slice(),
+                        force_locked: false,
                         changed: true,
                     };
                 }
@@ -2441,6 +2444,12 @@ export class RasterizerScene {
             prev_skeleton = skeleton;
             prev_light = light;
             prev_lightmap = lightmap;
+        }
+
+        if (VSG.config.vao) {
+            const gl_ext = OS.get_singleton().gl_ext;
+
+            gl_ext.bindVertexArray(null);
         }
 
         this._setup_light_type(null, null);
@@ -2712,7 +2721,7 @@ export class RasterizerScene {
         let specular = light.param[LIGHT_PARAM_SPECULAR];
         let sign = (light.negative && !accum_pass) ? -1 : 1;
 
-        this.set_uniform_n("LIGHT_SPECULAR", specular);
+        this.set_uniform_n("LIGHT_SPECULAR", specular, true, true);
 
         let light_color = light.color.as_array();
         let sign_energy_PI = sign * energy * Math.PI;
@@ -2720,10 +2729,11 @@ export class RasterizerScene {
             light_color[0] * sign_energy_PI,
             light_color[1] * sign_energy_PI,
             light_color[2] * sign_energy_PI,
-            light_color[3] * sign_energy_PI
+            light_color[3] * sign_energy_PI,
+            true, true
         );
 
-        this.set_uniform_v("shadow_color", light.shadow_color.as_array());
+        this.set_uniform_v("shadow_color", light.shadow_color.as_array(), true, true);
 
         // specific parameters
         switch (light.type) {
@@ -2733,7 +2743,7 @@ export class RasterizerScene {
                 p_view_transform.basis.xform_inv(direction, direction);
                 direction.normalize();
 
-                this.set_uniform_v("LIGHT_DIRECTION", direction.as_array());
+                this.set_uniform_v("LIGHT_DIRECTION", direction.as_array(), true, true);
 
                 Vector3.free(direction);
 
@@ -2778,9 +2788,9 @@ export class RasterizerScene {
                         CameraMatrix.free(bias);
                     }
 
-                    this.set_uniform_n2("shadow_pixel_size", 1 / this.directional_shadow.size, 1 / this.directional_shadow.size);
-                    this.set_uniform_v("light_shadow_matrix", matrix.as_array());
-                    this.set_uniform_v("light_split_offsets", split_offsets, true);
+                    this.set_uniform_n2("shadow_pixel_size", 1 / this.directional_shadow.size, 1 / this.directional_shadow.size, true, true);
+                    this.set_uniform_v("light_shadow_matrix", matrix.as_array(), true, true);
+                    this.set_uniform_v("light_split_offsets", split_offsets, true, true);
 
                     CameraMatrix.free(matrix);
                 }
@@ -2788,10 +2798,10 @@ export class RasterizerScene {
             case LIGHT_OMNI: {
                 let position = p_view_transform.xform_inv(p_light.transform.origin);
 
-                this.set_uniform_v("LIGHT_POSITION", position.as_array());
+                this.set_uniform_v("LIGHT_POSITION", position.as_array(), true, true);
 
-                this.set_uniform_n("light_range", light.param[LIGHT_PARAM_RANGE]);
-                this.set_uniform_n("LIGHT_ATTENUATION", light.param[LIGHT_PARAM_ATTENUATION]);
+                this.set_uniform_n("light_range", light.param[LIGHT_PARAM_RANGE], true, true);
+                this.set_uniform_n("LIGHT_ATTENUATION", light.param[LIGHT_PARAM_ATTENUATION], true, true);
 
                 if (!this.state.render_no_shadows && light.shadow && shadow_atlas && shadow_atlas.shadow_owners.has(p_light)) {
                     let key = shadow_atlas.shadow_owners.get(p_light);
@@ -2820,38 +2830,39 @@ export class RasterizerScene {
 
                     let proj = p_view_transform.inverse().append(p_light.transform).invert();
 
-                    this.set_uniform_n2("shadow_pixel_size", 1 / shadow_atlas.size, 1 / shadow_atlas.size);
-                    this.set_uniform_v("light_shadow_matrix", proj.as_array());
+                    this.set_uniform_n2("shadow_pixel_size", 1 / shadow_atlas.size, 1 / shadow_atlas.size, true, true);
+                    this.set_uniform_v("light_shadow_matrix", proj.as_array(), true, true);
                     this.set_uniform_n4(
                         "light_clamp",
                         x / atlas_size,
                         y / atlas_size,
                         width / atlas_size,
-                        height / atlas_size
+                        height / atlas_size,
+                        true, true
                     );
-                    // this.set_uniform_f4("light_clamp", 0, 0, 0.5, 0.25);
+                    // this.set_uniform_f4("light_clamp", 0, 0, 0.5, 0.25, true, true);
                 }
             } break;
             case LIGHT_SPOT: {
                 let position = p_view_transform.xform_inv(p_light.transform.origin);
 
-                this.set_uniform_v("LIGHT_POSITION", position.as_array());
+                this.set_uniform_v("LIGHT_POSITION", position.as_array(), true, true);
 
                 let direction = p_view_transform.inverse()
                     .basis.xform(p_light.transform.basis.xform(Vector3.create(0, 0, -1)))
                     .normalize()
-                this.set_uniform_v("LIGHT_DIRECTION", direction.as_array());
+                this.set_uniform_v("LIGHT_DIRECTION", direction.as_array(), true, true);
 
                 let attenuation = light.param[LIGHT_PARAM_ATTENUATION];
                 let range = light.param[LIGHT_PARAM_RANGE];
                 let spot_attenuation = light.param[LIGHT_PARAM_SPOT_ATTENUATION];
                 let angle = light.param[LIGHT_PARAM_SPOT_ANGLE];
                 angle = Math.cos(deg2rad(angle));
-                this.set_uniform_n("LIGHT_ATTENUATION",         attenuation);
-                this.set_uniform_n("LIGHT_SPOT_ATTENUATION",    spot_attenuation);
-                this.set_uniform_n("LIGHT_SPOT_RANGE",          spot_attenuation);
-                this.set_uniform_n("LIGHT_SPOT_ANGLE",          angle);
-                this.set_uniform_n("light_range",               range);
+                this.set_uniform_n("LIGHT_ATTENUATION", attenuation, true, true);
+                this.set_uniform_n("LIGHT_SPOT_ATTENUATION", spot_attenuation, true, true);
+                this.set_uniform_n("LIGHT_SPOT_RANGE", spot_attenuation, true, true);
+                this.set_uniform_n("LIGHT_SPOT_ANGLE", angle, true, true);
+                this.set_uniform_n("light_range", range, true, true);
 
                 Vector3.free(direction);
                 Vector3.free(position);
@@ -2863,37 +2874,38 @@ export class RasterizerScene {
         }
     }
 
-    /**
-     * @param {Element_t} p_element
-     * @param {Skeleton_t} p_skeleton
-     */
     _setup_geometry(p_element: Element_t, p_skeleton: Skeleton_t) {
         const gl = this.gl;
+        const gl_ext = OS.get_singleton().gl_ext;
 
         switch (p_element.instance.base_type) {
             case INSTANCE_TYPE_MESH: {
                 let s: Surface_t = p_element.geometry as Surface_t;
 
-                gl.bindBuffer(gl.ARRAY_BUFFER, s.vertex_id);
+                if (VSG.config.vao) {
+                    gl_ext.bindVertexArray(s.vao_id);
+                } else {
+                    gl.bindBuffer(gl.ARRAY_BUFFER, s.vertex_id);
 
-                if (s.index_array_len > 0) {
-                    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, s.index_id);
-                }
+                    if (s.index_array_len > 0) {
+                        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, s.index_id);
+                    }
 
-                for (let i = 0; i < ARRAY_MAX; i++) {
-                    let attr = s.attribs[i];
-                    if (attr.enabled) {
-                        gl.enableVertexAttribArray(attr.index);
-                        gl.vertexAttribPointer(attr.index, attr.size, attr.type, attr.normalized, attr.stride, attr.offset);
-                    } else {
-                        gl.disableVertexAttribArray(attr.index);
-                        switch (attr.index) {
-                            case ARRAY_NORMAL: {
-                                gl.vertexAttrib4f(ARRAY_NORMAL, 0.0, 0.0, 1.0, 1.0);
-                            } break;
-                            case ARRAY_COLOR: {
-                                gl.vertexAttrib4f(ARRAY_COLOR, 1.0, 1.0, 1.0, 1.0);
-                            } break;
+                    for (let i = 0; i < ARRAY_MAX; i++) {
+                        let attr = s.attribs[i];
+                        if (attr.enabled) {
+                            gl.enableVertexAttribArray(attr.index);
+                            gl.vertexAttribPointer(attr.index, attr.size, attr.type, attr.normalized, attr.stride, attr.offset);
+                        } else {
+                            gl.disableVertexAttribArray(attr.index);
+                            switch (attr.index) {
+                                case ARRAY_NORMAL: {
+                                    gl.vertexAttrib4f(ARRAY_NORMAL, 0.0, 0.0, 1.0, 1.0);
+                                } break;
+                                case ARRAY_COLOR: {
+                                    gl.vertexAttrib4f(ARRAY_COLOR, 1.0, 1.0, 1.0, 1.0);
+                                } break;
+                            }
                         }
                     }
                 }
@@ -2903,7 +2915,7 @@ export class RasterizerScene {
                 if (p_skeleton) {
                     if (!VSG.config.use_skeleton_software) {
                         this.bind_texture(VSG.config.max_texture_image_units - 1, p_skeleton.gl_tex);
-                        this.set_uniform_n("bone_transforms", VSG.config.max_texture_image_units - 1);
+                        this.set_uniform_n("bone_transforms", VSG.config.max_texture_image_units - 1, true, true);
                     } else {
                         // let buffer = this.storage.resources.skeleton_transform_buffer;
 
@@ -2939,11 +2951,6 @@ export class RasterizerScene {
         }
     }
 
-    /**
-     * @param {Material_t} p_material
-     * @param {boolean} p_alpha_pass
-     * @param {number} p_skeleton_tex_size
-     */
     _setup_material(p_material: Material_t, p_alpha_pass: boolean, p_skeleton_tex_size: number = 0) {
         const gl = this.gl;
 
@@ -2955,12 +2962,12 @@ export class RasterizerScene {
 
         if (shader.spatial.uses_screen_texture && this.storage.frame.current_rt) {
             this.bind_texture(VSG.config.max_texture_image_units - 4, this.storage.frame.current_rt.copy_screen_effect.gl_color);
-            this.set_uniform_n("SCREEN_TEXTURE", VSG.config.max_texture_image_units - 4);
+            this.set_uniform_n("SCREEN_TEXTURE", VSG.config.max_texture_image_units - 4, true, true);
         }
 
         if (shader.spatial.uses_depth_texture && this.storage.frame.current_rt) {
             this.bind_texture(VSG.config.max_texture_image_units - 4, this.storage.frame.current_rt.copy_screen_effect.gl_depth);
-            this.set_uniform_n("DEPTH_TEXTURE", VSG.config.max_texture_image_units - 4);
+            this.set_uniform_n("DEPTH_TEXTURE", VSG.config.max_texture_image_units - 4, true, true);
         }
 
         if (shader.spatial.no_depth_test || shader.spatial.uses_depth_texture) {
@@ -2993,7 +3000,7 @@ export class RasterizerScene {
             this.state.gl.depthMask = enable_depth_mask;
         }
 
-        this.set_uniform_n2("skeleton_texture_size", p_skeleton_tex_size, 0);
+        this.set_uniform_n2("skeleton_texture_size", p_skeleton_tex_size, 0, true, true);
 
         // bind material specific textures
         let i = 0;
@@ -3009,12 +3016,17 @@ export class RasterizerScene {
             }
 
             this.bind_texture(i, tex.gl_tex);
-            this.set_uniform_n(name, i);
+            this.set_uniform_n(name, i, true, true);
             if (i === 0) {
                 this.state.current_main_tex = tex.gl_tex;
             }
 
             i += 1;
+        }
+
+        // bind material specific parameters
+        for (let name in p_material.params) {
+            this.set_uniform_v(name, p_material.params[name]);
         }
 
         return shader_rebind;
@@ -3225,150 +3237,23 @@ export class RasterizerScene {
         this.storage._copy_screen();
     }
 
-    /**
-     * @param {string} name
-     * @param {number} value
-     * @param {boolean} [force_changed]
-     */
-    set_uniform_n(name: string, value: number, force_changed: boolean = false) {
+    set_uniform_n(name: string, value: number, force_changed: boolean = false, force_change_lock: boolean = false) {
         let state = this.state.uniform_states[name];
         if (!state) {
             state = this.state.uniform_states[name] = {
                 changed: true,
+                force_locked: false,
                 value: [value],
             };
             return;
         }
 
-        if (Math.abs(state.value[0] - value) > UNIFORM_EPSILON) {
+        if (force_change_lock) {
             state.value[0] = value;
-            state.changed = true;
-        }
-
-        if (force_changed) {
-            state.changed = true;
-        }
-    }
-    /**
-     * @param {string} name
-     * @param {number} v0
-     * @param {number} v1
-     * @param {boolean} [force_changed]
-     */
-    set_uniform_n2(name: string, v0: number, v1: number, force_changed: boolean = false) {
-        let state = this.state.uniform_states[name];
-        if (!state) {
-            state = this.state.uniform_states[name] = {
-                changed: true,
-                value: [v0, v1],
-            };
-            return;
-        }
-
-        if (Math.abs(state.value[0] - v0) > UNIFORM_EPSILON) {
-            state.value[0] = v0;
-            state.changed = true;
-        }
-        if (Math.abs(state.value[1] - v1) > UNIFORM_EPSILON) {
-            state.value[1] = v1;
-            state.changed = true;
-        }
-
-        if (force_changed) {
-            state.changed = true;
-        }
-    }
-    /**
-     * @param {string} name
-     * @param {number} v0
-     * @param {number} v1
-     * @param {number} v2
-     * @param {boolean} [force_changed]
-     */
-    set_uniform_n3(name: string, v0: number, v1: number, v2: number, force_changed: boolean = false) {
-        let state = this.state.uniform_states[name];
-        if (!state) {
-            state = this.state.uniform_states[name] = {
-                changed: true,
-                value: [v0, v1, v2],
-            };
-            return;
-        }
-
-        if (Math.abs(state.value[0] - v0) > UNIFORM_EPSILON) {
-            state.value[0] = v0;
-            state.changed = true;
-        }
-        if (Math.abs(state.value[1] - v1) > UNIFORM_EPSILON) {
-            state.value[1] = v1;
-            state.changed = true;
-        }
-        if (Math.abs(state.value[2] - v2) > UNIFORM_EPSILON) {
-            state.value[2] = v2;
-            state.changed = true;
-        }
-
-        if (force_changed) {
-            state.changed = true;
-        }
-    }
-    /**
-     * @param {string} name
-     * @param {number} v0
-     * @param {number} v1
-     * @param {number} v2
-     * @param {number} v3
-     * @param {boolean} [force_changed]
-     */
-    set_uniform_n4(name: string, v0: number, v1: number, v2: number, v3: number, force_changed: boolean = false) {
-        let state = this.state.uniform_states[name];
-        if (!state) {
-            state = this.state.uniform_states[name] = {
-                changed: true,
-                value: [v0, v1, v2, v3],
-            };
-            return;
-        }
-
-        if (Math.abs(state.value[0] - v0) > UNIFORM_EPSILON) {
-            state.value[0] = v0;
-            state.changed = true;
-        }
-        if (Math.abs(state.value[1] - v1) > UNIFORM_EPSILON) {
-            state.value[1] = v1;
-            state.changed = true;
-        }
-        if (Math.abs(state.value[2] - v2) > UNIFORM_EPSILON) {
-            state.value[2] = v2;
-            state.changed = true;
-        }
-        if (Math.abs(state.value[3] - v3) > UNIFORM_EPSILON) {
-            state.value[3] = v3;
-            state.changed = true;
-        }
-
-        if (force_changed) {
-            state.changed = true;
-        }
-    }
-    /**
-     * @param {string} name
-     * @param {number[]} value
-     * @param {boolean} [force_changed]
-     */
-    set_uniform_v(name: string, value: number[], force_changed: boolean = false) {
-        let state = this.state.uniform_states[name];
-        if (!state) {
-            state = this.state.uniform_states[name] = {
-                changed: true,
-                value: value.slice(),
-            };
-            return;
-        }
-
-        for (let i = 0; i < value.length; i++) {
-            if (Math.abs(state.value[i] - value[i]) > UNIFORM_EPSILON) {
-                state.value[i] = value[i];
+            state.force_locked = true;
+        } else if (!state.force_locked) {
+            if (Math.abs(state.value[0] - value) > UNIFORM_EPSILON) {
+                state.value[0] = value;
                 state.changed = true;
             }
         }
@@ -3377,19 +3262,145 @@ export class RasterizerScene {
             state.changed = true;
         }
     }
-    /**
-     * @param {string} name
-     */
+    set_uniform_n2(name: string, v0: number, v1: number, force_changed: boolean = false, force_change_lock: boolean = false) {
+        let state = this.state.uniform_states[name];
+        if (!state) {
+            state = this.state.uniform_states[name] = {
+                changed: true,
+                force_locked: false,
+                value: [v0, v1],
+            };
+            return;
+        }
+
+        if (force_change_lock) {
+            state.value[0] = v0;
+            state.value[1] = v1;
+            state.force_locked = true;
+        } else if (!state.force_locked) {
+            if (Math.abs(state.value[0] - v0) > UNIFORM_EPSILON) {
+                state.value[0] = v0;
+                state.changed = true;
+            }
+            if (Math.abs(state.value[1] - v1) > UNIFORM_EPSILON) {
+                state.value[1] = v1;
+                state.changed = true;
+            }
+        }
+
+        if (force_changed) {
+            state.changed = true;
+        }
+    }
+    set_uniform_n3(name: string, v0: number, v1: number, v2: number, force_changed: boolean = false, force_change_lock: boolean = false) {
+        let state = this.state.uniform_states[name];
+        if (!state) {
+            state = this.state.uniform_states[name] = {
+                changed: true,
+                force_locked: false,
+                value: [v0, v1, v2],
+            };
+            return;
+        }
+
+        if (force_change_lock) {
+            state.value[0] = v0;
+            state.value[1] = v1;
+            state.value[2] = v2;
+            state.force_locked = true;
+        } else if (!state.force_locked) {
+            if (Math.abs(state.value[0] - v0) > UNIFORM_EPSILON) {
+                state.value[0] = v0;
+                state.changed = true;
+            }
+            if (Math.abs(state.value[1] - v1) > UNIFORM_EPSILON) {
+                state.value[1] = v1;
+                state.changed = true;
+            }
+            if (Math.abs(state.value[2] - v2) > UNIFORM_EPSILON) {
+                state.value[2] = v2;
+                state.changed = true;
+            }
+        }
+
+        if (force_changed) {
+            state.changed = true;
+        }
+    }
+    set_uniform_n4(name: string, v0: number, v1: number, v2: number, v3: number, force_changed: boolean = false, force_change_lock: boolean = false) {
+        let state = this.state.uniform_states[name];
+        if (!state) {
+            state = this.state.uniform_states[name] = {
+                changed: true,
+                force_locked: false,
+                value: [v0, v1, v2, v3],
+            };
+            return;
+        }
+
+        if (force_change_lock) {
+            state.value[0] = v0;
+            state.value[1] = v1;
+            state.value[2] = v2;
+            state.value[3] = v3;
+            state.force_locked = true;
+        } else if (!state.force_locked) {
+            if (Math.abs(state.value[0] - v0) > UNIFORM_EPSILON) {
+                state.value[0] = v0;
+                state.changed = true;
+            }
+            if (Math.abs(state.value[1] - v1) > UNIFORM_EPSILON) {
+                state.value[1] = v1;
+                state.changed = true;
+            }
+            if (Math.abs(state.value[2] - v2) > UNIFORM_EPSILON) {
+                state.value[2] = v2;
+                state.changed = true;
+            }
+            if (Math.abs(state.value[3] - v3) > UNIFORM_EPSILON) {
+                state.value[3] = v3;
+                state.changed = true;
+            }
+        }
+
+        if (force_changed) {
+            state.changed = true;
+        }
+    }
+    set_uniform_v(name: string, value: number[], force_changed: boolean = false, force_change_lock: boolean = false) {
+        let state = this.state.uniform_states[name];
+        if (!state) {
+            state = this.state.uniform_states[name] = {
+                changed: true,
+                force_locked: false,
+                value: value.slice(),
+            };
+            return;
+        }
+
+        if (force_change_lock) {
+            for (let i = 0; i < value.length; i++) {
+                state.value[i] = value[i];
+            }
+            state.force_locked = true;
+        } else if (!state.force_locked) {
+            for (let i = 0; i < value.length; i++) {
+                if (Math.abs(state.value[i] - value[i]) > UNIFORM_EPSILON) {
+                    state.value[i] = value[i];
+                    state.changed = true;
+                }
+            }
+        }
+
+        if (force_changed) {
+            state.changed = true;
+        }
+    }
     get_uniform_v(name: string) {
         let state = this.state.uniform_states[name];
         return state ? state.value : null;
     }
 
-    /**
-     * @param {WebGLTexture} texture
-     * @param {number} slot
-     * @param {string} name
-     */
     bind_texture(slot: number, texture: WebGLTexture) {
         const gl = this.gl;
 
@@ -3411,7 +3422,7 @@ export class RasterizerScene {
     }
 }
 
-type UniformState = { changed: boolean, value: number[] };
+type UniformState = { changed: boolean, value: number[], force_locked: boolean };
 type TextureState = { slot: number, texture: WebGLTexture };
 
 /**
@@ -3420,6 +3431,7 @@ type TextureState = { slot: number, texture: WebGLTexture };
 function mark_uniforms_outdated(table: { [name: string]: UniformState; }) {
     for (let name in table) {
         table[name].changed = true;
+        table[name].force_locked = false;
     }
 }
 

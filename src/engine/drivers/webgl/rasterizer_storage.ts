@@ -45,7 +45,7 @@ import {
 } from "engine/servers/visual/visual_server_scene";
 import { VSG } from "engine/servers/visual/visual_server_globals";
 
-import { ARRAY_MAX } from "engine/scene/const";
+import { ARRAY_COLOR, ARRAY_MAX, ARRAY_NORMAL } from "engine/scene/const";
 import {
     PIXEL_FORMAT_L8,
     PIXEL_FORMAT_LA8,
@@ -449,6 +449,7 @@ export class Surface_t extends Geometry_t {
 
     vertex_id: WebGLBuffer = null;
     index_id: WebGLBuffer = null;
+    vao_id: WebGLVertexArrayObject = null;
 
     aabb = new AABB;
 
@@ -481,7 +482,7 @@ export class Mesh_t extends Instantiable_t {
 }
 
 /** @type {{ [length: string]: Float32Array[] }} */
-const Float32ArrayPool: { [length: string]: Float32Array[]; } = { }
+const Float32ArrayPool: { [length: string]: Float32Array[]; } = {}
 /**
  * @param {number} size
  */
@@ -1309,9 +1310,9 @@ export class RasterizerStorage {
             gl.bindTexture(gl.TEXTURE_2D, rt.copy_screen_effect.gl_color);
 
             if (rt.flags.TRANSPARENT) {
-                gl.texImage2D(gl.TEXTURE_2D, 0,  gl.RGBA, rt.width, rt.height, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+                gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, rt.width, rt.height, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
             } else {
-                gl.texImage2D(gl.TEXTURE_2D, 0,  gl.RGB, rt.width, rt.height, 0, gl.RGB, gl.UNSIGNED_BYTE, null);
+                gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, rt.width, rt.height, 0, gl.RGB, gl.UNSIGNED_BYTE, null);
             }
 
             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
@@ -1561,17 +1562,6 @@ export class RasterizerStorage {
             this.mesh_remove_surface(mesh, 0);
         }
     }
-    /**
-     * @param {Mesh_t} mesh
-     * @param {number} primitive
-     * @param {VertAttribDef[]} attribs
-     * @param {ArrayBuffer | Float32Array} vertices
-     * @param {ArrayBuffer | Uint16Array} indices
-     * @param {number} array_len
-     * @param {number} index_array_len
-     * @param {boolean} [use_3d_vertices]
-     * @param {AABB} [p_aabb]
-     */
     mesh_add_surface_from_data(mesh: Mesh_t, primitive: number, attribs: VertAttribDef[], vertices: ArrayBuffer | Float32Array, indices: ArrayBuffer | Uint16Array, array_len: number, index_array_len: number, use_3d_vertices: boolean = false, p_aabb: AABB = null) {
         const gl = this.gl;
 
@@ -1661,16 +1651,65 @@ export class RasterizerStorage {
             surface.aabb.copy(p_aabb);
         }
 
-        surface.vertex_id = gl.createBuffer();
-        gl.bindBuffer(gl.ARRAY_BUFFER, surface.vertex_id);
-        gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
-        gl.bindBuffer(gl.ARRAY_BUFFER, null);
+        if (VSG.config.vao) {
+            const gl_ext = OS.get_singleton().gl_ext;
 
-        if (indices) {
-            surface.index_id = gl.createBuffer();
-            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, surface.index_id);
-            gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indices, gl.STATIC_DRAW);
+            // VAO begin
+            surface.vao_id = gl_ext.createVertexArray();
+            gl_ext.bindVertexArray(surface.vao_id);
+
+            // - vertex buffer
+            surface.vertex_id = gl.createBuffer();
+            gl.bindBuffer(gl.ARRAY_BUFFER, surface.vertex_id);
+            gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
+
+            // - index buffer
+            if (indices) {
+                surface.index_id = gl.createBuffer();
+                gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, surface.index_id);
+                gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indices, gl.STATIC_DRAW);
+            }
+
+            // - layout
+            for (let i = 0; i < ARRAY_MAX; i++) {
+                let attr = surface.attribs[i];
+                if (attr.enabled) {
+                    gl.enableVertexAttribArray(attr.index);
+                    gl.vertexAttribPointer(attr.index, attr.size, attr.type, attr.normalized, attr.stride, attr.offset);
+                } else {
+                    gl.disableVertexAttribArray(attr.index);
+                    switch (attr.index) {
+                        case ARRAY_NORMAL: {
+                            gl.vertexAttrib4f(ARRAY_NORMAL, 0.0, 0.0, 1.0, 1.0);
+                        } break;
+                        case ARRAY_COLOR: {
+                            gl.vertexAttrib4f(ARRAY_COLOR, 1.0, 1.0, 1.0, 1.0);
+                        } break;
+                    }
+                }
+            }
+
+            // VAO end
+            if (VSG.config.vao) {
+                gl_ext.bindVertexArray(null);
+            }
+
+            gl.bindBuffer(gl.ARRAY_BUFFER, null);
             gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
+        } else {
+            // - vertex buffer
+            surface.vertex_id = gl.createBuffer();
+            gl.bindBuffer(gl.ARRAY_BUFFER, surface.vertex_id);
+            gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
+            gl.bindBuffer(gl.ARRAY_BUFFER, null);
+
+            // - index buffer
+            if (indices) {
+                surface.index_id = gl.createBuffer();
+                gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, surface.index_id);
+                gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indices, gl.STATIC_DRAW);
+                gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
+            }
         }
 
         mesh.surfaces.push(surface);
@@ -2065,7 +2104,7 @@ export class RasterizerStorage {
             case LIGHT_OMNI: {
                 let r = p_light.param[LIGHT_PARAM_RANGE];
                 let aabb = AABB.create();
-                aabb.set(-r, -r, -r, r*2, r*2, r*2);
+                aabb.set(-r, -r, -r, r * 2, r * 2, r * 2);
                 return aabb;
             };
             case LIGHT_DIRECTIONAL: {
