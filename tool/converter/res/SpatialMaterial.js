@@ -37,7 +37,7 @@ module.exports = (data) => {
         res.conditions.push("USE_SHADOW_TO_OPACITY");
     }
     if (data.prop["flags_unshaded"]) {
-        res.conditions.push("SHADLESS");
+        res.spatial.unshaded = true;
     }
     if (data.prop["params_use_alpha_scissor"]) {
         res.spatial.uses_alpha_scissor = true;

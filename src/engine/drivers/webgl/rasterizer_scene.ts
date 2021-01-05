@@ -351,7 +351,7 @@ const sort_by_depth = (a: Element_t, b: Element_t) => {
  */
 const sort_by_reverse_depth_and_priority = (a: Element_t, b: Element_t) => {
     if (a.priority === b.priority) {
-        return a.instance.depth - b.instance.depth;
+        return b.instance.depth - a.instance.depth;
     } else {
         return a.priority - b.priority;
     }
@@ -479,7 +479,7 @@ class RenderList_t {
 
 let def_id = 0;
 const SHADER_DEF = {
-    SHADLESS: def_id++,
+    SHADELESS: def_id++,
     BASE_PASS: def_id++,
 
     ENABLE_TANGENT_INTERP: def_id++,
@@ -733,7 +733,7 @@ export class RasterizerScene {
                 0, 0, 1, 0,
                 0, 0, 0, 1,
             ],
-            world_matrix: [
+            world_transform: [
                 1, 0, 0, 0,
                 0, 1, 0, 0,
                 0, 0, 1, 0,
@@ -934,16 +934,20 @@ export class RasterizerScene {
         let inst = base.fork();
 
         // override params and textures
-        Object.assign(inst.params, config.params);
-        Object.assign(inst.textures, config.textures);
+        for (let k in config.params) {
+            inst.params[k] = config.params[k].slice();
+        }
+        for (let k in config.textures) {
+            inst.textures[k] = config.textures[k];
+        }
 
         return inst;
     }
 
     material_base_get(config: MaterialInstanceConfig) {
-        config = Object.assign({}, DEFAULT_MATERIAL_CONFIG, config);
-        Object.assign(config.params, DEFAULT_MATERIAL_CONFIG.params, config.params);
-        Object.assign(config.textures, DEFAULT_MATERIAL_CONFIG.textures, config.textures);
+        config = Object.assign(Object.create(null), DEFAULT_MATERIAL_CONFIG, config);
+        config.params = Object.assign(Object.create(null), DEFAULT_MATERIAL_CONFIG.params, config.params);
+        config.textures = Object.assign(Object.create(null), DEFAULT_MATERIAL_CONFIG.textures, config.textures);
 
         const key = create_shader_config_key(config);
         let base = material_base_table[key];
@@ -2079,7 +2083,7 @@ export class RasterizerScene {
         let prev_instancing = false;
         let prev_depth_prepass = false;
 
-        this.set_shader_condition("SHADLESS", false);
+        this.set_shader_condition("SHADELESS", false);
 
         let prev_base_pass = false;
         let prev_light: LightInstance_t = null;
@@ -2144,10 +2148,10 @@ export class RasterizerScene {
                 if (unshaded != prev_unshaded) {
                     rebind = true;
                     if (unshaded) {
-                        this.set_shader_condition("SHADLESS", true);
+                        this.set_shader_condition("SHADELESS", true);
                         this.set_shader_condition("USE_LIGHTING", false);
                     } else {
-                        this.set_shader_condition("SHADLESS", false);
+                        this.set_shader_condition("SHADELESS", false);
                     }
                     prev_unshaded = unshaded;
                 }
@@ -2360,7 +2364,7 @@ export class RasterizerScene {
                 this.set_uniform_n("lightmap_energy", lightmap_energy, true, true);
             }
 
-            this.set_uniform_v("world_matrix", e.instance.transform.as_array(), true, true);
+            this.set_uniform_v("world_transform", e.instance.transform.as_array(), true, true);
 
             let mat_uniforms = this.state.current_shader.uniforms;
             for (let name in mat_uniforms) {
@@ -2414,7 +2418,7 @@ export class RasterizerScene {
 
         this._setup_light_type(null, null);
         this.set_shader_condition("USE_SKELETON", false);
-        this.set_shader_condition("SHADLESS", false);
+        this.set_shader_condition("SHADELESS", false);
         this.set_shader_condition("BASE_PASS", false);
         this.set_shader_condition("USE_INSTANCING", false);
         this.set_shader_condition("USE_LIGHTMAP", false);
