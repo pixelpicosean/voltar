@@ -285,6 +285,119 @@
             }
         ]
     },
+    "res://mesh/sphere.tscn": {
+        "type": "PackedScene",
+        "sub": [
+            {
+                "id": 1,
+                "type": "SpatialMaterial",
+                "spatial": {},
+                "conditions": []
+            },
+            {
+                "id": 2,
+                "type": "ArrayMesh",
+                "surfaces": [
+                    {
+                        "blend_shape_data": [],
+                        "format": 279,
+                        "index_count": 2880,
+                        "material": [
+                            "@sub#",
+                            "1"
+                        ],
+                        "primitive": 4,
+                        "skeleton_aabb": [],
+                        "vertex_count": 1984,
+                        "is_2d": false,
+                        "arrays": {
+                            "__type__": "b",
+                            "is_2d": false,
+                            "aabb": {
+                                "position": {
+                                    "x": -1,
+                                    "y": -1,
+                                    "z": -1
+                                },
+                                "size": {
+                                    "x": 2,
+                                    "y": 2,
+                                    "z": 2
+                                }
+                            },
+                            "vertex": {
+                                "index": 0,
+                                "offset": 1652,
+                                "length": 95232
+                            },
+                            "index": {
+                                "index": 0,
+                                "offset": 96884,
+                                "length": 5760
+                            },
+                            "array_len": 1984,
+                            "index_array_len": 2880,
+                            "attribs": [
+                                {
+                                    "enabled": true,
+                                    "index": 0,
+                                    "type": 5126,
+                                    "size": 3,
+                                    "stride": 48,
+                                    "offset": 0,
+                                    "normalized": false,
+                                    "integer": false
+                                },
+                                {
+                                    "enabled": true,
+                                    "index": 1,
+                                    "type": 5126,
+                                    "size": 3,
+                                    "stride": 48,
+                                    "offset": 12,
+                                    "normalized": false,
+                                    "integer": false
+                                },
+                                {
+                                    "enabled": true,
+                                    "index": 2,
+                                    "type": 5126,
+                                    "size": 4,
+                                    "stride": 48,
+                                    "offset": 24,
+                                    "normalized": false,
+                                    "integer": false
+                                },
+                                {
+                                    "enabled": true,
+                                    "index": 4,
+                                    "type": 5126,
+                                    "size": 2,
+                                    "stride": 48,
+                                    "offset": 40,
+                                    "normalized": false,
+                                    "integer": false
+                                }
+                            ]
+                        }
+                    }
+                ]
+            }
+        ],
+        "nodes": [
+            {
+                "type": "MeshInstance",
+                "name": "Sphere",
+                "mesh": [
+                    "@sub#",
+                    "2"
+                ],
+                "material": [
+                    null
+                ]
+            }
+        ]
+    },
     "res://scene/ui/input.tscn": {
         "type": "PackedScene",
         "sub": [],
@@ -293,90 +406,6 @@
                 "type": "Node2D",
                 "name": "input",
                 "elem_id": "word_input"
-            }
-        ]
-    },
-    "res://scene/transparent.tscn": {
-        "type": "PackedScene",
-        "ext": {
-            "2": "media/aa.png"
-        },
-        "sub": [
-            {
-                "id": 1,
-                "type": "Environment",
-                "bg_mode": 1,
-                "bg_color": {
-                    "r": 0.984314,
-                    "g": 0.643137,
-                    "b": 0.564706,
-                    "a": 1
-                }
-            },
-            {
-                "id": 2,
-                "type": "PlaneMesh"
-            },
-            {
-                "id": 3,
-                "type": "SpatialMaterial",
-                "spatial": {
-                    "uses_alpha": true
-                },
-                "conditions": [],
-                "albedo_texture": [
-                    "@ext#",
-                    "2"
-                ]
-            }
-        ],
-        "nodes": [
-            {
-                "type": "Spatial",
-                "name": "transparent"
-            },
-            {
-                "type": "WorldEnvironment",
-                "name": "world_environment",
-                "parent": ".",
-                "environment": [
-                    "@sub#",
-                    "1"
-                ]
-            },
-            {
-                "type": "Camera",
-                "name": "camera",
-                "parent": ".",
-                "transform": [
-                    0.916363,
-                    -0.211882,
-                    0.339684,
-                    0,
-                    0.84847,
-                    0.529244,
-                    -0.400349,
-                    -0.484979,
-                    0.777506,
-                    2.26847,
-                    3.39202,
-                    5.07463
-                ]
-            },
-            {
-                "type": "MeshInstance",
-                "name": "mesh_instance",
-                "parent": ".",
-                "mesh": [
-                    "@sub#",
-                    "2"
-                ],
-                "material": [
-                    [
-                        "@sub#",
-                        "3"
-                    ]
-                ]
             }
         ]
     },
@@ -1243,12 +1272,12 @@
                             },
                             "vertex": {
                                 "index": 0,
-                                "offset": 1652,
+                                "offset": 102644,
                                 "length": 27064
                             },
                             "index": {
                                 "index": 0,
-                                "offset": 28716,
+                                "offset": 129708,
                                 "length": 840
                             },
                             "array_len": 398,
@@ -11027,12 +11056,12 @@
                             },
                             "vertex": {
                                 "index": 0,
-                                "offset": 29556,
+                                "offset": 130548,
                                 "length": 10080
                             },
                             "index": {
                                 "index": 0,
-                                "offset": 39636,
+                                "offset": 140628,
                                 "length": 648
                             },
                             "array_len": 210,
@@ -11112,12 +11141,12 @@
                             },
                             "vertex": {
                                 "index": 0,
-                                "offset": 40284,
+                                "offset": 141276,
                                 "length": 24048
                             },
                             "index": {
                                 "index": 0,
-                                "offset": 64332,
+                                "offset": 165324,
                                 "length": 1536
                             },
                             "array_len": 501,
@@ -11264,12 +11293,12 @@
                             },
                             "vertex": {
                                 "index": 0,
-                                "offset": 65868,
+                                "offset": 166860,
                                 "length": 28032
                             },
                             "index": {
                                 "index": 0,
-                                "offset": 93900,
+                                "offset": 194892,
                                 "length": 1176
                             },
                             "array_len": 584,
@@ -11373,12 +11402,12 @@
                             },
                             "vertex": {
                                 "index": 0,
-                                "offset": 95076,
+                                "offset": 196068,
                                 "length": 8640
                             },
                             "index": {
                                 "index": 0,
-                                "offset": 103716,
+                                "offset": 204708,
                                 "length": 696
                             },
                             "array_len": 180,
@@ -11909,6 +11938,244 @@
                     -1.64133,
                     2.42199,
                     1.0668e-7
+                ]
+            }
+        ]
+    },
+    "res://scene/transparent.tscn": {
+        "type": "PackedScene",
+        "ext": {
+            "1": "res://mesh/sphere.tscn",
+            "2": "media/aa.png"
+        },
+        "sub": [
+            {
+                "id": 1,
+                "type": "Environment",
+                "bg_mode": 1,
+                "bg_color": {
+                    "r": 0.984314,
+                    "g": 0.643137,
+                    "b": 0.564706,
+                    "a": 1
+                }
+            },
+            {
+                "id": 2,
+                "type": "PlaneMesh"
+            },
+            {
+                "id": 3,
+                "type": "SpatialMaterial",
+                "spatial": {
+                    "uses_alpha": true
+                },
+                "conditions": [],
+                "albedo_texture": [
+                    "@ext#",
+                    "2"
+                ]
+            },
+            {
+                "id": 4,
+                "type": "CubeMesh",
+                "size": {
+                    "x": 8,
+                    "y": 2,
+                    "z": 8
+                }
+            },
+            {
+                "id": 5,
+                "type": "SpatialMaterial",
+                "spatial": {},
+                "conditions": []
+            },
+            {
+                "id": 6,
+                "type": "SpatialMaterial",
+                "spatial": {
+                    "uses_alpha": true
+                },
+                "conditions": [],
+                "albedo_color": {
+                    "r": 0.423529,
+                    "g": 0.835294,
+                    "b": 0.901961,
+                    "a": 0.388235
+                },
+                "roughness": 0,
+                "metallic": 0.65,
+                "metallic_specular": 1
+            }
+        ],
+        "nodes": [
+            {
+                "type": "Spatial",
+                "name": "transparent"
+            },
+            {
+                "type": "WorldEnvironment",
+                "name": "world_environment",
+                "parent": ".",
+                "environment": [
+                    "@sub#",
+                    "1"
+                ]
+            },
+            {
+                "type": "Camera",
+                "name": "camera",
+                "parent": ".",
+                "transform": [
+                    0.916363,
+                    -0.211882,
+                    0.339684,
+                    0,
+                    0.84847,
+                    0.529244,
+                    -0.400349,
+                    -0.484979,
+                    0.777506,
+                    2.26847,
+                    3.39202,
+                    5.07463
+                ]
+            },
+            {
+                "type": "MeshInstance",
+                "name": "transparent",
+                "parent": ".",
+                "transform": [
+                    -3.78552e-8,
+                    0.866025,
+                    0.5,
+                    -2.18557e-8,
+                    0.5,
+                    -0.866025,
+                    -1,
+                    -4.37114e-8,
+                    1.91069e-15,
+                    -1,
+                    1,
+                    0
+                ],
+                "mesh": [
+                    "@sub#",
+                    "2"
+                ],
+                "material": [
+                    [
+                        "@sub#",
+                        "3"
+                    ]
+                ]
+            },
+            {
+                "type": "MeshInstance",
+                "name": "transparent2",
+                "parent": ".",
+                "transform": [
+                    1,
+                    0,
+                    0,
+                    0,
+                    0.5,
+                    -0.866025,
+                    0,
+                    0.866025,
+                    0.5,
+                    0,
+                    1,
+                    -1
+                ],
+                "mesh": [
+                    "@sub#",
+                    "2"
+                ],
+                "material": [
+                    [
+                        "@sub#",
+                        "3"
+                    ]
+                ]
+            },
+            {
+                "type": "MeshInstance",
+                "name": "mesh_instance",
+                "parent": ".",
+                "transform": [
+                    1,
+                    0,
+                    0,
+                    0,
+                    1,
+                    0,
+                    0,
+                    0,
+                    1,
+                    0,
+                    -1,
+                    0
+                ],
+                "mesh": [
+                    "@sub#",
+                    "4"
+                ],
+                "material": [
+                    [
+                        "@sub#",
+                        "5"
+                    ]
+                ]
+            },
+            {
+                "type": "SpotLight",
+                "name": "spot_light",
+                "parent": ".",
+                "transform": [
+                    1,
+                    0,
+                    0,
+                    0,
+                    -4.37114e-8,
+                    1,
+                    0,
+                    -1,
+                    -4.37114e-8,
+                    0,
+                    4,
+                    0
+                ],
+                "spot_range": 8.79549,
+                "spot_angle": 42.4677
+            },
+            {
+                "name": "Sphere",
+                "parent": ".",
+                "transform": [
+                    1,
+                    0,
+                    0,
+                    0,
+                    1,
+                    0,
+                    0,
+                    0,
+                    1,
+                    0,
+                    0.920532,
+                    0
+                ],
+                "material": [
+                    [
+                        "@sub#",
+                        "6"
+                    ]
+                ],
+                "instance": [
+                    "@ext#",
+                    "1"
                 ]
             }
         ]
