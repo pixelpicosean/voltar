@@ -1,11 +1,14 @@
+import { remove_item } from "engine/dep/index";
 import { VSG } from "engine/servers/visual/visual_server_globals";
 
 type Shader_t = import("engine/drivers/webgl/rasterizer_storage").Shader_t;
 
 export class Shader {
-    conditional = 0;
     textures: string[];
-    defines: { [condition: string]: number };
+
+    conditions = <number[]>[];
+    defines: { [name: string]: number };
+    define_names: { [value: number]: string };
 
     base: Shader_t;
     current: Shader_t;
@@ -15,10 +18,12 @@ export class Shader {
 
         this.textures = textures;
 
-        this.defines = defines.reduce((map, def, idx) => {
-            map[def] = 1 << idx;
-            return map;
-        }, Object.create(null) as { [condition: string]: number });
+        this.defines = Object.create(null);
+        this.define_names = Object.create(null);
+        for (let i = 0; i < defines.length; i++) {
+            this.defines[defines[i]] = i;
+            this.define_names[i] = defines[i];
+        }
 
         this.current = this.base;
     }
@@ -26,7 +31,7 @@ export class Shader {
     bind() {
         const gl = VSG.storage.gl;
 
-        this.current = VSG.storage.shader_get_instance_with_defines(this.base, this.conditional, this.get_def_code(this.conditional));
+        this.current = VSG.storage.shader_get_instance_with_defines(this.base, this.conditions, this.get_def_code(this.conditions));
         let gl_prog = this.current.gl_prog;
 
         gl.useProgram(gl_prog);
@@ -112,21 +117,54 @@ export class Shader {
         }
     }
 
-    set_conditional(p_conditional: string, p_enabled: boolean) {
+    set_conditional(p_condition: string, p_enabled: boolean) {
         if (p_enabled) {
-            this.conditional |= this.defines[p_conditional];
+            add_to_condition(this.conditions, p_condition, this.defines);
         } else {
-            this.conditional &= ~this.defines[p_conditional];
+            remove_from_condition(this.conditions, p_condition, this.defines);
         }
     }
 
-    get_def_code(condition: number) {
+    get_def_code(conditions: number[]) {
         let code = '';
-        for (let k in this.defines) {
-            if ((condition & this.defines[k]) === this.defines[k]) {
-                code += `#define ${k}\n`;
-            }
+        for (let c of conditions) {
+            code += `#define ${this.define_names[c]}\n`;
         }
         return code;
     }
+}
+
+function add_to_condition(conditions: number[], name: keyof typeof defines, defines: { [name: string]: number }): number[] {
+    let value = defines[name];
+
+    // already enabled
+    if (conditions.indexOf(value) >= 0) {
+        return conditions;
+    }
+
+    if (conditions.length === 0) {
+        conditions.push(value);
+    } else {
+        if (value < conditions[0]) {
+            conditions.unshift(value);
+        } else {
+            for (let i = 0; i < conditions.length; i++) {
+                if (value > conditions[i]) {
+                    conditions.splice(i + 1, 0, value);
+                    break;
+                }
+            }
+        }
+    }
+
+    return conditions;
+}
+
+function remove_from_condition(conditions: number[], name: keyof typeof defines, defines: { [name: string]: number }): number[] {
+    let value = defines[name];
+
+    let idx = conditions.indexOf(value);
+    if (idx >= 0) remove_item(conditions, idx);
+
+    return conditions;
 }

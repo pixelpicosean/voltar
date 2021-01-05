@@ -1,14 +1,15 @@
-import { res_class_map } from 'engine/registry';
-import { Color } from 'engine/core/color';
-import { lerp, deg2rad, nearest_po2 } from 'engine/core/math/math_funcs';
-import { Vector2 } from 'engine/core/math/vector2';
-import { Vector3 } from 'engine/core/math/vector3';
-import { Rect2 } from 'engine/core/math/rect2';
-import { Basis } from 'engine/core/math/basis';
-import { Transform } from 'engine/core/math/transform';
-import { CameraMatrix } from 'engine/core/math/camera_matrix';
-import { range_sort } from 'engine/core/v_array';
-import { OS } from 'engine/core/os/os';
+import { res_class_map } from "engine/registry";
+import { remove_item } from "engine/dep/index";
+import { Color } from "engine/core/color";
+import { lerp, deg2rad, nearest_po2 } from "engine/core/math/math_funcs";
+import { Vector2 } from "engine/core/math/vector2";
+import { Vector3 } from "engine/core/math/vector3";
+import { Rect2 } from "engine/core/math/rect2";
+import { Basis } from "engine/core/math/basis";
+import { Transform } from "engine/core/math/transform";
+import { CameraMatrix } from "engine/core/math/camera_matrix";
+import { copy_array_values, range_sort } from "engine/core/v_array";
+import { OS } from "engine/core/os/os";
 
 import {
     INSTANCE_TYPE_MESH,
@@ -29,16 +30,16 @@ import {
     LIGHT_OMNI_SHADOW_DETAIL_HORIZONTAL,
     LIGHT_OMNI_SHADOW_CUBE,
     VisualServer,
-} from 'engine/servers/visual_server';
+} from "engine/servers/visual_server";
 import {
     Instance_t,
-} from 'engine/servers/visual/visual_server_scene';
-import { VSG } from 'engine/servers/visual/visual_server_globals';
+} from "engine/servers/visual/visual_server_scene";
+import { VSG } from "engine/servers/visual/visual_server_globals";
 
 import {
     ShaderMaterial,
     SpatialMaterial,
-} from 'engine/scene/resources/material';
+} from "engine/scene/resources/material";
 import {
     ARRAY_VERTEX,
     ARRAY_NORMAL,
@@ -47,9 +48,9 @@ import {
     ARRAY_BONES,
     ARRAY_WEIGHTS,
     ARRAY_MAX,
-} from 'engine/scene/const';
+} from "engine/scene/const";
 
-import { EffectBlurShader } from './shaders/blur';
+import { EffectBlurShader } from "./shaders/blur";
 import {
     Mesh_t,
     Surface_t,
@@ -58,8 +59,11 @@ import {
     Shader_t,
     Material_t,
     Light_t,
+    LightmapCapture_t,
     Skeleton_t,
     Sky_t,
+
+    RasterizerStorage,
 
     BLEND_MODE_MIX,
     BLEND_MODE_ADD,
@@ -72,16 +76,15 @@ import {
     DEPTH_DRAW_ALPHA_PREPASS,
     DEPTH_DRAW_ALWAYS,
     DEPTH_DRAW_NEVER,
-    LightmapCapture_t,
-} from './rasterizer_storage';
+} from "./rasterizer_storage";
 
 import {
     parse_uniforms_from_code,
     parse_attributes_from_code,
-} from './shader_parser';
+} from "./shader_parser";
 
-import spatial_vs from './shaders/spatial.vert';
-import spatial_fs from './shaders/spatial.frag';
+import spatial_vs from "./shaders/spatial.vert";
+import spatial_fs from "./shaders/spatial.frag";
 
 const UNIFORM_EPSILON = 0.00000001;
 
@@ -101,21 +104,50 @@ export const LIGHTMODE_LIGHTMAP = 2;
 
 const INSTANCE_BONE_BASE = 13;
 
+type DiffuseTypes = "burley" | "lambert" | "lambert_wrap" | "oren_nayar" | "toon";
+type SpecularTypes = "schlick_ggx" | "blinn" | "toon" | "phone";
+
+const DIFFUSE_LIST: DiffuseTypes[] = [
+    "burley",
+    "lambert",
+    "lambert_wrap",
+    "oren_nayar",
+    "toon",
+]
+
+const SPECULAR_LIST: SpecularTypes[] = [
+    "schlick_ggx",
+    "blinn",
+    "toon",
+    "phone",
+]
+
 interface MaterialInstanceConfig {
+    diffuse: number;
+    specular: number;
+
+    spatial: {
+        uses_alpha: boolean,
+    },
+    conditions: (keyof typeof SHADER_DEF)[],
+
     features: string[];
-    diffuse?: 'burley' | 'lambert' | 'lambert_wrap' | 'oren_nayar' | 'toon';
-    specular?: 'schlick_ggx' | 'blinn' | 'toon' | 'phone';
+
     params: { [name: string]: number[] };
     textures: { [name: string]: Texture_t };
 }
 
-/** @type {MaterialInstanceConfig} */
 const DEFAULT_MATERIAL_CONFIG: MaterialInstanceConfig = {
-    diffuse: 'burley',
-    specular: 'schlick_ggx',
+    diffuse: 0,
+    specular: 0,
+
+    spatial: {
+        uses_alpha: false,
+    },
+    conditions: [],
 
     features: [
-        'albedo',
+        "albedo",
     ],
 
     params: {
@@ -126,8 +158,7 @@ const DEFAULT_MATERIAL_CONFIG: MaterialInstanceConfig = {
     textures: {},
 }
 
-/** @type {{ [key: string]: Material_t }} */
-const material_base_table: { [key: string]: Material_t; } = {}
+const material_base_table: { [key: string]: Material_t } = {}
 
 export class Environment_t {
     bg_mode = ENV_BG_CLEAR_COLOR;
@@ -208,7 +239,7 @@ export class Environment_t {
                         this[k] = [value.r, value.g, value.b, value.a];
                     } else {
                         if (value.type === "ProceduralSky" || value.type === "PanoramaSky") {
-                            let sky = new (res_class_map[value.type])() as import('engine/scene/resources/sky').PanoramaSky;
+                            let sky = new (res_class_map[value.type])() as import("engine/scene/resources/sky").PanoramaSky;
                             sky._load_data(value);
                             // @ts-ignore
                             this[k] = sky.sky;
@@ -396,19 +427,6 @@ class RenderList_t {
         this.alpha_element_count = 0;
     }
 
-    add_alpha_element() {
-        if (this.element_count + this.alpha_element_count >= this.max_elements) return null;
-
-        if (!this.base_elements[this.element_count]) {
-            this.base_elements[this.element_count] = new Element_t;
-        }
-
-        let idx = this.max_elements - this.alpha_element_count - 1;
-        this.elements[idx] = this.base_elements[this.element_count];
-        this.alpha_element_count++;
-        return this.elements[idx];
-    }
-
     add_element() {
         if (this.element_count + this.alpha_element_count >= this.max_elements) return null;
 
@@ -418,6 +436,20 @@ class RenderList_t {
 
         this.elements[this.element_count] = this.base_elements[this.element_count];
         return this.elements[this.element_count++];
+    }
+
+    add_alpha_element() {
+        if (this.element_count + this.alpha_element_count >= this.max_elements) return null;
+
+        let idx = this.max_elements - this.alpha_element_count - 1;
+
+        if (!this.base_elements[idx]) {
+            this.base_elements[idx] = new Element_t;
+        }
+
+        this.elements[idx] = this.base_elements[idx];
+        this.alpha_element_count++;
+        return this.elements[idx];
     }
 
     sort_by_key(p_alpha: boolean) {
@@ -445,83 +477,84 @@ class RenderList_t {
     }
 }
 
+let def_id = 0;
 const SHADER_DEF = {
-    SHADLESS: 1 << 0,
-    BASE_PASS: 1 << 1,
+    SHADLESS: def_id++,
+    BASE_PASS: def_id++,
 
-    ENABLE_TANGENT_INTERP: 1 << 2,
-    ENABLE_NORMALMAP: 1 << 3,
-    ENABLE_COLOR_INTERP: 1 << 4,
-    ENABLE_UV_INTERP: 1 << 5,
-    ENABLE_UV2_INTERP: 1 << 6,
-    USE_SKELETON: 1 << 7,
-    USE_INSTANCING: 1 << 8,
+    ENABLE_TANGENT_INTERP: def_id++,
+    ENABLE_NORMALMAP: def_id++,
+    ENABLE_COLOR_INTERP: def_id++,
+    ENABLE_UV_INTERP: def_id++,
+    ENABLE_UV2_INTERP: def_id++,
+    USE_SKELETON: def_id++,
+    USE_INSTANCING: def_id++,
 
-    USE_LIGHTMAP: 1 << 9,
-    USE_LIGHTING: 1 << 10,
+    USE_LIGHTMAP: def_id++,
+    USE_LIGHTING: def_id++,
 
-    USE_SHADOW: 1 << 11,
-    USE_SHADOW_TO_OPACITY: 1 << 12,
+    USE_SHADOW: def_id++,
+    USE_SHADOW_TO_OPACITY: def_id++,
 
-    USE_DEPTH_PREPASS: 1 << 13,
-    RENDER_DEPTH: 1 << 14,
-    USE_RGBA_SHADOWS: 1 << 15,
+    USE_DEPTH_PREPASS: def_id++,
+    RENDER_DEPTH: def_id++,
+    USE_RGBA_SHADOWS: def_id++,
 
-    LIGHT_MODE_DIRECTIONAL: 1 << 16,
-    LIGHT_MODE_OMNI: 1 << 17,
-    LIGHT_MODE_SPOT: 1 << 18,
+    LIGHT_MODE_DIRECTIONAL: def_id++,
+    LIGHT_MODE_OMNI: def_id++,
+    LIGHT_MODE_SPOT: def_id++,
 
-    DIFFUSE_OREN_NAYAR: 1 << 19,
-    DIFFUSE_LAMBERT_WRAP: 1 << 20,
-    DIFFUSE_TOON: 1 << 21,
-    DIFFUSE_BURLEY: 1 << 22,
+    DIFFUSE_OREN_NAYAR: def_id++,
+    DIFFUSE_LAMBERT_WRAP: def_id++,
+    DIFFUSE_TOON: def_id++,
+    DIFFUSE_BURLEY: def_id++,
 
-    SPECULAR_BLINN: 1 << 23,
-    SPECULAR_PHONE: 1 << 24,
-    SPECULAR_TOON: 1 << 25,
-    SPECULAR_SCHLICK_GGX: 1 << 26,
+    SPECULAR_BLINN: def_id++,
+    SPECULAR_PHONE: def_id++,
+    SPECULAR_TOON: def_id++,
+    SPECULAR_SCHLICK_GGX: def_id++,
 
-    FOG_DEPTH_ENABLED: 1 << 27,
-    FOG_HEIGHT_ENABLED: 1 << 28,
+    FOG_DEPTH_ENABLED: def_id++,
+    FOG_HEIGHT_ENABLED: def_id++,
 
-    RENDER_DEPTH_DUAL_PARABOLOID: 1 << 29,
+    RENDER_DEPTH_DUAL_PARABOLOID: def_id++,
 
-    LIGHT_USE_RIM: 1 << 30,
-    USE_SKELETON_SOFTWARE: 1 << 31,
+    LIGHT_USE_RIM: def_id++,
+    USE_SKELETON_SOFTWARE: def_id++,
+
+    ALPHA_SCISSOR_USED: def_id++,
 };
+const SHADER_DEF_NAME_TABLE: { [value: number]: keyof typeof SHADER_DEF } = {};
+for (let key in SHADER_DEF) {
+    SHADER_DEF_NAME_TABLE[SHADER_DEF[<keyof typeof SHADER_DEF>key]] = <keyof typeof SHADER_DEF>key;
+}
 
 const DEFAULT_SPATIAL_ATTRIBS = [
-    { name: 'position', loc: 0 },
-    { name: 'normal', loc: 1 },
-    { name: 'tangent', loc: 2 },
-    { name: 'color', loc: 3 },
-    { name: 'uv', loc: 4 },
-    { name: 'uv2', loc: 5 },
-    { name: 'bone_ids', loc: 6 },
-    { name: 'bone_weights', loc: 7 },
+    { name: "vertex_attrib", loc: 0 },
+    { name: "normal_attrib", loc: 1 },
+    { name: "tangent_attrib", loc: 2 },
+    { name: "color_attrib", loc: 3 },
+    { name: "uv_attrib", loc: 4 },
+    { name: "uv2_attrib", loc: 5 },
+    { name: "bone_ids", loc: 6 },
+    { name: "bone_weights", loc: 7 },
 
-    { name: 'instance_xform_row_0', loc: 8 },
-    { name: 'instance_xform_row_1', loc: 9 },
-    { name: 'instance_xform_row_2', loc: 10 },
+    { name: "instance_xform_row_0", loc: 8 },
+    { name: "instance_xform_row_1", loc: 9 },
+    { name: "instance_xform_row_2", loc: 10 },
 
-    { name: 'instance_color', loc: 11 },
-    { name: 'instance_custom_data', loc: 12 },
+    { name: "instance_color", loc: 11 },
+    { name: "instance_custom_data", loc: 12 },
 
-    { name: 'bone_transform_row_0', loc: 13 },
-    { name: 'bone_transform_row_1', loc: 14 },
-    { name: 'bone_transform_row_2', loc: 15 },
+    { name: "bone_transform_row_0", loc: 13 },
+    { name: "bone_transform_row_1", loc: 14 },
+    { name: "bone_transform_row_2", loc: 15 },
 ]
 
-/**
- * @param {number} condition
- */
-function get_shader_def_code(condition: number) {
-    let code = '';
-    for (let k in SHADER_DEF) {
-        // @ts-ignore
-        if ((condition & SHADER_DEF[k]) === SHADER_DEF[k]) {
-            code += `#define ${k}\n`;
-        }
+function get_shader_def_code(condition: number[]): string {
+    let code = "";
+    for (let value of condition) {
+        code += `#define ${SHADER_DEF_NAME_TABLE[value]}\n`;
     }
     return code;
 }
@@ -529,81 +562,94 @@ function get_shader_def_code(condition: number) {
 /* spatial shader feature begin */
 
 const SPATIAL_FEATURES = {
-    'general': {
-        condition: 0,
+    "general": {
+        condition: <(keyof typeof SHADER_DEF)[]>[],
         uniform: `
             uniform highp float m_roughness;
             uniform highp float m_specular;
             uniform highp float m_metallic;
         `,
-        fragment: `
+        fragment: (config: MaterialInstanceConfig) => `
             METALLIC = m_metallic;
             ROUGHNESS = m_roughness;
             SPECULAR = m_specular;
         `,
         value: {
-            'm_roughness': [1],
-            'm_specular': [0.5],
-            'm_metallic': [0],
+            "m_roughness": [1],
+            "m_specular": [0.5],
+            "m_metallic": [0],
         },
         texture: {
-            // 'lightmap': 'white',
+            // "lightmap": "white",
         },
     },
 
-    'albedo': {
-        condition: 0,
+    "albedo": {
+        condition: <(keyof typeof SHADER_DEF)[]>[
+            "ENABLE_UV_INTERP"
+        ],
         uniform: `
             uniform sampler2D m_texture_albedo;
             uniform highp vec4 m_albedo;
         `,
-        fragment: `
-            ALBEDO = texture(m_texture_albedo, UV).rgb * m_albedo.rgb;
-        `,
+        fragment: (config: MaterialInstanceConfig) => {
+            let code = `
+                vec4 m_albedo_tex = texture(m_texture_albedo, UV);
+                ALBEDO = m_albedo_tex.rgb * m_albedo.rgb;
+            `;
+            if (config.spatial.uses_alpha) {
+                code += `\ALPHA = m_albedo.a * m_albedo_tex.a;`;
+            }
+            return code;
+        },
         value: {
-            'm_albedo': [1, 1, 1, 1],
+            "m_albedo": [1, 1, 1, 1],
         },
         texture: {
-            'm_texture_albedo': 'white',
+            "m_texture_albedo": "white",
         },
     },
-    'emission': {
-        condition: 0,
+    "emission": {
+        condition: <(keyof typeof SHADER_DEF)[]>[
+            "ENABLE_UV_INTERP",
+        ],
         uniform: `
             uniform sampler2D m_texture_emission;
             uniform highp vec4 m_emission;
             uniform highp float m_emission_energy;
         `,
-        fragment: `
+        fragment: (config: MaterialInstanceConfig) => `
             vec3 m_emission_tex = texture(m_texture_emission, UV).rgb;
             EMISSION = (m_emission.rgb + m_emission_tex) * m_emission_energy;
         `,
         value: {
-            'm_emission': [0, 0, 0, 1],
-            'm_emission_energy': [1],
+            "m_emission": [0, 0, 0, 1],
+            "m_emission_energy": [1],
         },
         texture: {
-            'm_texture_emission': 'black',
+            "m_texture_emission": "black",
         },
     },
-    'rim': {
-        condition: SHADER_DEF.LIGHT_USE_RIM,
+    "rim": {
+        condition: <(keyof typeof SHADER_DEF)[]>[
+            "LIGHT_USE_RIM",
+        ],
         uniform: `
             uniform sampler2D m_texture_rim;
             uniform highp float m_rim;
             uniform highp float m_rim_tint;
         `,
-        fragment: `
+        fragment: (config: MaterialInstanceConfig) => `
             vec2 m_rim_tex = texture(m_texture_rim, UV).xy;
             RIM = m_rim * m_rim_tex.x;
             RIM_TINT = m_rim_tint * m_rim_tex.y;
         `,
         value: {
-            'm_rim': [1],
-            'm_rim_tint': [0.5],
+            "m_rim": [1],
+            "m_rim_tint": [0.5],
         },
         texture: {
-            'm_texture_rim': 'white',
+            "m_texture_rim": "white",
         },
     },
 }
@@ -619,7 +665,7 @@ let sky_transform_arr = [
 ]
 
 export class RasterizerScene {
-    storage: import('./rasterizer_storage').RasterizerStorage = null;
+    storage: RasterizerStorage = null;
 
     // private
     gl: WebGLRenderingContext = null;
@@ -634,10 +680,8 @@ export class RasterizerScene {
         current_light: 0,
     };
 
-    /** @type {SpatialMaterial} */
     default_material: SpatialMaterial = null;
 
-    /** @type {LightInstance_t[]} */
     render_light_instances: LightInstance_t[] = [];
     render_directional_lights = 0;
     render_light_instance_count = 0;
@@ -753,8 +797,8 @@ export class RasterizerScene {
         uniform_states: Object.create(null) as { [name: string]: UniformState },
         texture_states: Object.create(null) as { [slot: number]: TextureState },
 
-        conditions: 0,
-        prev_conditions: 0,
+        conditions: <number[]>[],
+        prev_conditions: <number[]>[],
 
         gl: {
             CULL_FACE: false,
@@ -768,7 +812,6 @@ export class RasterizerScene {
         },
     };
 
-    /** @type {EffectBlurShader} */
     effect_blur_shader: EffectBlurShader = null;
 
     shadow_atlas_realloc_tolerance_msec = 500;
@@ -867,9 +910,6 @@ export class RasterizerScene {
 
     iteration() { }
 
-    /**
-     * @param {LightInstance_t} light_instance
-     */
     free_light_instance(light_instance: LightInstance_t) {
         // remove from shadow atlases
         for (let shadow_atlas of light_instance.shadow_atlases) {
@@ -900,35 +940,38 @@ export class RasterizerScene {
         return inst;
     }
 
-    /**
-     * @param {MaterialInstanceConfig} config
-     */
     material_base_get(config: MaterialInstanceConfig) {
         config = Object.assign({}, DEFAULT_MATERIAL_CONFIG, config);
         Object.assign(config.params, DEFAULT_MATERIAL_CONFIG.params, config.params);
         Object.assign(config.textures, DEFAULT_MATERIAL_CONFIG.textures, config.textures);
 
-        const key = `${config.features.sort().join('.')}.${config.diffuse}.${config.specular}`;
+        const key = create_shader_config_key(config);
         let base = material_base_table[key];
 
         if (!base) {
             const mat = new ShaderMaterial(`spatial[${key}]`);
 
-            const features = new Set(['general', ...config.features]);
+            const features = new Set(["general", ...config.features]);
 
             // shader code
-            // @ts-ignore
-            let condition = SHADER_DEF[`DIFFUSE_${config.diffuse.toUpperCase()}`] | SHADER_DEF[`SPECULAR_${config.specular.toUpperCase()}`]
-            let uniforms = ''
-            let fragment = ''
+            let conditions: number[] = [];
+            add_to_condition(conditions, `DIFFUSE_${DIFFUSE_LIST[config.diffuse].toUpperCase()}` as (keyof typeof SHADER_DEF));
+            add_to_condition(conditions, `SPECULAR_${SPECULAR_LIST[config.specular].toUpperCase()}` as (keyof typeof SHADER_DEF));
+            for (let c of config.conditions) {
+                add_to_condition(conditions, c);
+            }
 
-            for (let feature of features) {
-                // @ts-ignore
-                uniforms += SPATIAL_FEATURES[feature].uniform;
-                // @ts-ignore
-                fragment += SPATIAL_FEATURES[feature].fragment;
-                // @ts-ignore
-                condition |= SPATIAL_FEATURES[feature].condition;
+            let uniforms = ""
+            let fragment = ""
+
+            for (let name of features) {
+                let feature = SPATIAL_FEATURES[name as (keyof typeof SPATIAL_FEATURES)];
+
+                uniforms += feature.uniform;
+                fragment += feature.fragment(config);
+                for (let c of feature.condition) {
+                    add_to_condition(conditions, c as (keyof typeof SHADER_DEF));
+                }
             }
 
             mat.set_shader(`shader_type spatial;\n${uniforms}\nvoid fragment() {\n${fragment}\n}`);
@@ -938,8 +981,11 @@ export class RasterizerScene {
                 mat,
                 spatial_vs,
                 spatial_fs,
-                condition
+                conditions
             );
+
+            // spatial flags/params
+            Object.assign(base.shader.spatial, config.spatial);
 
             // default values/textures
             for (let feature of features) {
@@ -968,15 +1014,11 @@ export class RasterizerScene {
         this.scene_pass = p_pass;
     }
 
-    /**
-     * @param {number} param
-     * @param {boolean} value
-     */
-    set_shader_condition(param: number, value: boolean) {
+    set_shader_condition(param: keyof typeof SHADER_DEF, value: boolean) {
         if (value) {
-            this.state.conditions |= param;
+            add_to_condition(this.state.conditions, param);
         } else {
-            this.state.conditions &= ~param;
+            remove_from_condition(this.state.conditions, param);
         }
     }
 
@@ -1410,8 +1452,8 @@ export class RasterizerScene {
         }
 
         this.state.current_shader = null;
-        this.state.prev_conditions = -1;
-        this.state.conditions = 0;
+        this.state.prev_conditions.length = 0;
+        this.state.conditions.length = 0;
 
         this.state.used_screen_texture = false;
         this.state.viewport_size.set(viewport_width, viewport_height);
@@ -1530,7 +1572,7 @@ export class RasterizerScene {
 
         // opaque pass first
         this.render_list.sort_by_key(false);
-        this._render_render_list(this.render_list.elements, this.render_list.element_count, cam_transform, p_cam_projection, p_shadow_atlas, p_env, 0, 0, reverse_cull, false, false);
+        this._render_render_list(this.render_list.elements, 0, this.render_list.element_count, cam_transform, p_cam_projection, p_shadow_atlas, p_env, 0, 0, reverse_cull, false, false);
 
         if (p_env && p_env.bg_mode === ENV_BG_SKY && (!this.storage.frame.current_rt || !this.storage.frame.current_rt.flags.TRANSPARENT)) {
             if (sky && sky.panorama) {
@@ -1549,7 +1591,7 @@ export class RasterizerScene {
         gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
 
         this.render_list.sort_by_reverse_depth_and_priority(true);
-        this._render_render_list(this.render_list.elements, this.render_list.alpha_element_count, cam_transform, p_cam_projection, p_shadow_atlas, p_env, 0, 0, reverse_cull, true, false);
+        this._render_render_list(this.render_list.elements, this.render_list.max_elements - this.render_list.alpha_element_count, this.render_list.alpha_element_count, cam_transform, p_cam_projection, p_shadow_atlas, p_env, 0, 0, reverse_cull, true, false);
 
         this._post_process(p_env, p_cam_projection);
 
@@ -1577,8 +1619,8 @@ export class RasterizerScene {
         let light_transform = Transform.create();
 
         this.state.current_shader = null;
-        this.state.prev_conditions = -1;
-        this.state.conditions = 0;
+        this.state.prev_conditions.length = 0;
+        this.state.conditions.length = 0;
 
         if (light.type === LIGHT_DIRECTIONAL) {
             light_instance.light_directional_index = this.directional_shadow.current_light;
@@ -1657,7 +1699,7 @@ export class RasterizerScene {
 
                     this.state.dual_parboloid_zfar = zfar;
 
-                    this.set_shader_condition(SHADER_DEF.RENDER_DEPTH_DUAL_PARABOLOID, true);
+                    this.set_shader_condition("RENDER_DEPTH_DUAL_PARABOLOID", true);
                 }
             } else {
                 light_projection.copy(light_instance.shadow_transforms[0].camera);
@@ -1710,14 +1752,14 @@ export class RasterizerScene {
             flip_facing = !flip_facing;
         }
 
-        this.set_shader_condition(SHADER_DEF.RENDER_DEPTH, true);
-        this.set_shader_condition(SHADER_DEF.USE_RGBA_SHADOWS, VSG.config.use_rgba_3d_shadows);
+        this.set_shader_condition("RENDER_DEPTH", true);
+        this.set_shader_condition("USE_RGBA_SHADOWS", VSG.config.use_rgba_3d_shadows);
 
-        this._render_render_list(this.render_list.elements, this.render_list.element_count, light_transform, light_projection, null, null, bias, normal_bias, flip_facing, false, true);
+        this._render_render_list(this.render_list.elements, 0, this.render_list.element_count, light_transform, light_projection, null, null, bias, normal_bias, flip_facing, false, true);
 
-        this.set_shader_condition(SHADER_DEF.RENDER_DEPTH, false);
-        this.set_shader_condition(SHADER_DEF.USE_RGBA_SHADOWS, false);
-        this.set_shader_condition(SHADER_DEF.RENDER_DEPTH_DUAL_PARABOLOID, false);
+        this.set_shader_condition("RENDER_DEPTH", false);
+        this.set_shader_condition("USE_RGBA_SHADOWS", false);
+        this.set_shader_condition("RENDER_DEPTH_DUAL_PARABOLOID", false);
 
         if (this.storage.frame.current_rt) {
             gl.viewport(0, 0, this.storage.frame.current_rt.width, this.storage.frame.current_rt.height);
@@ -1730,7 +1772,7 @@ export class RasterizerScene {
         Transform.free(light_transform);
     }
 
-    init_shader_material(shader_material: ShaderMaterial, vs: string, fs: string, conditions: number) {
+    init_shader_material(shader_material: ShaderMaterial, vs: string, fs: string, conditions: number[]) {
         let vs_code = vs
             // uniform
             .replace("/* GLOBALS */", `${shader_material.global_code}\n`)
@@ -1797,11 +1839,7 @@ export class RasterizerScene {
         return material;
     }
 
-    /**
-     * @param {Material_t} material
-     * @param {number} conditions
-     */
-    get_shader_with_conditions(material: Material_t, conditions: number) {
+    get_shader_with_conditions(material: Material_t, conditions: number[]) {
         return VSG.storage.shader_get_instance_with_defines(material.shader, conditions, get_shader_def_code(conditions));
     }
 
@@ -1811,7 +1849,7 @@ export class RasterizerScene {
     bind_scene_shader(material: Material_t) {
         let shader = this.get_shader_with_conditions(material, this.state.conditions);
 
-        let rebind = this.state.prev_conditions !== this.state.conditions
+        let rebind = !is_condition_equal(this.state.prev_conditions, this.state.conditions)
             ||
             this.state.current_shader !== shader
 
@@ -1821,7 +1859,7 @@ export class RasterizerScene {
             this.state.current_shader = shader;
         }
 
-        this.state.prev_conditions = this.state.conditions;
+        copy_array_values(this.state.conditions, this.state.prev_conditions);
 
         return rebind;
     }
@@ -1909,7 +1947,7 @@ export class RasterizerScene {
     }
 
     _add_geometry_with_material(p_geometry: Geometry_t, p_instance: Instance_t, p_material: Material_t, p_depth_pass: boolean, p_shadow_pass: boolean) {
-        let has_base_alpha = false;
+        let has_base_alpha = p_material.shader.spatial.uses_alpha && !p_material.shader.spatial.uses_alpha_scissor;
         let has_blend_alpha = false;
         let has_alpha = has_base_alpha || has_blend_alpha;
 
@@ -2027,7 +2065,7 @@ export class RasterizerScene {
         }
     }
 
-    _render_render_list(p_elements: Element_t[], p_element_count: number, p_view_transform: Transform, p_projection: CameraMatrix, p_shadow_atlas: ShadowAtlas_t, p_env: Environment_t, p_shadow_bias: number, p_shadow_normal_bias: number, p_reverse_cull: boolean, p_alpha_pass: boolean, p_shadow: boolean) {
+    _render_render_list(p_elements: Element_t[], p_element_start: number, p_element_count: number, p_view_transform: Transform, p_projection: CameraMatrix, p_shadow_atlas: ShadowAtlas_t, p_env: Environment_t, p_shadow_bias: number, p_shadow_normal_bias: number, p_reverse_cull: boolean, p_alpha_pass: boolean, p_shadow: boolean) {
         let view_transform_inverse = p_view_transform.inverse();
         let projection_inverse = p_projection.inverse();
 
@@ -2041,7 +2079,7 @@ export class RasterizerScene {
         let prev_instancing = false;
         let prev_depth_prepass = false;
 
-        this.set_shader_condition(SHADER_DEF.SHADLESS, false);
+        this.set_shader_condition("SHADLESS", false);
 
         let prev_base_pass = false;
         let prev_light: LightInstance_t = null;
@@ -2068,8 +2106,8 @@ export class RasterizerScene {
         let fog_max_distance = 0;
         let using_fog = false;
         if (p_env && !p_shadow && !!p_env.fog_enabled[0] && (!!p_env.fog_depth_enabled[0] || !!p_env.fog_height_enabled[0])) {
-            this.set_shader_condition(SHADER_DEF.FOG_DEPTH_ENABLED, p_env.fog_depth_enabled[0] > 0);
-            this.set_shader_condition(SHADER_DEF.FOG_HEIGHT_ENABLED, p_env.fog_height_enabled[0] > 0);
+            this.set_shader_condition("FOG_DEPTH_ENABLED", p_env.fog_depth_enabled[0] > 0);
+            this.set_shader_condition("FOG_HEIGHT_ENABLED", p_env.fog_height_enabled[0] > 0);
             if (p_env.fog_depth_end[0] > 0) {
                 fog_max_distance = p_env.fog_depth_end[0];
             } else {
@@ -2086,7 +2124,7 @@ export class RasterizerScene {
         mark_textures_outdated(this.state.texture_states);
 
         for (let i = 0; i < p_element_count; i++) {
-            let e = p_elements[i];
+            let e = p_elements[i + p_element_start];
 
             let material = e.material;
             let uniform_states = this.state.uniform_states;
@@ -2106,10 +2144,10 @@ export class RasterizerScene {
                 if (unshaded != prev_unshaded) {
                     rebind = true;
                     if (unshaded) {
-                        this.set_shader_condition(SHADER_DEF.SHADLESS, true);
-                        this.set_shader_condition(SHADER_DEF.USE_LIGHTING, false);
+                        this.set_shader_condition("SHADLESS", true);
+                        this.set_shader_condition("USE_LIGHTING", false);
                     } else {
-                        this.set_shader_condition(SHADER_DEF.SHADLESS, false);
+                        this.set_shader_condition("SHADLESS", false);
                     }
                     prev_unshaded = unshaded;
                 }
@@ -2117,7 +2155,7 @@ export class RasterizerScene {
                 let base_pass = !accum_pass && !unshaded;
 
                 if (base_pass != prev_base_pass) {
-                    this.set_shader_condition(SHADER_DEF.BASE_PASS, base_pass);
+                    this.set_shader_condition("BASE_PASS", base_pass);
                     rebind = true;
                     prev_base_pass = base_pass;
                 }
@@ -2194,7 +2232,7 @@ export class RasterizerScene {
                 }
 
                 if (lightmap !== prev_lightmap) {
-                    this.set_shader_condition(SHADER_DEF.USE_LIGHTMAP, !!lightmap);
+                    this.set_shader_condition("USE_LIGHTMAP", !!lightmap);
 
                     rebind = true;
                     rebind_lightmap = true;
@@ -2208,7 +2246,7 @@ export class RasterizerScene {
             }
 
             if (depth_prepass !== prev_depth_prepass) {
-                this.set_shader_condition(SHADER_DEF.USE_DEPTH_PREPASS, depth_prepass);
+                this.set_shader_condition("USE_DEPTH_PREPASS", depth_prepass);
                 prev_depth_prepass = depth_prepass;
                 rebind = true;
             }
@@ -2216,7 +2254,7 @@ export class RasterizerScene {
             let instancing = e.instance.base_type === INSTANCE_TYPE_MULTIMESH;
 
             if (instancing != prev_instancing) {
-                this.set_shader_condition(SHADER_DEF.USE_INSTANCING, instancing);
+                this.set_shader_condition("USE_INSTANCING", instancing);
                 rebind = true;
             }
 
@@ -2224,11 +2262,11 @@ export class RasterizerScene {
 
             if (skeleton != prev_skeleton) {
                 if (skeleton) {
-                    this.set_shader_condition(SHADER_DEF.USE_SKELETON, true);
-                    this.set_shader_condition(SHADER_DEF.USE_SKELETON_SOFTWARE, VSG.config.use_skeleton_software);
+                    this.set_shader_condition("USE_SKELETON", true);
+                    this.set_shader_condition("USE_SKELETON_SOFTWARE", VSG.config.use_skeleton_software);
                 } else {
-                    this.set_shader_condition(SHADER_DEF.USE_SKELETON, false);
-                    this.set_shader_condition(SHADER_DEF.USE_SKELETON_SOFTWARE, false);
+                    this.set_shader_condition("USE_SKELETON", false);
+                    this.set_shader_condition("USE_SKELETON_SOFTWARE", false);
                 }
 
                 rebind = true;
@@ -2341,7 +2379,7 @@ export class RasterizerScene {
                     };
                 }
 
-                // no need to upload if it's not changed yet
+                // no need to upload if it"s not changed yet
                 if (!state.changed) continue;
 
                 switch (u.type) {
@@ -2355,7 +2393,7 @@ export class RasterizerScene {
                     case "mat4": gl.uniformMatrix4fv(u.gl_loc, false, state.value); break;
                 }
 
-                // now it's synced with GPU
+                // now it"s synced with GPU
                 state.changed = false;
             }
 
@@ -2375,16 +2413,16 @@ export class RasterizerScene {
         }
 
         this._setup_light_type(null, null);
-        this.set_shader_condition(SHADER_DEF.USE_SKELETON, false);
-        this.set_shader_condition(SHADER_DEF.SHADLESS, false);
-        this.set_shader_condition(SHADER_DEF.BASE_PASS, false);
-        this.set_shader_condition(SHADER_DEF.USE_INSTANCING, false);
-        this.set_shader_condition(SHADER_DEF.USE_LIGHTMAP, false);
-        this.set_shader_condition(SHADER_DEF.FOG_DEPTH_ENABLED, false);
-        this.set_shader_condition(SHADER_DEF.FOG_HEIGHT_ENABLED, false);
-        this.set_shader_condition(SHADER_DEF.USE_DEPTH_PREPASS, false);
+        this.set_shader_condition("USE_SKELETON", false);
+        this.set_shader_condition("SHADLESS", false);
+        this.set_shader_condition("BASE_PASS", false);
+        this.set_shader_condition("USE_INSTANCING", false);
+        this.set_shader_condition("USE_LIGHTMAP", false);
+        this.set_shader_condition("FOG_DEPTH_ENABLED", false);
+        this.set_shader_condition("FOG_HEIGHT_ENABLED", false);
+        this.set_shader_condition("USE_DEPTH_PREPASS", false);
 
-        this.set_shader_condition(SHADER_DEF.ENABLE_UV_INTERP, false);
+        this.set_shader_condition("ENABLE_UV_INTERP", false);
 
         Transform.free(view_transform_inverse);
         CameraMatrix.free(projection_inverse);
@@ -2574,24 +2612,24 @@ export class RasterizerScene {
     _setup_light_type(p_light: LightInstance_t, shadow_atlas: ShadowAtlas_t) {
         const gl = this.gl;
 
-        this.set_shader_condition(SHADER_DEF.USE_LIGHTING, false);
-        this.set_shader_condition(SHADER_DEF.USE_SHADOW, false);
-        this.set_shader_condition(SHADER_DEF.LIGHT_MODE_DIRECTIONAL, false);
-        this.set_shader_condition(SHADER_DEF.LIGHT_MODE_OMNI, false);
-        this.set_shader_condition(SHADER_DEF.LIGHT_MODE_SPOT, false);
+        this.set_shader_condition("USE_LIGHTING", false);
+        this.set_shader_condition("USE_SHADOW", false);
+        this.set_shader_condition("LIGHT_MODE_DIRECTIONAL", false);
+        this.set_shader_condition("LIGHT_MODE_OMNI", false);
+        this.set_shader_condition("LIGHT_MODE_SPOT", false);
 
         if (!p_light) {
             return;
         }
 
-        this.set_shader_condition(SHADER_DEF.USE_LIGHTING, true);
+        this.set_shader_condition("USE_LIGHTING", true);
 
         switch (p_light.light.type) {
             case LIGHT_DIRECTIONAL: {
-                this.set_shader_condition(SHADER_DEF.LIGHT_MODE_DIRECTIONAL, true);
+                this.set_shader_condition("LIGHT_MODE_DIRECTIONAL", true);
 
                 if (!this.state.render_no_shadows && p_light.light.shadow) {
-                    this.set_shader_condition(SHADER_DEF.USE_SHADOW, true);
+                    this.set_shader_condition("USE_SHADOW", true);
                     if (VSG.config.use_rgba_3d_shadows) {
                         this.bind_texture(VSG.config.max_texture_image_units - 3, this.directional_shadow.gl_color);
                     } else {
@@ -2601,10 +2639,10 @@ export class RasterizerScene {
                 }
             } break;
             case LIGHT_OMNI: {
-                this.set_shader_condition(SHADER_DEF.LIGHT_MODE_OMNI, true);
+                this.set_shader_condition("LIGHT_MODE_OMNI", true);
 
                 if (!this.state.render_no_shadows && shadow_atlas && p_light.light.shadow) {
-                    this.set_shader_condition(SHADER_DEF.USE_SHADOW, true);
+                    this.set_shader_condition("USE_SHADOW", true);
                     if (VSG.config.use_rgba_3d_shadows) {
                         this.bind_texture(VSG.config.max_texture_image_units - 3, shadow_atlas.gl_color);
                     } else {
@@ -2614,10 +2652,10 @@ export class RasterizerScene {
                 }
             } break;
             case LIGHT_SPOT: {
-                this.set_shader_condition(SHADER_DEF.LIGHT_MODE_SPOT, true);
+                this.set_shader_condition("LIGHT_MODE_SPOT", true);
 
                 if (!this.state.render_no_shadows && shadow_atlas && p_light.light.shadow) {
-                    this.set_shader_condition(SHADER_DEF.USE_SHADOW, true);
+                    this.set_shader_condition("USE_SHADOW", true);
                     if (VSG.config.use_rgba_3d_shadows) {
                         this.bind_texture(VSG.config.max_texture_image_units - 3, shadow_atlas.gl_color);
                     } else {
@@ -2790,7 +2828,7 @@ export class RasterizerScene {
                 Vector3.free(position);
 
                 if (!this.state.render_no_shadows && light.shadow && shadow_atlas && shadow_atlas.shadow_owners.has(p_light)) {
-                    // FIXME: GLES2 spot shadow not work in Godot 3.2, maybe there's a bug
+                    // FIXME: GLES2 spot shadow not work in Godot 3.2, maybe there"s a bug
                 }
             } break;
         }
@@ -2875,8 +2913,6 @@ export class RasterizerScene {
 
     _setup_material(p_material: Material_t, p_alpha_pass: boolean, p_skeleton_tex_size: number = 0) {
         const gl = this.gl;
-
-        this.set_shader_condition(SHADER_DEF.ENABLE_UV_INTERP, true);
 
         let shader_rebind = this.bind_scene_shader(p_material);
 
@@ -3034,15 +3070,15 @@ export class RasterizerScene {
                 } break;
             }
 
-            this.effect_blur_shader.set_uniform_float('dof_begin', p_env.dof_blur_far_distance[0]);
-            this.effect_blur_shader.set_uniform_float('dof_end', p_env.dof_blur_far_distance[0] + p_env.dof_blur_far_transition[0]);
-            this.effect_blur_shader.set_uniform_float('dof_radius', radius);
-            this.effect_blur_shader.set_uniform_vec2('pixel_size', 1 / vp_w, 1 / vp_h);
-            this.effect_blur_shader.set_uniform_float('camera_z_near', p_cam_projection.get_z_near());
-            this.effect_blur_shader.set_uniform_float('camera_z_far', p_cam_projection.get_z_far());
+            this.effect_blur_shader.set_uniform_float("dof_begin", p_env.dof_blur_far_distance[0]);
+            this.effect_blur_shader.set_uniform_float("dof_end", p_env.dof_blur_far_distance[0] + p_env.dof_blur_far_transition[0]);
+            this.effect_blur_shader.set_uniform_float("dof_radius", radius);
+            this.effect_blur_shader.set_uniform_vec2("pixel_size", 1 / vp_w, 1 / vp_h);
+            this.effect_blur_shader.set_uniform_float("camera_z_near", p_cam_projection.get_z_near());
+            this.effect_blur_shader.set_uniform_float("camera_z_far", p_cam_projection.get_z_far());
 
             // horizontal
-            this.effect_blur_shader.set_uniform_vec2('dof_dir', 1, 0);
+            this.effect_blur_shader.set_uniform_vec2("dof_dir", 1, 0);
 
             gl.activeTexture(gl.TEXTURE0);
             gl.bindTexture(gl.TEXTURE_2D, this.storage.frame.current_rt.offscreen_effects[0].gl_color);
@@ -3054,7 +3090,7 @@ export class RasterizerScene {
             this.storage._copy_screen();
 
             // vertical
-            this.effect_blur_shader.set_uniform_vec2('dof_dir', 0, 1);
+            this.effect_blur_shader.set_uniform_vec2("dof_dir", 0, 1);
 
             gl.activeTexture(gl.TEXTURE0);
             gl.bindTexture(gl.TEXTURE_2D, this.storage.frame.current_rt.offscreen_effects[1].gl_color);
@@ -3099,13 +3135,13 @@ export class RasterizerScene {
                 } break;
             }
 
-            this.effect_blur_shader.set_uniform_float('dof_begin', p_env.dof_blur_near_distance[0]);
-            this.effect_blur_shader.set_uniform_float('dof_end', p_env.dof_blur_near_distance[0] - p_env.dof_blur_near_transition[0]);
-            this.effect_blur_shader.set_uniform_vec2('dof_dir', 1, 0);
-            this.effect_blur_shader.set_uniform_float('dof_radius', radius);
-            this.effect_blur_shader.set_uniform_vec2('pixel_size', 1 / vp_w, 1 / vp_h);
-            this.effect_blur_shader.set_uniform_float('camera_z_near', p_cam_projection.get_z_near());
-            this.effect_blur_shader.set_uniform_float('camera_z_far', p_cam_projection.get_z_far());
+            this.effect_blur_shader.set_uniform_float("dof_begin", p_env.dof_blur_near_distance[0]);
+            this.effect_blur_shader.set_uniform_float("dof_end", p_env.dof_blur_near_distance[0] - p_env.dof_blur_near_transition[0]);
+            this.effect_blur_shader.set_uniform_vec2("dof_dir", 1, 0);
+            this.effect_blur_shader.set_uniform_float("dof_radius", radius);
+            this.effect_blur_shader.set_uniform_vec2("pixel_size", 1 / vp_w, 1 / vp_h);
+            this.effect_blur_shader.set_uniform_float("camera_z_near", p_cam_projection.get_z_near());
+            this.effect_blur_shader.set_uniform_float("camera_z_far", p_cam_projection.get_z_far());
 
             // horizontal
 
@@ -3122,13 +3158,13 @@ export class RasterizerScene {
             this.effect_blur_shader.set_conditional("DOF_NEAR_FIRST_TAP", false);
             this.effect_blur_shader.bind();
 
-            this.effect_blur_shader.set_uniform_float('dof_begin', p_env.dof_blur_near_distance[0]);
-            this.effect_blur_shader.set_uniform_float('dof_end', p_env.dof_blur_near_distance[0] - p_env.dof_blur_near_transition[0]);
-            this.effect_blur_shader.set_uniform_vec2('dof_dir', 0, 1);
-            this.effect_blur_shader.set_uniform_float('dof_radius', radius);
-            this.effect_blur_shader.set_uniform_vec2('pixel_size', 1 / vp_w, 1 / vp_h);
-            this.effect_blur_shader.set_uniform_float('camera_z_near', p_cam_projection.get_z_near());
-            this.effect_blur_shader.set_uniform_float('camera_z_far', p_cam_projection.get_z_far());
+            this.effect_blur_shader.set_uniform_float("dof_begin", p_env.dof_blur_near_distance[0]);
+            this.effect_blur_shader.set_uniform_float("dof_end", p_env.dof_blur_near_distance[0] - p_env.dof_blur_near_transition[0]);
+            this.effect_blur_shader.set_uniform_vec2("dof_dir", 0, 1);
+            this.effect_blur_shader.set_uniform_float("dof_radius", radius);
+            this.effect_blur_shader.set_uniform_vec2("pixel_size", 1 / vp_w, 1 / vp_h);
+            this.effect_blur_shader.set_uniform_float("camera_z_near", p_cam_projection.get_z_near());
+            this.effect_blur_shader.set_uniform_float("camera_z_far", p_cam_projection.get_z_far());
 
             gl.activeTexture(gl.TEXTURE0);
             gl.bindTexture(gl.TEXTURE_2D, this.storage.frame.current_rt.offscreen_effects[1].gl_color);
@@ -3377,4 +3413,55 @@ function get_material_texture(material: Material_t, name: string, fallback: Text
         (material.origin && material.origin.textures[name])
         ||
         fallback;
+}
+
+function add_to_condition(conditions: number[], name: keyof typeof SHADER_DEF): number[] {
+    let value = SHADER_DEF[name];
+
+    // already enabled
+    if (conditions.indexOf(value) >= 0) {
+        return conditions;
+    }
+
+    if (conditions.length === 0) {
+        conditions.push(value);
+    } else {
+        if (value < conditions[0]) {
+            conditions.unshift(value);
+        } else {
+            for (let i = 0; i < conditions.length; i++) {
+                if (value > conditions[i]) {
+                    conditions.splice(i + 1, 0, value);
+                    break;
+                }
+            }
+        }
+    }
+
+    return conditions;
+}
+
+function remove_from_condition(conditions: number[], name: keyof typeof SHADER_DEF): number[] {
+    let value = SHADER_DEF[name];
+
+    let idx = conditions.indexOf(value);
+    if (idx >= 0) remove_item(conditions, idx);
+
+    return conditions;
+}
+
+function is_condition_equal(c_A: number[], c_B: number[]): boolean {
+    if (c_A.length !== c_B.length) return false;
+    for (let i = 0; i < c_A.length; i++) {
+        if (c_A[i] !== c_B[i]) return false;
+    }
+    return true;
+}
+
+function create_shader_config_key(config: MaterialInstanceConfig) {
+    let key = `${config.features.sort().join(".")}.${config.diffuse}.${config.specular}`;
+    for (let prop in config.spatial) {
+        key += `.${prop}=${config.spatial[<keyof typeof config.spatial>prop] ? 1 : 0}`;
+    }
+    return key;
 }

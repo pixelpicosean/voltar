@@ -12,9 +12,17 @@
         "pack_id": 0,
         "images": [
             {
+                "key": "media/aa.png",
+                "flags": {
+                    "FILTER": false,
+                    "REPEAT": false,
+                    "MIPMAPS": false
+                }
+            },
+            {
                 "key": "media/cube.png",
                 "flags": {
-                    "FILTER": true,
+                    "FILTER": false,
                     "REPEAT": false,
                     "MIPMAPS": false
                 }
@@ -22,7 +30,7 @@
             {
                 "key": "media/cube2.png",
                 "flags": {
-                    "FILTER": true,
+                    "FILTER": false,
                     "REPEAT": false,
                     "MIPMAPS": false
                 }
@@ -30,7 +38,7 @@
             {
                 "key": "media/cube3.png",
                 "flags": {
-                    "FILTER": true,
+                    "FILTER": false,
                     "REPEAT": false,
                     "MIPMAPS": false
                 }
@@ -38,7 +46,7 @@
             {
                 "key": "media/cube4.png",
                 "flags": {
-                    "FILTER": true,
+                    "FILTER": false,
                     "REPEAT": false,
                     "MIPMAPS": false
                 }
@@ -46,7 +54,7 @@
             {
                 "key": "media/cube5.png",
                 "flags": {
-                    "FILTER": true,
+                    "FILTER": false,
                     "REPEAT": false,
                     "MIPMAPS": false
                 }
@@ -54,7 +62,7 @@
             {
                 "key": "media/cube6.png",
                 "flags": {
-                    "FILTER": true,
+                    "FILTER": false,
                     "REPEAT": false,
                     "MIPMAPS": false
                 }
@@ -62,7 +70,7 @@
             {
                 "key": "media/cube7.png",
                 "flags": {
-                    "FILTER": true,
+                    "FILTER": false,
                     "REPEAT": false,
                     "MIPMAPS": false
                 }
@@ -70,7 +78,7 @@
             {
                 "key": "media/LightMap.png",
                 "flags": {
-                    "FILTER": true,
+                    "FILTER": false,
                     "REPEAT": false,
                     "MIPMAPS": false
                 }

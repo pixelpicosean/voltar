@@ -2,11 +2,11 @@ uniform highp mat4 CAMERA_MATRIX;
 uniform highp mat4 INV_CAMERA_MATRIX;
 uniform highp mat4 PROJECTION_MATRIX;
 uniform highp mat4 INV_PROJECTION_MATRIX;
-uniform highp mat4 world_matrix;
+uniform highp mat4 world_transform;
 
 uniform highp float TIME;
 
-uniform highp float viewport_size;
+uniform highp float VIEWPORT_SIZE;
 
 #ifdef RENDER_DEPTH
     uniform float light_bias;
@@ -26,14 +26,32 @@ uniform highp float viewport_size;
 
 /* GLOBALS */
 
-attribute highp vec3 position;
-attribute vec3 normal;
+attribute highp vec3 vertex_attrib;
+attribute vec3 normal_attrib;
+
+#if defined(ENABLE_TANGENT_INTERP) || defined(ENABLE_NORMALMAP)
+    attribute vec4 tangent_attrib;
+#endif
+
+#if defined(ENABLE_COLOR_INTERP)
+    attribute vec4 color_attrib;
+#endif
 
 #if defined(ENABLE_UV_INTERP)
-    attribute vec2 uv;
+    attribute vec2 uv_attrib;
 #endif
+
 #if defined(ENABLE_UV2_INTERP) || defined(USE_LIGHTMAP)
-    attribute vec2 uv2;
+    attribute vec2 uv2_attrib;
+#endif
+
+#if defined(USE_INSTANCING)
+    attribute highp vec4 instance_xform_row_0;
+    attribute highp vec4 instance_xform_row_1;
+    attribute highp vec4 instance_xform_row_2;
+
+    attribute highp vec4 instance_color;
+    attribute highp vec4 instance_custom_data;
 #endif
 
 #if defined(RENDER_DEPTH) && defined(USE_RGBA_SHADOWS)
@@ -42,6 +60,15 @@ attribute vec3 normal;
 
 varying highp vec3 vertex_interp;
 varying vec3 normal_interp;
+
+#if defined(ENABLE_TANGENT_INTERP) || defined(ENABLE_NORMALMAP)
+    varying vec3 tangent_interp;
+    varying vec3 binormal_interp;
+#endif
+
+#if defined(ENABLE_COLOR_INTERP)
+    varying vec4 color_interp;
+#endif
 
 #if defined(ENABLE_UV_INTERP)
     varying vec2 uv_interp;
@@ -83,18 +110,57 @@ highp vec4 texel2DFetch(highp sampler2D tex, ivec2 size, ivec2 coord) {
 }
 
 void main() {
-    vec3 VERTEX = position;
-    vec3 NORMAL = normal;
+    highp vec4 vertex = vec4(vertex_attrib, 1.0);
+
+    mat4 WORLD_MATRIX = world_transform;
+
+    #if defined(USE_INSTANCING)
+        {
+            highp mat4 m = mat4(
+                instance_xform_row_0,
+                instance_xform_row_1,
+                instance_xform_row_2,
+                vec4(0.0, 0.0, 0.0, 1.0)
+            );
+            WORLD_MATRIX = WORLD_MATRIX * transpose(m);
+        }
+    #endif
+
+    vec3 NORMAL = normal_attrib;
+
+    #if defined(ENABLE_TANGENT_INTERP) || defined(ENABLE_NORMALMAP)
+        vec3 TANGENT = tangent_attrib.xyz;
+        float binormalf = tangent_attrib.a;
+        vec3 BINORMAL = normalize(cross(NORMAL, TANGENT) * binormalf);
+    #endif
+
+    #if defined(ENABLE_COLOR_INTERP)
+        color_interp = color_attrib;
+        #ifdef USE_INSTANCING
+            color_interp *= instance_color;
+        #endif
+    #endif
 
     #if defined(ENABLE_UV_INTERP)
-        uv_interp = uv;
+        uv_interp = uv_attrib;
     #endif
 
     #if defined(ENABLE_UV2_INTERP) || defined(USE_LIGHTMAP)
-        uv2_interp = uv2;
+        uv2_interp = uv2_attrib;
     #endif
 
-    mat4 WORLD_MATRIX = world_matrix;
+    #if defined(OVERRIDE_POSITION)
+        highp vec4 POSITION;
+    #endif
+
+    #if !defined(SKIP_TRANSFORM_USED) && defined(VERTEX_WORLD_COORDS_USED)
+        vertex = WORLD_MATRIX * vertex;
+        NORMAL = normalize((WORLD_MATRIX * vec4(NORMAL, 0.0)).xyz);
+        #if defined(ENABLE_TANGENT_INTERP) || defined(ENABLE_NORMALMAP)
+            TANGENT = normalize((WORLD_MATRIX * vec4(TANGENT, 0.0)).xyz);
+            BINORMAL = normalize((WORLD_MATRIX * vec4(BINORMAL, 0.0)).xyz);
+        #endif
+    #endif
 
     #ifdef USE_SKELETON
         highp mat4 bone_transform = mat4(0.0);
@@ -125,12 +191,14 @@ void main() {
     #endif
 
     #ifdef USE_INSTANCING
-        vec4 instance_custom = vec4(0.0);
+        vec4 instance_custom = instance_custom_data;
     #else
         vec4 instance_custom = vec4(0.0);
     #endif
 
     mat4 MODELVIEW_MATRIX = INV_CAMERA_MATRIX * WORLD_MATRIX;
+
+    vec3 VERTEX = vertex.xyz;
 
     float POINT_SIZE = 1.0;
 
@@ -139,11 +207,36 @@ void main() {
 
     gl_PointSize = POINT_SIZE;
 
-    vec4 vertex = MODELVIEW_MATRIX * vec4(VERTEX, 1.0);
-    NORMAL = normalize((MODELVIEW_MATRIX * vec4(NORMAL, 0.0)).xyz);
+    vertex = vec4(VERTEX, 1.0);
+    vec4 outvec = vertex;
+
+    #if !defined(SKIP_TRANSFORM_USED) && !defined(VERTEX_WORLD_COORDS_USED)
+        vertex = MODELVIEW_MATRIX * vertex;
+        NORMAL = normalize((MODELVIEW_MATRIX * vec4(NORMAL, 0.0)).xyz);
+
+        #if defined(ENABLE_TANGENT_INTERP) || defined(ENABLE_NORMALMAP)
+            TANGENT = normalize((MODELVIEW_MATRIX * vec4(TANGENT, 0.0)).xyz);
+            BINORMAL = normalize((MODELVIEW_MATRIX * vec4(BINORMAL, 0.0)).xyz);
+        #endif
+    #endif
+
+    #if !defined(SKIP_TRANSFORM_USED) && defined(VERTEX_WORLD_COORDS_USED)
+        vertex = INV_CAMERA_MATRIX * vertex;
+        NORMAL = normalize((INV_CAMERA_MATRIX * vec4(NORMAL, 0.0)).xyz);
+
+        #if defined(ENABLE_TANGENT_INTERP) || defined(ENABLE_NORMALMAP)
+            TANGENT = normalize((INV_CAMERA_MATRIX * vec4(TANGENT, 0.0)).xyz);
+            BINORMAL = normalize((INV_CAMERA_MATRIX * vec4(BINORMAL, 0.0)).xyz);
+        #endif
+    #endif
 
     vertex_interp = vertex.xyz;
     normal_interp = NORMAL;
+
+    #if defined(ENABLE_TANGENT_INTERP) || defined(ENABLE_NORMALMAP)
+        tangent_interp = TANGENT;
+        binormal_interp = BINORMAL;
+    #endif
 
     #ifdef RENDER_DEPTH
         #ifdef RENDER_DEPTH_DUAL_PARABOLOID
@@ -173,7 +266,11 @@ void main() {
         shadow_coord = light_shadow_matrix * vi4;
     #endif
 
-    gl_Position = PROJECTION_MATRIX * vec4(vertex.xyz, 1.0);
+    #if defined(OVERRIDE_POSITION)
+        gl_Position = POSITION;
+    #else
+        gl_Position = PROJECTION_MATRIX * vec4(vertex_interp, 1.0);
+    #endif
 
     #if defined(RENDER_DEPTH) && defined(USE_RGBA_SHADOWS)
         position_interp = gl_Position;

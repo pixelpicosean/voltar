@@ -349,11 +349,14 @@ export class Shader_t {
         cull_mode: CULL_MODE_FRONT,
 
         uses_alpha: false,
+        uses_alpha_scissor: false,
         unshaded: false,
         no_depth_test: false,
         uses_screen_texture: false,
         uses_depth_texture: false,
         uses_time: false,
+        uses_tangent: false,
+        uses_world_coordinates: false,
     };
 
     data = {
@@ -387,8 +390,9 @@ export class Material_t {
 
     shader: Shader_t = null;
 
-    params: { [s: string]: number[]; } = Object.create(null);
-    textures: { [s: string]: Texture_t; } = Object.create(null);
+    flags: { [s: string]: boolean } = Object.create(null);
+    params: { [s: string]: number[] } = Object.create(null);
+    textures: { [s: string]: Texture_t } = Object.create(null);
 
     origin: Material_t = null;
 
@@ -406,12 +410,17 @@ export class Material_t {
 
         m.batchable = this.batchable;
         m.render_priority = this.render_priority;
+
         m.next_pass = this.next_pass;
+
         m.can_cast_shadow_cache = this.can_cast_shadow_cache;
         m.is_animated_cache = this.is_animated_cache;
 
         m.shader = this.shader;
 
+        for (let k in this.flags) {
+            m.flags[k] = this.flags[k];
+        }
         for (let k in this.params) {
             m.params[k] = this.params[k].slice();
         }
@@ -1359,12 +1368,6 @@ export class RasterizerStorage {
 
     /* Material API */
 
-    /**
-     * @param {string} vs
-     * @param {string} fs
-     * @param {AttribDesc[]} attrs
-     * @param {UniformDesc[]} uniforms
-     */
     shader_create(vs: string, fs: string, attrs: AttribDesc[], uniforms: UniformDesc[]) {
         const gl = this.gl;
 
@@ -1425,16 +1428,13 @@ export class RasterizerStorage {
         return shd;
     }
 
-    /**
-     * @param {Shader_t} shader
-     * @param {number} id
-     * @param {string} def_str
-     */
-    shader_get_instance_with_defines(shader: Shader_t, id: number, def_str: string) {
+    shader_get_instance_with_defines(shader: Shader_t, conditions: number[], def_str: string) {
         let table = shader_with_defines[shader.id];
         if (!table) {
             shader_with_defines[shader.id] = table = {};
         }
+
+        let id = conditions.join(",");
 
         let shd = table[id];
         if (!shd) {
@@ -1451,11 +1451,6 @@ export class RasterizerStorage {
         return shd;
     }
 
-    /**
-     * @param {Shader_t} shader
-     * @param {Object<string, number[]>} [param]
-     * @param {boolean} [uses_screen_texture]
-     */
     material_create(shader: Shader_t, param: { [s: string]: number[]; } = {}, uses_screen_texture: boolean = false) {
         const mt = new Material_t;
         mt.shader = shader;
@@ -1482,10 +1477,6 @@ export class RasterizerStorage {
         return mt;
     }
 
-    /**
-     * @param {Material_t} mt
-     * @param {Object<string, number[]>} param
-     */
     material_set_param(mt: Material_t, param: { [s: string]: number[]; }) {
         for (let k in param) {
             for (let i = 0; i < mt.params[k].length; i++) {
@@ -1494,10 +1485,6 @@ export class RasterizerStorage {
         }
     }
 
-    /**
-     * @param {Material_t} mt
-     * @returns {boolean}
-     */
     material_casts_shadows(mt: Material_t): boolean {
         if (mt.dirty_list.in_list()) {
             this._update_material(mt);
@@ -1512,9 +1499,6 @@ export class RasterizerStorage {
         return casts_shadows;
     }
 
-    /**
-     * @param {Material_t} mt
-     */
     _update_material(mt: Material_t) {
         if (mt.dirty_list.in_list()) {
             this._material_dirty_list.remove(mt.dirty_list);

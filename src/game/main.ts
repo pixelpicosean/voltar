@@ -22,10 +22,12 @@ v.Main.setup(Settings, {
     },
     application: {
         // main_scene: Preloader("res://scene/demo.tscn"),
-        main_scene: Preloader("res://scene/demo_3d.tscn"),
-        // main_scene: Preloader("res://scene/multi_mat.tscn"),
-        // main_scene: Preloader("res://scene/baked_light.tscn"),
-        // main_scene: Preloader("res://scene/platformer.tscn"),
         // main_scene: Preloader("res://scene/rigidbody.tscn"),
+        // main_scene: Preloader("res://scene/platformer.tscn"),
+
+        // main_scene: Preloader("res://scene/multi_mat.tscn"),
+        // main_scene: Preloader("res://scene/demo_3d.tscn"),
+        // main_scene: Preloader("res://scene/baked_light.tscn"),
+        main_scene: Preloader("res://scene/transparent.tscn"),
     },
 });

@@ -1,0 +1,25 @@
+[gd_scene load_steps=5 format=2]
+
+[ext_resource path="res://image/standalone/aa.png" type="Texture" id=2]
+
+[sub_resource type="Environment" id=1]
+background_mode = 1
+background_color = Color( 0.984314, 0.643137, 0.564706, 1 )
+
+[sub_resource type="PlaneMesh" id=2]
+
+[sub_resource type="SpatialMaterial" id=3]
+flags_transparent = true
+albedo_texture = ExtResource( 2 )
+
+[node name="transparent" type="Spatial"]
+
+[node name="world_environment" type="WorldEnvironment" parent="."]
+environment = SubResource( 1 )
+
+[node name="camera" type="Camera" parent="."]
+transform = Transform( 0.916363, -0.211882, 0.339684, 0, 0.84847, 0.529244, -0.400349, -0.484979, 0.777506, 2.26847, 3.39202, 5.07463 )
+
+[node name="mesh_instance" type="MeshInstance" parent="."]
+mesh = SubResource( 2 )
+material/0 = SubResource( 3 )

@@ -99,8 +99,8 @@ export class SpatialMaterial extends Material {
         /** @type {Set<string>} */
         let features: Set<string> = new Set;
 
-        let params: { [name: string]: number[]; } = Object.create(null);
-        let textures: { [name: string]: Texture_t; } = Object.create(null);
+        let params: { [name: string]: number[] } = Object.create(null);
+        let textures: { [name: string]: Texture_t } = Object.create(null);
 
         for (let k in data) {
             let v = data[k];
@@ -160,7 +160,14 @@ export class SpatialMaterial extends Material {
         }
 
         this.material = VSG.scene_render.metarial_instance_create({
+            diffuse: data.diffuse || 0,
+            specular: data.specular || 0,
+
+            spatial: data.spatial || Object.create(null),
+            conditions: data.conditions || [],
+
             features: [...features],
+
             params,
             textures,
         });

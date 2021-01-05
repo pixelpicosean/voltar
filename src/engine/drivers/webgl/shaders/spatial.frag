@@ -3,8 +3,26 @@ precision mediump float;
 #define M_PI 3.14159265359
 
 uniform highp mat4 CAMERA_MATRIX;
+uniform highp mat4 INV_CAMERA_MATRIX;
+uniform highp mat4 PROJECTION_MATRIX;
+uniform highp mat4 INV_PROJECTION_MATRIX;
+
+uniform highp mat4 world_transform;
 
 uniform highp float TIME;
+
+uniform highp float VIEWPORT_SIZE;
+
+#if defined(SCREEN_UV_USED)
+    uniform vec2 screen_pixel_size;
+#endif
+
+#if defined(SCREEN_TEXTURE_USED)
+    uniform highp sampler2D SCREEN_TEXTURE; // texunit: -4
+#endif
+#if defined(DEPTH_TEXTURE_USED)
+    uniform highp sampler2D DEPTH_TEXTURE; // texunit: -4
+#endif
 
 #ifdef USE_LIGHTMAP
     uniform mediump sampler2D lightmap; // texunit: -4
@@ -65,6 +83,15 @@ uniform float ambient_energy;
 varying highp vec3 vertex_interp;
 varying vec3 normal_interp;
 
+#if defined(ENABLE_TANGENT_INTERP) || defined(ENABLE_NORMALMAP)
+    varying vec3 tangent_interp;
+    varying vec3 binormal_interp;
+#endif
+
+#if defined(ENABLE_COLOR_INTERP)
+    varying vec2 color_interp;
+#endif
+
 #if defined(ENABLE_UV_INTERP)
     varying vec2 uv_interp;
 #endif
@@ -72,6 +99,8 @@ varying vec3 normal_interp;
 #if defined(ENABLE_UV2_INTERP) || defined(USE_LIGHTMAP)
     varying vec2 uv2_interp;
 #endif
+
+varying vec3 view_interp;
 
 /* light */
 
@@ -291,13 +320,6 @@ void main() {
     #endif
 
     highp vec3 vertex = vertex_interp;
-    vec3 NORMAL = normalize(normal_interp);
-    vec2 UV = vec2(0.0);
-
-    #if defined(ENABLE_UV_INTERP)
-        UV = uv_interp;
-    #endif
-
     vec3 view = -normalize(vertex_interp);
     vec3 eye_position = view;
 
@@ -317,15 +339,59 @@ void main() {
         specular_blob_intensity *= SPECULAR * 2.0;
     #endif
 
+    #if defined(ENABLE_TANGENT_INTERP) || defined(ENABLE_NORMALMAP)
+        vec3 BINORMAL = normalize(binormal_interp);
+        vec3 TANGENT = normalize(tangent_interp);
+    #else
+        vec3 BINORMAL = vec3(0.0);
+        vec3 TANGENT = vec3(0.0);
+    #endif
+    vec3 NORMAL = normalize(normal_interp);
+
+    #if defined(ENABLE_NORMALMAP)
+        vec3 NORMALMAP = vec3(0.5);
+    #endif
+    float NORMALMAP_DEPTH = 1.0;
+
+    #if defined(ALPHA_SCISSOR_USED)
+        float ALPHA_SCISSOR = 0.5;
+    #endif
+
+    #if defined(SCREEN_UV_USED)
+        vec2 SCREEN_UV = gl_FragCoord.xy * screen_pixel_size;
+    #endif
+
+    #if defined(ENABLE_UV_INTERP)
+        vec2 UV = uv_interp;
+    #endif
+    #if defined(ENABLE_UV2_INTERP)
+        vec2 UV2 = uv2_interp;
+    #endif
+
     /* FRAGMENT_CODE_BEGIN */
     /* FRAGMENT_CODE_END */
+
+    #if defined(ENABLE_NORMALMAP)
+        NORMALMAP.xy = NORMALMAP.xy * 2.0 - 1.0;
+        NORMALMAP.z = sqrt(max(0.0, 1.0 - dot(NORMALMAP.xy, NORMALMAP.xy)));
+
+        NORMAL = normalize(mix(normal_interp, TANGENT * NORMALMAP.x + BINORMAL * NORMALMAP.y + NORMAL * NORMALMAP.z, NORMALMAP_DEPTH));
+    #endif
+
+    NORMAL = normalize(NORMAL);
 
     vec3 specular_light = vec3(0.0);
     vec3 diffuse_light = vec3(0.0);
     vec3 ambient_light = vec3(0.0);
 
     #if !defined(USE_SHADOW_TO_OPACITY)
-        #ifdef USE_DEPTH_PREPASS
+        #if defined(ALPHA_SCISSOR_USED)
+            if (ALPHA < ALPHA_SCISSOR) {
+                discard;
+            }
+        #endif
+
+        #if defined(USE_DEPTH_PREPASS)
             if (ALPHA < 0.1) {
                 discard;
             }
@@ -390,34 +456,37 @@ void main() {
             }
             L = normalize(light_vec);
 
-            #ifdef USE_SHADOW
-                {
-                    highp vec4 splane = shadow_coord;
-                    float shadow_len = length(splane.xyz);
+            #if !defined(SHADOWS_DISABLED)
 
-                    splane.xyz = normalize(splane.xyz);
+                #if defined(USE_SHADOW)
+                    {
+                        highp vec4 splane = shadow_coord;
+                        float shadow_len = length(splane.xyz);
 
-                    vec4 clamp_rect = light_clamp;
+                        splane.xyz = normalize(splane.xyz);
 
-                    if (splane.z >= 0.0) {
-                        splane.z += 1.0;
+                        vec4 clamp_rect = light_clamp;
 
-                        clamp_rect.y += clamp_rect.w;
-                    } else {
-                        splane.z = 1.0 - splane.z;
+                        if (splane.z >= 0.0) {
+                            splane.z += 1.0;
+
+                            clamp_rect.y += clamp_rect.w;
+                        } else {
+                            splane.z = 1.0 - splane.z;
+                        }
+
+                        splane.xy /= splane.z;
+                        splane.xy = splane.xy * 0.5 + 0.5;
+                        splane.z = shadow_len / light_range;
+
+                        splane.xy = clamp_rect.xy + splane.xy * clamp_rect.zw;
+                        splane.w = 1.0;
+
+                        float shadow = sample_shadow(light_shadow_atlas, splane);
+
+                        light_att *= mix(shadow_color.rgb, vec3(1.0), shadow);
                     }
-
-                    splane.xy /= splane.z;
-                    splane.xy = splane.xy * 0.5 + 0.5;
-                    splane.z = shadow_len / light_range;
-
-                    splane.xy = clamp_rect.xy + splane.xy * clamp_rect.zw;
-                    splane.w = 1.0;
-
-                    float shadow = sample_shadow(light_shadow_atlas, splane);
-
-                    light_att *= mix(shadow_color.rgb, vec3(1.0), shadow);
-                }
+                #endif
             #endif
         #endif
 
@@ -450,13 +519,15 @@ void main() {
 
             L = normalize(light_rel_vec);
 
-            #ifdef USE_SHADOW
-                {
-                    highp vec4 splane = shadow_coord;
+            #if !defined(SHADOWS_DISABLED)
+                #if defined(USE_SHADOW)
+                    {
+                        highp vec4 splane = shadow_coord;
 
-                    float shadow = sample_shadow(light_shadow_atlas, splane);
-                    light_att *= mix(shadow_color.rgb, vec3(1.0), shadow);
-                }
+                        float shadow = sample_shadow(light_shadow_atlas, splane);
+                        light_att *= mix(shadow_color.rgb, vec3(1.0), shadow);
+                    }
+                #endif
             #endif
         #endif
 
@@ -466,11 +537,13 @@ void main() {
 
             float depth_z = -vertex_interp.z;
 
-            #ifdef USE_SHADOW
-                if (depth_z < light_split_offsets.x) {
-                    float shadow = sample_shadow(light_directional_shadow, shadow_coord);
-                    light_att *= mix(shadow_color.rgb, vec3(1.0), shadow);
-                }
+            #if !defined(SHADOWS_DISABLED)
+                #if defined(USE_SHADOW)
+                    if (depth_z < light_split_offsets.x) {
+                        float shadow = sample_shadow(light_directional_shadow, shadow_coord);
+                        light_att *= mix(shadow_color.rgb, vec3(1.0), shadow);
+                    }
+                #endif
             #endif
         #endif
 
@@ -497,10 +570,16 @@ void main() {
         );
     #endif // USE_LIGHTING
 
-    #ifdef USE_SHADOW_TO_OPACITY
+    #if defined(USE_SHADOW_TO_OPACITY)
         ALPHA = min(ALPHA, clamp(length(ambient_light), 0.0, 1.0));
 
-        #ifdef USE_DEPTH_PREPASS
+        #if defined(ALPHA_SCISSOR_USED)
+            if (ALPHA < ALPHA_SCISSOR) {
+                discard;
+            }
+        #endif
+
+        #if defined(USE_DEPTH_PREPASS)
             if (ALPHA < 0.1) {
                 discard;
             }
@@ -508,7 +587,7 @@ void main() {
     #endif
 
     #ifndef RENDER_DEPTH
-        #ifdef SHADELESS
+        #if defined(SHADELESS)
             gl_FragColor = vec4(ALBEDO, ALPHA);
         #else
             ambient_light *= ALBEDO;

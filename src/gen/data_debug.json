@@ -13,6 +13,8 @@
         "sub": [],
         "resource": {
             "type": "SpatialMaterial",
+            "spatial": {},
+            "conditions": [],
             "albedo_texture": [
                 "@ext#",
                 "1"
@@ -24,7 +26,9 @@
         "sub": [
             {
                 "id": 1,
-                "type": "SpatialMaterial"
+                "type": "SpatialMaterial",
+                "spatial": {},
+                "conditions": []
             },
             {
                 "id": 2,
@@ -127,7 +131,9 @@
             },
             {
                 "id": 3,
-                "type": "SpatialMaterial"
+                "type": "SpatialMaterial",
+                "spatial": {},
+                "conditions": []
             }
         ],
         "nodes": [
@@ -152,7 +158,9 @@
         "sub": [
             {
                 "id": 1,
-                "type": "SpatialMaterial"
+                "type": "SpatialMaterial",
+                "spatial": {},
+                "conditions": []
             },
             {
                 "id": 2,
@@ -255,7 +263,9 @@
             },
             {
                 "id": 3,
-                "type": "SpatialMaterial"
+                "type": "SpatialMaterial",
+                "spatial": {},
+                "conditions": []
             }
         ],
         "nodes": [
@@ -283,6 +293,90 @@
                 "type": "Node2D",
                 "name": "input",
                 "elem_id": "word_input"
+            }
+        ]
+    },
+    "res://scene/transparent.tscn": {
+        "type": "PackedScene",
+        "ext": {
+            "2": "media/aa.png"
+        },
+        "sub": [
+            {
+                "id": 1,
+                "type": "Environment",
+                "bg_mode": 1,
+                "bg_color": {
+                    "r": 0.984314,
+                    "g": 0.643137,
+                    "b": 0.564706,
+                    "a": 1
+                }
+            },
+            {
+                "id": 2,
+                "type": "PlaneMesh"
+            },
+            {
+                "id": 3,
+                "type": "SpatialMaterial",
+                "spatial": {
+                    "uses_alpha": true
+                },
+                "conditions": [],
+                "albedo_texture": [
+                    "@ext#",
+                    "2"
+                ]
+            }
+        ],
+        "nodes": [
+            {
+                "type": "Spatial",
+                "name": "transparent"
+            },
+            {
+                "type": "WorldEnvironment",
+                "name": "world_environment",
+                "parent": ".",
+                "environment": [
+                    "@sub#",
+                    "1"
+                ]
+            },
+            {
+                "type": "Camera",
+                "name": "camera",
+                "parent": ".",
+                "transform": [
+                    0.916363,
+                    -0.211882,
+                    0.339684,
+                    0,
+                    0.84847,
+                    0.529244,
+                    -0.400349,
+                    -0.484979,
+                    0.777506,
+                    2.26847,
+                    3.39202,
+                    5.07463
+                ]
+            },
+            {
+                "type": "MeshInstance",
+                "name": "mesh_instance",
+                "parent": ".",
+                "mesh": [
+                    "@sub#",
+                    "2"
+                ],
+                "material": [
+                    [
+                        "@sub#",
+                        "3"
+                    ]
+                ]
             }
         ]
     },
@@ -11705,6 +11799,8 @@
             {
                 "id": 2,
                 "type": "SpatialMaterial",
+                "spatial": {},
+                "conditions": [],
                 "albedo_color": {
                     "r": 1,
                     "g": 0.47451,
