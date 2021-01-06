@@ -8,7 +8,11 @@ import 'game/demo/demo';
 import 'game/demo/platformer';
 
 
-v.preload('media/sprites-0.json');
+v.preload({
+    type: "atlas",
+    url: 'media/sprites-0.json',
+    params: { FILTER: true },
+});
 
 
 import Settings from 'gen/project.json';
@@ -21,13 +25,13 @@ v.Main.setup(Settings, {
         stretch_aspect: v.STRETCH_ASPECT_KEEP,
     },
     application: {
-        // main_scene: Preloader("res://scene/demo.tscn"),
+        main_scene: Preloader("res://scene/demo.tscn"),
         // main_scene: Preloader("res://scene/rigidbody.tscn"),
         // main_scene: Preloader("res://scene/platformer.tscn"),
 
         // main_scene: Preloader("res://scene/multi_mat.tscn"),
         // main_scene: Preloader("res://scene/demo_3d.tscn"),
         // main_scene: Preloader("res://scene/baked_light.tscn"),
-        main_scene: Preloader("res://scene/transparent.tscn"),
+        // main_scene: Preloader("res://scene/transparent.tscn"),
     },
 });

@@ -7,12 +7,12 @@ import {
 } from "engine/core/math/math_defs";
 
 import { StyleBox } from "./style_box";
-import { BitmapFont } from "./font";
+import { BitmapFont, DynamicFont } from "./font";
 
 
 export const default_font_name = 'mini';
 
-let default_font: BitmapFont = null;
+let default_font: BitmapFont | DynamicFont = null;
 const default_style = (() => {
     const style = new StyleBox();
     style.set_default_margin(MARGIN_BOTTOM, 0);
@@ -29,7 +29,7 @@ export class Theme {
         return default_theme;
     }
 
-    static set_default_font(font: BitmapFont) {
+    static set_default_font(font: BitmapFont | DynamicFont) {
         default_font = font;
     }
 
@@ -77,12 +77,7 @@ export class Theme {
         return default_style;
     }
 
-    /**
-     * @param {string} name
-     * @param {string} type
-     * @returns {BitmapFont}
-     */
-    get_font(name: string, type: string): BitmapFont {
+    get_font(name: string, type: string): BitmapFont | DynamicFont {
         if (this.font_map[type]) {
             let font = this.font_map[type][name];
             if (font) {

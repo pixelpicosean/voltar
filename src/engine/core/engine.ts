@@ -2,9 +2,7 @@ import {
     preload_queue,
     res_class_map,
     set_resource_map,
-    set_raw_resource_map,
     get_resource_map,
-    get_raw_resource_map,
     set_binary_pack_list,
     set_json_pack_list,
     scene_class_map,
@@ -14,20 +12,26 @@ import { get_extname } from 'engine/utils/string';
 
 import { VSG } from 'engine/servers/visual/visual_server_globals';
 
-import { ResourceLoader } from './io/resource_loader.js';
-import { decompress } from './io/z.js';
-
 import { default_font_name, Theme } from 'engine/scene/resources/theme';
 import { registered_bitmap_fonts } from 'engine/scene/resources/font';
 import { PackedScene } from 'engine/scene/resources/packed_scene';
-
-import meta from 'gen/meta.json';
 import { ImageTexture } from 'engine/scene/resources/texture';
 
-type SceneTree = import('engine/scene/main/scene_tree').SceneTree;
+import {
+    prepare_for_load,
+    start_to_load,
+    clear_loading_queue,
 
-type ProgressCallback = (percent: number) => any;
-type CompleteCallback = Function;
+    load_res,
+    load_tres,
+
+    loading_events,
+    load_atlas,
+} from './io/loader';
+
+import meta from 'gen/meta.json';
+
+type SceneTree = import('engine/scene/main/scene_tree').SceneTree;
 
 export class Engine {
     static get_singleton() { return singleton }
@@ -60,8 +64,6 @@ export class Engine {
 
     main_loop: SceneTree = null;
 
-    _progress_callback: (progress: number, full: number) => any = null;
-
     constructor() {
         singleton = this;
     }
@@ -71,80 +73,70 @@ export class Engine {
     get_frames_drawn() { return this.frames_drawn }
 
     get_main_loop() { return this.main_loop }
-    set_main_loop(value: import('engine/scene/main/scene_tree').SceneTree) { this.main_loop = value }
+    set_main_loop(value: SceneTree) { this.main_loop = value }
 
-    start_preload(progress_callback: (percent: number) => any, complete_callback: Function) {
-        // Initialize loader here since our plugins are all
-        // registered now
-        const loader = new ResourceLoader();
+    start_preload(load_callback: () => void) {
         preload_queue.is_start = true;
 
+        // add default resource to the queue
+        preload_queue.queue.unshift({ type: "tres", url: `media/data.tres` });
+
         // Load resources marked as preload
-        preload_queue.queue.unshift([`media/${default_font_name}.fnt`]);
-        preload_queue.queue.unshift([`media/data.tres`]);
-        for (const settings of preload_queue.queue) {
-            loader.add.call(loader, ...settings);
+        prepare_for_load();
+        for (let file of preload_queue.queue) {
+            switch (file.type) {
+                case "tres": {
+                    load_tres(file.url, file.key);
+                } break;
+                case "res": {
+                    load_res(file.url, file.key);
+                } break;
+                case "atlas": {
+                    load_atlas(file.url, file.params);
+                } break;
+            }
         }
-        for (const b of meta["binary_files"]) {
-            loader.add.call(loader, b);
+        for (let url of meta["binary_files"]) {
+            load_res(url);
         }
-        for (const b of meta["json_files"]) {
-            loader.add.call(loader, b);
+        for (let url of meta["json_files"]) {
+            load_tres(url);
         }
+        start_to_load();
 
-        if (progress_callback) {
-            loader.connect('progress', () => {
-                progress_callback(loader.progress);
-            })
-        }
+        loading_events.connect_once("load_all_completed", () => {
+            clear_loading_queue();
 
-        loader.load(() => {
             preload_queue.is_complete = true;
-            Theme.set_default_font(registered_bitmap_fonts[default_font_name]);
 
-            let res_str = decompress(loader.resources['media/data.tres'].data);
-            let resources = JSON.parse(res_str);
-            loader.resources['media/data.tres'] = undefined;
+            // Theme.set_default_font(registered_bitmap_fonts[default_font_name]);
 
             // fetch resource map updated by loader
             let resource_map = get_resource_map();
-            let raw_resource_map = get_raw_resource_map();
 
             // merge resources data into our existing resources
-            resource_map = Object.assign(resource_map, resources);
-            raw_resource_map = Object.assign(raw_resource_map, resources, loader.resources);
+            resource_map = Object.assign(resource_map, resource_map["media/data.tres"]);
 
             // override
             set_resource_map(resource_map);
-            set_raw_resource_map(raw_resource_map);
-            set_json_pack_list(meta["json_files"].map((url: string) => {
-                let raw = raw_resource_map[url].data;
-                raw_resource_map[url] = undefined;
-                loader.resources[url] = undefined;
-                return JSON.parse(decompress(raw));
-            }));
-            set_binary_pack_list(meta["binary_files"].map((url: string) => {
-                let raw = raw_resource_map[url].data;
-                raw_resource_map[url] = undefined;
-                loader.resources[url] = undefined;
-                return raw;
-            }));
+            set_json_pack_list(meta["json_files"].map((url: string) => resource_map[url] ));
+            set_binary_pack_list(meta["binary_files"].map((url: string) => resource_map[url] ));
 
-            let process_queue: any[] = [];
-            const register_task = (e: any) => {
-                process_queue.push(e);
+            let post_process_queue: any[] = [];
+            const register_post_process = (e: any) => {
+                post_process_queue.push(e);
             }
-            const on_task_done = (e: any) => {
-                let idx = process_queue.indexOf(e);
+            const on_post_process_task_done = (e: any) => {
+                let idx = post_process_queue.indexOf(e);
                 if (idx >= 0) {
-                    process_queue.splice(idx, 1);
+                    post_process_queue.splice(idx, 1);
 
-                    if (process_queue.length === 0) {
-                        on_preload_finished();
+                    if (post_process_queue.length === 0) {
+                        on_post_process_completed();
                     }
                 }
             }
-            const on_preload_finished = () => {
+            const on_post_process_completed = () => {
                 /** @type {string[]} */
                 const resource_check_ignores: string[] = meta['resource_check_ignores'];
 
@@ -230,17 +222,9 @@ export class Engine {
                     }
                 }
 
-                for (let k in loader.resources) {
-                    if (!raw_resource_map[k]) {
-                        raw_resource_map[k] = loader.resources[k];
-                    }
-                }
-
-                complete_callback && complete_callback();
-
                 VSG.storage.update_onload_update_list();
 
-                loader.resources = null;
+                load_callback();
             }
 
             // process preload resources
@@ -258,19 +242,19 @@ export class Engine {
                 img.src = `data:image/${ext};base64,${image_pack[i]}`; // base64
                 img.onload = () => {
                     tex.create_from_image(img, flags);
-                    on_task_done(tex);
+                    on_post_process_task_done(tex);
                 }
                 resource_map[key] = tex;
 
-                register_task(tex);
+                register_post_process(tex);
             });
 
             // no longer need raw image data
             image_pack.length = 0;
 
             // no tasks to process
-            if (process_queue.length === 0) {
-                on_preload_finished();
+            if (post_process_queue.length === 0) {
+                on_post_process_completed();
             }
         });
     }

@@ -185,28 +185,24 @@ Main.events.connect_once('started', () => {
 // ------------------------------------------------------------------
 // Resource loading functions
 // ------------------------------------------------------------------
-import { ResourceLoader } from './core/io/resource_loader.js';
 import {
     get_resource_map,
     preload_queue,
 } from './registry';
+import { LoadTypes } from './core/io/const';
 
 /**
  * Preload a resource before game start.
  */
-export function preload(...settings: (string | object)[]) {
+export function preload(file: { type: LoadTypes, url: string, key?: string, params?: any }) {
     if (!preload_queue.is_start && preload_queue.is_complete) {
-        throw new Error('"preload" can only be called before launch!');
+        throw new Error('"preload" is already started!');
     }
-    preload_queue.queue.push(settings);
+    preload_queue.queue.push(file);
 }
 
-/**
- * @param  {...(string | Object)} settings
- */
-export function load(...settings: (string | object)[]) {
-    // @ts-ignore
-    return new ResourceLoader().add(...settings).load();
+export function load(file: { type: LoadTypes, url: string, key?: string }) {
+    // @Incomplete: make this an alias or remove it
 }
 
 /**
