@@ -93,6 +93,10 @@ export class ArrayMesh extends Mesh {
             } else {
                 this.add_surface_from_arrays(surface.primitive, surface.arrays, surface.is_2d);
             }
+
+            this.surfaces[i] = new Surface;
+            this.surfaces[i].material = surface.material;
+            VSG.storage.mesh_surface_set_material(this.mesh, i, surface.material.material);
         }
 
         return this;
