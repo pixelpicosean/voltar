@@ -257,7 +257,7 @@ void main() {
             float z_ofs = light_bias;
             z_ofs += (1.0 - abs(normal_interp.z)) * light_normal_bias;
 
-            vertex.z -= z_ofs;
+            vertex_interp.z -= z_ofs;
         #endif
     #endif
 
