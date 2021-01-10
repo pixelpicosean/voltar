@@ -66,6 +66,9 @@ import {
 } from "engine/scene/resources/texture";
 // import { CubemapFilterShader } from "./shaders/cubemap_filter";
 import { CopyShader } from "./shaders/copy";
+import { TonemapShader } from "./shaders/tonemap";
+
+type CubemapFilterShader = import("./shaders/cubemap_filter").CubemapFilterShader;
 
 const SMALL_VEC2 = new Vector2(0.00001, 0.00001);
 const SMALL_VEC3 = new Vector3(0.00001, 0.00001, 0.00001);
@@ -584,7 +587,8 @@ export class RasterizerStorage {
 
     shaders = {
         copy: null as CopyShader,
-        cubemap_filter: null as import("./shaders/cubemap_filter").CubemapFilterShader,
+        tonemap: null as TonemapShader,
+        cubemap_filter: null as CubemapFilterShader,
     };
 
     resources = {
@@ -720,6 +724,7 @@ export class RasterizerStorage {
         }
 
         this.shaders.copy = new CopyShader;
+        this.shaders.tonemap = new TonemapShader;
         // this.shaders.cubemap_filter = new CubemapFilterShader;
     }
 
@@ -732,15 +737,15 @@ export class RasterizerStorage {
         this.gl.useProgram(this.canvas.copy_shader.gl_prog);
     }
 
-    bind_quad_array() {
+    bind_quad_array(vertex_idx = 0, uv_idx = 1) {
         const gl = this.gl;
 
         gl.bindBuffer(gl.ARRAY_BUFFER, this.resources.quadie);
 
-        gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 16, 0);
-        gl.enableVertexAttribArray(0);
-        gl.vertexAttribPointer(1, 2, gl.FLOAT, false, 16, 8);
-        gl.enableVertexAttribArray(1);
+        gl.vertexAttribPointer(vertex_idx, 2, gl.FLOAT, false, 16, 0);
+        gl.enableVertexAttribArray(vertex_idx);
+        gl.vertexAttribPointer(uv_idx, 2, gl.FLOAT, false, 16, 8);
+        gl.enableVertexAttribArray(uv_idx);
     }
 
     _copy_screen() {

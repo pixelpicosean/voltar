@@ -3119,6 +3119,7 @@ export class RasterizerScene {
         if (p_env) {
             use_post_process = use_post_process && !!(p_env.adjustments_enabled[0] || p_env.dof_blur_near_enabled[0] || p_env.dof_blur_far_enabled[0]);
         }
+        use_post_process = use_post_process || this.storage.frame.current_rt.use_fxaa;
 
         // always copy final result to offscreen_effects[0]
         if (use_post_process) {
@@ -3272,13 +3273,24 @@ export class RasterizerScene {
         }
 
         // now draw final result back to current render target
-        this.storage.bind_copy_shader();
+
+        // this.storage.bind_copy_shader();
+
+        this.storage.shaders.tonemap.set_conditional("USE_FXAA", this.storage.frame.current_rt.use_fxaa);
+        this.storage.shaders.tonemap.bind();
+
+        if (this.storage.frame.current_rt.use_fxaa) {
+            this.storage.shaders.tonemap.set_uniform_vec2("pixel_size", 1 / this.storage.frame.current_rt.width, 1 / this.storage.frame.current_rt.height);
+        }
 
         gl.activeTexture(gl.TEXTURE0);
         gl.bindTexture(gl.TEXTURE_2D, this.storage.frame.current_rt.offscreen_effects[0].gl_color);
 
         gl.bindFramebuffer(gl.FRAMEBUFFER, this.storage.frame.current_rt.gl_fbo);
-        this.storage._copy_screen();
+
+        // this.storage._copy_screen();
+        this.storage.bind_quad_array(0, 4);
+        this.gl.drawArrays(this.gl.TRIANGLE_FAN, 0, 4);
     }
 
     set_uniform_n(name: string, value: number, force_changed: boolean = false, force_change_lock: boolean = false) {

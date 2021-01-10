@@ -207,8 +207,7 @@ export class OS {
 
             // TODO: compressed textures
 
-            // TODO: find a way to support sky rendering without `EXT_shader_texture_lod` extension
-            // gl.getExtension('EXT_shader_texture_lod');
+            gl.getExtension('EXT_shader_texture_lod');
 
             driver_config.support_float_texture = !!gl.getExtension('OES_texture_float');
 
