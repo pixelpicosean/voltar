@@ -15,20 +15,27 @@ import {
     INSTANCE_TYPE_MESH,
     INSTANCE_TYPE_MULTIMESH,
     INSTANCE_TYPE_IMMEDIATE,
+
     LIGHT_DIRECTIONAL,
     LIGHT_PARAM_ENERGY,
     LIGHT_PARAM_SPECULAR,
+    LIGHT_DIRECTIONAL_SHADOW_ORTHOGONAL,
+    LIGHT_DIRECTIONAL_SHADOW_PARALLEL_2_SPLITS,
+    LIGHT_DIRECTIONAL_SHADOW_PARALLEL_4_SPLITS,
+
     LIGHT_OMNI,
     LIGHT_PARAM_SHADOW_BIAS_SPLIT_SCALE,
     LIGHT_PARAM_RANGE,
     LIGHT_PARAM_SHADOW_BIAS,
     LIGHT_PARAM_SHADOW_NORMAL_BIAS,
+    LIGHT_OMNI_SHADOW_DETAIL_HORIZONTAL,
+    LIGHT_OMNI_SHADOW_CUBE,
+
     LIGHT_SPOT,
     LIGHT_PARAM_ATTENUATION,
     LIGHT_PARAM_SPOT_ANGLE,
     LIGHT_PARAM_SPOT_ATTENUATION,
-    LIGHT_OMNI_SHADOW_DETAIL_HORIZONTAL,
-    LIGHT_OMNI_SHADOW_CUBE,
+
     VisualServer,
 } from "engine/servers/visual_server";
 import {
@@ -519,7 +526,11 @@ const SHADER_DEF = {
 
     RENDER_DEPTH_DUAL_PARABOLOID: def_id++,
 
+    LIGHT_USE_PSSM2: def_id++,
+    LIGHT_USE_PSSM4: def_id++,
+    LIGHT_USE_PSSM_BLEND: def_id++,
     LIGHT_USE_RIM: def_id++,
+
     USE_SKELETON_SOFTWARE: def_id++,
 
     ALPHA_SCISSOR_USED: def_id++,
@@ -768,6 +779,24 @@ export class RasterizerScene {
             shadow_color: [0, 0, 0, 1],
             shadow_pixel_size: [0, 0],
             light_shadow_matrix: [
+                1, 0, 0, 0,
+                0, 1, 0, 0,
+                0, 0, 1, 0,
+                0, 0, 0, 1,
+            ],
+            light_shadow_matrix2: [
+                1, 0, 0, 0,
+                0, 1, 0, 0,
+                0, 0, 1, 0,
+                0, 0, 0, 1,
+            ],
+            light_shadow_matrix3: [
+                1, 0, 0, 0,
+                0, 1, 0, 0,
+                0, 0, 1, 0,
+                0, 0, 0, 1,
+            ],
+            light_shadow_matrix4: [
                 1, 0, 0, 0,
                 0, 1, 0, 0,
                 0, 0, 1, 0,
@@ -1044,15 +1073,6 @@ export class RasterizerScene {
         p_light.transform.copy(p_transform);
     }
 
-    /**
-     * @param {LightInstance_t} p_light
-     * @param {CameraMatrix} p_projection
-     * @param {Transform} p_transform
-     * @param {number} p_far
-     * @param {number} p_split
-     * @param {number} p_pass
-     * @param {number} [p_bias_scale]
-     */
     light_instance_set_shadow_transform(p_light: LightInstance_t, p_projection: CameraMatrix, p_transform: Transform, p_far: number, p_split: number, p_pass: number, p_bias_scale: number = 1.0) {
         if (p_light.light.type !== LIGHT_DIRECTIONAL) {
             p_pass = 0;
@@ -1080,9 +1100,6 @@ export class RasterizerScene {
         this.directional_shadow.current_light = 0;
     }
 
-    /**
-     * @param {LightInstance_t} p_light
-     */
     get_directional_light_shadow_size(p_light: LightInstance_t) {
         let shadow_size = 0;
 
@@ -1090,6 +1107,14 @@ export class RasterizerScene {
             shadow_size = this.directional_shadow.size;
         } else {
             shadow_size = (this.directional_shadow.size / 2) | 0;
+        }
+
+        switch (p_light.light.directional_shadow_mode) {
+            case LIGHT_DIRECTIONAL_SHADOW_ORTHOGONAL: break;
+            case LIGHT_DIRECTIONAL_SHADOW_PARALLEL_2_SPLITS:
+            case LIGHT_DIRECTIONAL_SHADOW_PARALLEL_4_SPLITS: {
+                shadow_size = Math.floor(shadow_size / 2);
+            } break;
         }
 
         return shadow_size;
@@ -2632,7 +2657,21 @@ export class RasterizerScene {
             case LIGHT_DIRECTIONAL: {
                 this.set_shader_condition("LIGHT_MODE_DIRECTIONAL", true);
 
+                switch (p_light.light.directional_shadow_mode) {
+                    case LIGHT_DIRECTIONAL_SHADOW_ORTHOGONAL: {
+                    } break;
+                    case LIGHT_DIRECTIONAL_SHADOW_PARALLEL_2_SPLITS: {
+                        this.set_shader_condition("LIGHT_USE_PSSM2", true);
+                    } break;
+                    case LIGHT_DIRECTIONAL_SHADOW_PARALLEL_4_SPLITS: {
+                        this.set_shader_condition("LIGHT_USE_PSSM4", true);
+                    } break;
+                }
+
+                this.set_shader_condition("LIGHT_USE_PSSM_BLEND", p_light.light.directional_blend_splits);
+
                 if (!this.state.render_no_shadows && p_light.light.shadow) {
+
                     this.set_shader_condition("USE_SHADOW", true);
                     if (VSG.config.use_rgba_3d_shadows) {
                         this.bind_texture(VSG.config.max_texture_image_units - 3, this.directional_shadow.gl_color);
@@ -2712,16 +2751,53 @@ export class RasterizerScene {
                 Vector3.free(direction);
 
                 if (!this.state.render_no_shadows && light.shadow && this.directional_shadow.gl_depth) {
-                    let shadow_count = 1;
+                    let shadow_count = 0;
                     let split_offsets = this.get_uniform_v("light_split_offsets");
 
-                    let matrix = CameraMatrix.create();
+                    switch (light.directional_shadow_mode) {
+                        case LIGHT_DIRECTIONAL_SHADOW_ORTHOGONAL: {
+                            shadow_count = 1;
+                        } break;
+                        case LIGHT_DIRECTIONAL_SHADOW_PARALLEL_2_SPLITS: {
+                            shadow_count = 2;
+                        } break;
+                        case LIGHT_DIRECTIONAL_SHADOW_PARALLEL_4_SPLITS: {
+                            shadow_count = 4;
+                        } break;
+                    }
+
+                    let matrices = [
+                        CameraMatrix.create(),
+                        CameraMatrix.create(),
+                        CameraMatrix.create(),
+                        CameraMatrix.create(),
+                    ];
 
                     for (let k = 0; k < shadow_count; k++) {
-                        let x = p_light.directional_rect.x;
-                        let y = p_light.directional_rect.x;
-                        let width = p_light.directional_rect.width;
-                        let height = p_light.directional_rect.height;
+                        let x = p_light.directional_rect.x | 0;
+                        let y = p_light.directional_rect.x | 0;
+                        let width = p_light.directional_rect.width | 0;
+                        let height = p_light.directional_rect.height | 0;
+
+                        if (light.directional_shadow_mode === LIGHT_DIRECTIONAL_SHADOW_PARALLEL_4_SPLITS) {
+                            width = (width / 2) | 0;
+                            height = (height / 2) | 0;
+
+                            switch (k) {
+                                case 1: x += width; break;
+                                case 2: y += height; break;
+                                case 3: {
+                                    x += width;
+                                    y += height;
+                                } break;
+                            }
+                        } else if (light.directional_shadow_mode === LIGHT_DIRECTIONAL_SHADOW_PARALLEL_2_SPLITS) {
+                            height = (height / 2) | 0;
+
+                            if (k !== 0) {
+                                y += height;
+                            }
+                        }
 
                         split_offsets[k] = p_light.shadow_transforms[k].split;
 
@@ -2741,7 +2817,7 @@ export class RasterizerScene {
                         );
                         rectm.set_light_atlas_rect(atlas_rect);
 
-                        matrix.copy(rectm)
+                        matrices[k].copy(rectm)
                             .append(bias)
                             .append(p_light.shadow_transforms[k].camera)
                             .append(modelview)
@@ -2753,10 +2829,16 @@ export class RasterizerScene {
                     }
 
                     this.set_uniform_n2("shadow_pixel_size", 1 / this.directional_shadow.size, 1 / this.directional_shadow.size, true, true);
-                    this.set_uniform_v("light_shadow_matrix", matrix.as_array(), true, true);
+                    this.set_uniform_v("light_shadow_matrix", matrices[0].as_array(), true, true);
+                    this.set_uniform_v("light_shadow_matrix2", matrices[1].as_array(), true, true);
+                    this.set_uniform_v("light_shadow_matrix3", matrices[2].as_array(), true, true);
+                    this.set_uniform_v("light_shadow_matrix4", matrices[3].as_array(), true, true);
                     this.set_uniform_v("light_split_offsets", split_offsets, true, true);
 
-                    CameraMatrix.free(matrix);
+                    CameraMatrix.free(matrices[0]);
+                    CameraMatrix.free(matrices[1]);
+                    CameraMatrix.free(matrices[2]);
+                    CameraMatrix.free(matrices[3]);
                 }
             } break;
             case LIGHT_OMNI: {
