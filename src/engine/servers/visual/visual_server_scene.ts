@@ -35,6 +35,9 @@ import {
 
     LIGHT_DIRECTIONAL_SHADOW_DEPTH_RANGE_OPTIMIZED,
     LIGHT_DIRECTIONAL_SHADOW_DEPTH_RANGE_STABLE,
+    LIGHT_DIRECTIONAL_SHADOW_ORTHOGONAL,
+    LIGHT_DIRECTIONAL_SHADOW_PARALLEL_2_SPLITS,
+    LIGHT_DIRECTIONAL_SHADOW_PARALLEL_4_SPLITS,
     SHADOW_CASTING_SETTING_SHADOWS_ONLY,
     LIGHT_OMNI,
     LIGHT_OMNI_SHADOW_DUAL_PARABOLOID,
@@ -1203,7 +1206,9 @@ export class VisualServerScene {
                 if (depth_range_mode === LIGHT_DIRECTIONAL_SHADOW_DEPTH_RANGE_OPTIMIZED) {
                     let planes = p_cam_projection.get_projection_planes(p_cam_transform);
                     let cull_count = p_scenario.octree.cull_convex(planes, this.instance_shadow_cull_result, MAX_INSTANCE_CULL, INSTANCE_GEOMETRY_MASK);
-                    let base = Plane.create().set_point_and_normal(p_cam_transform.origin, p_cam_transform.basis.get_axis(2).negate());
+                    let axis2_ne = p_cam_transform.basis.get_axis(2).negate();
+                    let base = Plane.create().set_point_and_normal(p_cam_transform.origin, axis2_ne);
+                    Vector3.free(axis2_ne);
 
                     let found_items = false;
                     let z_max = -1e20;
@@ -1241,8 +1246,18 @@ export class VisualServerScene {
 
                 let range = max_distance - min_distance;
 
-                // @Incomplete: support parallel 2/4 splits shadow modes
-                let splits = 1;
+                let splits = 0;
+                switch (light_base.directional_shadow_mode) {
+                    case LIGHT_DIRECTIONAL_SHADOW_ORTHOGONAL: {
+                        splits = 1;
+                    } break;
+                    case LIGHT_DIRECTIONAL_SHADOW_PARALLEL_2_SPLITS: {
+                        splits = 2;
+                    } break;
+                    case LIGHT_DIRECTIONAL_SHADOW_PARALLEL_4_SPLITS: {
+                        splits = 4;
+                    } break;
+                }
 
                 let distances = [min_distance, 0, 0, 0, 0];
                 for (let i = 0; i < splits; i++) {
@@ -1253,8 +1268,7 @@ export class VisualServerScene {
 
                 let texture_size = VSG.scene_render.get_directional_light_shadow_size(light.instance);
 
-                // @Incomplete: support shadow blend splits
-                let overlap = false;
+                let overlap = light_base.directional_blend_splits;
 
                 let first_radius = 0;
                 for (let i = 0; i < splits; i++) {
@@ -1265,7 +1279,7 @@ export class VisualServerScene {
                     if (p_cam_ortho) {
                         let vp_he = p_cam_projection.get_viewport_half_extents();
 
-                        camera_matrix.set_orthogonal(vp_he.y * 2, aspect, distances[(i === 0) ? i : i - 1], distances[i + 1], false);
+                        camera_matrix.set_orthogonal(vp_he.y * 2, aspect, distances[(i === 0 || !overlap) ? i : i - 1], distances[i + 1], false);
                     } else {
                         let fov = p_cam_projection.get_fov();
                         camera_matrix.set_perspective(fov, aspect, distances[(i === 0 || !overlap) ? i : i - 1], distances[i + 1], false);
@@ -1353,7 +1367,7 @@ export class VisualServerScene {
                         // z_max_cam = z_vec.dot(center) + radius;
                         z_min_cam = z_vec.dot(center) - radius;
 
-                        if (depth_range_mode === LIGHT_DIRECTIONAL_SHADOW_DEPTH_RANGE_STABLE) { // TODO: depth range stable
+                        if (depth_range_mode === LIGHT_DIRECTIONAL_SHADOW_DEPTH_RANGE_STABLE) {
                             let unit = radius * 2 / texture_size;
 
                             x_max_cam = stepify(x_max_cam, unit);

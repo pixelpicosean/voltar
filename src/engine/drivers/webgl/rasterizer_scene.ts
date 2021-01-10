@@ -2686,18 +2686,17 @@ export class RasterizerScene {
         }
     }
 
-    /**
-     * @param {LightInstance_t} p_light
-     * @param {ShadowAtlas_t} shadow_atlas
-     */
     _setup_light_type(p_light: LightInstance_t, shadow_atlas: ShadowAtlas_t) {
-        const gl = this.gl;
-
         this.set_shader_condition("USE_LIGHTING", false);
         this.set_shader_condition("USE_SHADOW", false);
+        this.set_shader_condition("SHADOW_MODE_PCF_5", false);
+        this.set_shader_condition("SHADOW_MODE_PCF_13", false);
         this.set_shader_condition("LIGHT_MODE_DIRECTIONAL", false);
         this.set_shader_condition("LIGHT_MODE_OMNI", false);
         this.set_shader_condition("LIGHT_MODE_SPOT", false);
+        this.set_shader_condition("LIGHT_USE_PSSM2", false);
+        this.set_shader_condition("LIGHT_USE_PSSM4", false);
+        this.set_shader_condition("LIGHT_USE_PSSM_BLEND", false);
 
         if (!p_light) {
             return;

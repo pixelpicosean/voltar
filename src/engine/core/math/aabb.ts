@@ -1,6 +1,7 @@
 import { Vector3, Vector3Like } from "./vector3";
 
-/** @type {AABB[]} */
+type Plane = import('./plane').Plane;
+
 const pool: AABB[] = [];
 
 export class AABB {
@@ -417,11 +418,7 @@ export class AABB {
         return true;
     }
 
-    /**
-     * @param {import('./plane').Plane[]} p_planes
-     * @param {Vector3[]} p_points
-     */
-    intersects_convex_shape(p_planes: import('./plane').Plane[], p_points: Vector3[]) {
+    intersects_convex_shape(p_planes: Plane[], p_points: Vector3[]) {
         let half_extents = this.size.clone().scale(0.5);
         let ofs = this.position.clone().add(half_extents);
 
@@ -511,11 +508,7 @@ export class AABB {
             this.size.is_equal_approx(aabb.size);
     }
 
-    /**
-     * @param {import('./plane').Plane} p_plane
-     * @param {{ min: number, max: number }} result
-     */
-    project_range_in_plane(p_plane: import('./plane').Plane, result: { min: number; max: number; }) {
+    project_range_in_plane(p_plane: Plane, result: { min: number; max: number; }) {
         let half_extents = this.size.clone().scale(0.5);
         let center = this.position.clone().add(half_extents);
 
