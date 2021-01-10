@@ -95,8 +95,7 @@ export class ArrayMesh extends Mesh {
             }
 
             this.surfaces[i] = new Surface;
-            this.surfaces[i].material = surface.material;
-            VSG.storage.mesh_surface_set_material(this.mesh, i, surface.material.material);
+            this.surface_set_material(i, surface.material);
         }
 
         return this;
@@ -112,16 +111,12 @@ export class ArrayMesh extends Mesh {
         return this.surfaces[idx].material;
     }
 
-    /**
-     * @param {number} idx
-     * @param {Material} material
-     */
     surface_set_material(idx: number, material: Material) {
         if (this.surfaces[idx].material === material) {
             return;
         }
         this.surfaces[idx].material = material;
-        VSG.storage.mesh_surface_set_material(this.mesh, idx, material.material);
+        VSG.storage.mesh_surface_set_material(this.mesh, idx, material ? material.material : null);
     }
 
     /**
