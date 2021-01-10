@@ -6,9 +6,11 @@ import {
 import { InputEventKey } from "./os/input_event";
 import { KEYS } from "./os/keyboard";
 
+type Node = import("engine/scene/main/node").Node;
+
 interface ApplicationSettings {
     name?: string
-    main_scene?: { instance: () => import("engine/scene/main/node").Node }
+    main_scene?: { instance: () => Node }
     pause_on_blur?: boolean
     min_update_step?: number
 }
@@ -31,6 +33,9 @@ interface DisplaySettings {
     resizable?: boolean;
     fxaa?: boolean;
     render_tree_balance?: number;
+
+    directional_shadow_size?: number,
+    shadow_filter_mode?: 0 | 1 | 2,
 }
 
 interface PhysicsSettings {
@@ -89,6 +94,9 @@ const DefaultSettings: Settings = {
         fxaa: false,
 
         render_tree_balance: 0,
+
+        directional_shadow_size: 4096,
+        shadow_filter_mode: 1,
     },
     physics: {
         physics_fps: 60,

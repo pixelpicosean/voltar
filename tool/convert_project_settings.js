@@ -134,6 +134,16 @@ module.exports.convert_project_settings = (project_url) => {
             display.render_tree_balance = render_tree_balance;
         }
 
+        let directional_shadow_size = int(settings.rendering["quality/directional_shadow/size"]);
+        if (directional_shadow_size) {
+            display.directional_shadow_size = directional_shadow_size;
+        }
+
+        let shadow_filter_mode = int(settings.rendering["quality/shadow/filter_mode"]);
+        if (shadow_filter_mode) {
+            display.shadow_filter_mode = shadow_filter_mode;
+        }
+
         real_settings.display = display;
     }
     if (settings.physics) {

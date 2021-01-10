@@ -1,5 +1,5 @@
 import { SelfList, List } from "engine/core/self_list";
-import { nearest_po2, deg2rad, clamp } from "engine/core/math/math_funcs";
+import { next_power_of_2, deg2rad, clamp } from "engine/core/math/math_funcs";
 import { Vector2 } from "engine/core/math/vector2";
 import { Vector3 } from "engine/core/math/vector3";
 import { AABB } from "engine/core/math/aabb";
@@ -499,7 +499,7 @@ const Float32ArrayPool: { [length: string]: Float32Array[]; } = {}
  * @param {number} size
  */
 function new_float32array(size: number) {
-    const length = nearest_po2(size);
+    const length = next_power_of_2(size);
     let pool = Float32ArrayPool[length];
     if (!pool) {
         pool = Float32ArrayPool[length] = [];
@@ -2379,7 +2379,7 @@ export class RasterizerStorage {
     buffer_create(type: number, size: number, usage: number = WebGLRenderingContext.STREAM_DRAW) {
         const gl = this.gl;
 
-        const size_po2 = nearest_po2(size);
+        const size_po2 = next_power_of_2(size);
         const buffers = this.buffers[size_po2] = this.buffers[size_po2] || [];
         const buffer = buffers.pop() || {
             size: size_po2,

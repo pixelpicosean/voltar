@@ -1,7 +1,7 @@
 import { res_class_map } from "engine/registry";
 import { remove_item } from "engine/dep/index";
 import { Color } from "engine/core/color";
-import { lerp, deg2rad, nearest_po2 } from "engine/core/math/math_funcs";
+import { lerp, deg2rad, next_power_of_2 } from "engine/core/math/math_funcs";
 import { Vector2 } from "engine/core/math/vector2";
 import { Vector3 } from "engine/core/math/vector3";
 import { Rect2 } from "engine/core/math/rect2";
@@ -92,6 +92,7 @@ import {
 
 import spatial_vs from "./shaders/spatial.vert";
 import spatial_fs from "./shaders/spatial.frag";
+import { ProjectSettings } from "engine/core/project_settings";
 
 const UNIFORM_EPSILON = 0.00000001;
 
@@ -108,6 +109,10 @@ const MAX_LIGHTS = 255;
 export const LIGHTMODE_NORMAL = 0;
 export const LIGHTMODE_UNSHADED = 1;
 export const LIGHTMODE_LIGHTMAP = 2;
+
+export const SHADOW_FILTER_NEAREST = 0;
+export const SHADOW_FILTER_PCF5 = 1;
+export const SHADOW_FILTER_PCF13 = 2;
 
 const INSTANCE_BONE_BASE = 13;
 
@@ -531,6 +536,9 @@ const SHADER_DEF = {
     LIGHT_USE_PSSM_BLEND: def_id++,
     LIGHT_USE_RIM: def_id++,
 
+    SHADOW_MODE_PCF_5: def_id++,
+    SHADOW_MODE_PCF_13: def_id++,
+
     USE_SKELETON_SOFTWARE: def_id++,
 
     ALPHA_SCISSOR_USED: def_id++,
@@ -690,6 +698,7 @@ export class RasterizerScene {
         size: 0,
         current_light: 0,
     };
+    shadow_filter_mode = SHADOW_FILTER_PCF5;
 
     default_material: SpatialMaterial = null;
 
@@ -886,7 +895,7 @@ export class RasterizerScene {
             /* directional shadow */
 
             this.directional_shadow.light_count = 0;
-            this.directional_shadow.size = 2048;
+            this.directional_shadow.size = next_power_of_2(ProjectSettings.get_singleton().display.directional_shadow_size);
 
             this.directional_shadow.gl_fbo = gl.createFramebuffer();
             gl.bindFramebuffer(gl.FRAMEBUFFER, this.directional_shadow.gl_fbo);
@@ -922,6 +931,8 @@ export class RasterizerScene {
                 gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, this.directional_shadow.gl_depth, 0);
             }
         }
+
+        this.shadow_filter_mode = ProjectSettings.get_singleton().display.shadow_filter_mode;
 
         {
             this.effect_blur_shader = new EffectBlurShader;
@@ -1133,7 +1144,7 @@ export class RasterizerScene {
      * @param {number} p_size
      */
     shadow_atlas_set_size(shadow_atlas: ShadowAtlas_t, p_size: number) {
-        p_size = nearest_po2(p_size);
+        p_size = next_power_of_2(p_size);
 
         if (p_size === shadow_atlas.size) {
             return;
@@ -1272,7 +1283,7 @@ export class RasterizerScene {
      * @param {number} p_subdivision
      */
     shadow_atlas_set_quadrant_subdivision(shadow_atlas: ShadowAtlas_t, p_quadrant: number, p_subdivision: number) {
-        let subdiv = nearest_po2(Math.floor(p_subdivision));
+        let subdiv = next_power_of_2(Math.floor(p_subdivision));
 
         subdiv = Math.floor(Math.sqrt(subdiv));
 
@@ -1338,7 +1349,7 @@ export class RasterizerScene {
         }
 
         let quad_size = p_shadow_atlas.size >> 1;
-        let desired_fit = Math.min(quad_size / p_shadow_atlas.smallest_subdiv, nearest_po2(quad_size * p_coverage));
+        let desired_fit = Math.min(quad_size / p_shadow_atlas.smallest_subdiv, next_power_of_2(quad_size * p_coverage));
 
         let valid_quadrants = [0, 0, 0, 0];
         let valid_quadrant_count = 0;
@@ -2679,6 +2690,9 @@ export class RasterizerScene {
                         this.bind_texture(VSG.config.max_texture_image_units - 3, this.directional_shadow.gl_depth);
                     }
                     this.set_uniform_n("light_directional_shadow", VSG.config.max_texture_image_units - 3);
+
+                    this.set_shader_condition("SHADOW_MODE_PCF_5", this.shadow_filter_mode === SHADOW_FILTER_PCF5);
+                    this.set_shader_condition("SHADOW_MODE_PCF_13", this.shadow_filter_mode === SHADOW_FILTER_PCF13);
                 }
             } break;
             case LIGHT_OMNI: {
@@ -2692,6 +2706,9 @@ export class RasterizerScene {
                         this.bind_texture(VSG.config.max_texture_image_units - 3, shadow_atlas.gl_depth);
                     }
                     this.set_uniform_n("light_shadow_atlas", VSG.config.max_texture_image_units - 3);
+
+                    this.set_shader_condition("SHADOW_MODE_PCF_5", this.shadow_filter_mode === SHADOW_FILTER_PCF5);
+                    this.set_shader_condition("SHADOW_MODE_PCF_13", this.shadow_filter_mode === SHADOW_FILTER_PCF13);
                 }
             } break;
             case LIGHT_SPOT: {
@@ -2705,6 +2722,9 @@ export class RasterizerScene {
                         this.bind_texture(VSG.config.max_texture_image_units - 3, shadow_atlas.gl_depth);
                     }
                     this.set_uniform_n("light_shadow_atlas", VSG.config.max_texture_image_units - 3);
+
+                    this.set_shader_condition("SHADOW_MODE_PCF_5", this.shadow_filter_mode === SHADOW_FILTER_PCF5);
+                    this.set_shader_condition("SHADOW_MODE_PCF_13", this.shadow_filter_mode === SHADOW_FILTER_PCF13);
                 }
             } break;
         }

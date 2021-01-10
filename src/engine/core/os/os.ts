@@ -20,6 +20,8 @@ import { VisualServer } from "engine/servers/visual_server";
 import { VSG } from "engine/servers/visual/visual_server_globals";
 import { AudioServer } from "engine/audio/audio.js";
 
+type ProjectSettings = import('../project_settings').ProjectSettings;
+
 
 export const MOUSE_MODE_VISIBLE = 0;
 export const MOUSE_MODE_HIDDEN = 1;
@@ -109,7 +111,7 @@ export class OS {
 
     initialize_core() { }
 
-    initialize(canvas: HTMLCanvasElement, settings: import('../project_settings').ProjectSettings) {
+    initialize(canvas: HTMLCanvasElement, settings: ProjectSettings) {
         this.canvas = canvas;
         if (this.video_mode.resizable) {
             canvas.width = window.innerWidth;

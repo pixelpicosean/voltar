@@ -208,11 +208,8 @@ export function rad2deg(rad: number): number {
 
 /**
  * Returns the nearest larger power of 2 for integer value.
- *
- * @param {number} v
- * @return {number}
  */
-export function nearest_po2(v: number): number {
+export function next_power_of_2(v: number): number {
     if (v === 0) return 0;
     --v;
     v |= v >>> 1;

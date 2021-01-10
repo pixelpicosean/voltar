@@ -24,7 +24,7 @@ uniform highp float VIEWPORT_SIZE;
     uniform highp sampler2D DEPTH_TEXTURE; // texunit: -4
 #endif
 
-#ifdef USE_LIGHTMAP
+#if defined(USE_LIGHTMAP)
     uniform mediump sampler2D lightmap; // texunit: -4
     uniform mediump float lightmap_energy;
 #endif
@@ -35,7 +35,7 @@ uniform float bg_energy;
 uniform vec4 ambient_color;
 uniform float ambient_energy;
 
-#ifdef USE_LIGHTING
+#if defined(USE_LIGHTING)
     uniform highp vec4 shadow_color;
 
     uniform highp vec4 LIGHT_COLOR;
@@ -52,19 +52,28 @@ uniform float ambient_energy;
     uniform highp float LIGHT_SPOT_ANGLE;
 
     uniform highp float light_range;
-    #ifdef USE_SHADOW
+    #if defined(USE_SHADOW)
         uniform highp vec2 shadow_pixel_size;
 
         #if defined(LIGHT_MODE_OMNI) || defined(LIGHT_MODE_SPOT)
             uniform highp sampler2D light_shadow_atlas; // tex: -3
         #endif
 
-        #ifdef LIGHT_MODE_DIRECTIONAL
+        #if defined(LIGHT_MODE_DIRECTIONAL)
             uniform highp sampler2D light_directional_shadow; // tex: -3
             uniform highp vec4 light_split_offsets;
         #endif
 
         varying highp vec4 shadow_coord;
+
+        #if defined(LIGHT_USE_PSSM2) || defined(LIGHT_USE_PSSM4)
+            varying highp vec4 shadow_coord2;
+        #endif
+
+        #if defined(LIGHT_USE_PSSM4)
+            varying highp vec4 shadow_coord3;
+            varying highp vec4 shadow_coord4;
+        #endif
 
         uniform vec4 light_clamp;
     #endif
@@ -72,7 +81,7 @@ uniform float ambient_energy;
 
 /* GLOBALS */
 
-#ifdef RENDER_DEPTH_DUAL_PARABOLOID
+#if defined(RENDER_DEPTH_DUAL_PARABOLOID)
     varying highp float dp_clip;
 #endif
 
@@ -111,7 +120,7 @@ vec3 F0(float metallic, float specular, vec3 albedo) {
 	return mix(vec3(dielectric), albedo, vec3(metallic));
 }
 
-#ifdef USE_LIGHTING
+#if defined(USE_LIGHTING)
 
     // This approximates G_GGX_2cos(cos_theta_l, alpha) * G_GGX_2cos(cos_theta_v, alpha)
     // See Filament docs, Specular G section.
@@ -263,7 +272,7 @@ vec3 F0(float metallic, float specular, vec3 albedo) {
             specular_light += light_color * specular_NL * specular_blob_intensity * attenuation;
         }
 
-        #ifdef USE_SHADOW_TO_OPACITY
+        #if defined(USE_SHADOW_TO_OPACITY)
             alpha = min(alpha, clamp(1.0 - length(attenuation), 0.0, 1.0));
         #endif
 
@@ -273,8 +282,8 @@ vec3 F0(float metallic, float specular, vec3 albedo) {
 
 /* shadow */
 
-#ifdef USE_SHADOW
-    #ifdef USE_RGBA_SHADOWS
+#if defined(USE_SHADOW)
+    #if defined(USE_RGBA_SHADOWS)
         #define SHADOW_DEPTH(m_val) dot(m_val, vec4(1.0 / (255.0 * 255.0 * 255.0), 1.0 / (255.0 * 255.0), 1.0 / 255.0, 1.0))
     #else
         #define SHADOW_DEPTH(m_val) (m_val).r
@@ -284,7 +293,45 @@ vec3 F0(float metallic, float specular, vec3 albedo) {
     #define SAMPLE_SHADOW_TEXEL_PROJ(p_shadow, p_pos) step(p_pos.z, SHADOW_DEPTH(texture2DProj(p_shadow, p_pos)))
 
     float sample_shadow(highp sampler2D shadow, highp vec4 spos) {
-        return SAMPLE_SHADOW_TEXEL_PROJ(shadow, spos);
+        #ifdef SHADOW_MODE_PCF_13
+            spos.xyz /= spos.w;
+            vec2 pos = spos.xy;
+            float depth = spos.z;
+
+            float avg = SAMPLE_SHADOW_TEXEL(shadow, pos, depth);
+            avg += SAMPLE_SHADOW_TEXEL(shadow, pos + vec2(shadow_pixel_size.x, 0.0), depth);
+            avg += SAMPLE_SHADOW_TEXEL(shadow, pos + vec2(-shadow_pixel_size.x, 0.0), depth);
+            avg += SAMPLE_SHADOW_TEXEL(shadow, pos + vec2(0.0, shadow_pixel_size.y), depth);
+            avg += SAMPLE_SHADOW_TEXEL(shadow, pos + vec2(0.0, -shadow_pixel_size.y), depth);
+            avg += SAMPLE_SHADOW_TEXEL(shadow, pos + vec2(shadow_pixel_size.x, shadow_pixel_size.y), depth);
+            avg += SAMPLE_SHADOW_TEXEL(shadow, pos + vec2(-shadow_pixel_size.x, shadow_pixel_size.y), depth);
+            avg += SAMPLE_SHADOW_TEXEL(shadow, pos + vec2(shadow_pixel_size.x, -shadow_pixel_size.y), depth);
+            avg += SAMPLE_SHADOW_TEXEL(shadow, pos + vec2(-shadow_pixel_size.x, -shadow_pixel_size.y), depth);
+            avg += SAMPLE_SHADOW_TEXEL(shadow, pos + vec2(shadow_pixel_size.x * 2.0, 0.0), depth);
+            avg += SAMPLE_SHADOW_TEXEL(shadow, pos + vec2(-shadow_pixel_size.x * 2.0, 0.0), depth);
+            avg += SAMPLE_SHADOW_TEXEL(shadow, pos + vec2(0.0, shadow_pixel_size.y * 2.0), depth);
+            avg += SAMPLE_SHADOW_TEXEL(shadow, pos + vec2(0.0, -shadow_pixel_size.y * 2.0), depth);
+            return avg * (1.0 / 13.0);
+        #endif
+
+        #ifdef SHADOW_MODE_PCF_5
+
+            spos.xyz /= spos.w;
+            vec2 pos = spos.xy;
+            float depth = spos.z;
+
+            float avg = SAMPLE_SHADOW_TEXEL(shadow, pos, depth);
+            avg += SAMPLE_SHADOW_TEXEL(shadow, pos + vec2(shadow_pixel_size.x, 0.0), depth);
+            avg += SAMPLE_SHADOW_TEXEL(shadow, pos + vec2(-shadow_pixel_size.x, 0.0), depth);
+            avg += SAMPLE_SHADOW_TEXEL(shadow, pos + vec2(0.0, shadow_pixel_size.y), depth);
+            avg += SAMPLE_SHADOW_TEXEL(shadow, pos + vec2(0.0, -shadow_pixel_size.y), depth);
+            return avg * (1.0 / 5.0);
+
+        #endif
+
+        #if !defined(SHADOW_MODE_PCF_5) || !defined(SHADOW_MODE_PCF_13)
+            return SAMPLE_SHADOW_TEXEL_PROJ(shadow, spos);
+        #endif
     }
 #endif
 
@@ -292,20 +339,20 @@ vec3 F0(float metallic, float specular, vec3 albedo) {
 
 #if defined(FOG_DEPTH_ENABLED) || defined(FOG_HEIGHT_ENABLED)
     uniform mediump vec4 fog_color_base;
-    #ifdef LIGHT_MODE_DIRECTIONAL
+    #if defined(LIGHT_MODE_DIRECTIONAL)
         uniform mediump vec4 fog_sun_color_amount;
     #endif
 
     uniform float fog_transmit_enabled;
     uniform mediump float fog_transmit_curve;
 
-    #ifdef FOG_DEPTH_ENABLED
+    #if defined(FOG_DEPTH_ENABLED)
         uniform highp float fog_depth_begin;
         uniform mediump float fog_depth_curve;
         uniform mediump float fog_max_distance;
     #endif
 
-    #ifdef FOG_HEIGHT_ENABLED
+    #if defined(FOG_HEIGHT_ENABLED)
         uniform highp float fog_height_min;
         uniform highp float fog_height_max;
         uniform mediump float fog_height_curve;
@@ -313,7 +360,7 @@ vec3 F0(float metallic, float specular, vec3 albedo) {
 #endif
 
 void main() {
-    #ifdef RENDER_DEPTH_DUAL_PARABOLOID
+    #if defined(RENDER_DEPTH_DUAL_PARABOLOID)
         if (dp_clip > 0.0) {
             discard;
         }
@@ -398,14 +445,14 @@ void main() {
         #endif
     #endif
 
-    #ifdef BASE_PASS
+    #if defined(BASE_PASS)
 
         // IBL precalculations
         float ndotv = clamp(dot(NORMAL, view), 0.0, 1.0);
         vec3 f0 = F0(METALLIC, SPECULAR, ALBEDO);
         vec3 F = f0 + (max(vec3(1.0 - ROUGHNESS), f0) - f0) * pow(1.0 - ndotv, 5.0);
 
-        #ifdef AMBIENT_LIGHT_DISABLED
+        #if defined(AMBIENT_LIGHT_DISABLED)
             ambient_light = vec3(0.0, 0.0, 0.0);
         #else
             ambient_light = ambient_color.rgb;
@@ -431,7 +478,7 @@ void main() {
             #endif
         }
 
-        #ifdef USE_LIGHTMAP
+        #if defined(USE_LIGHTMAP)
             ambient_light = texture2D(lightmap, uv2_interp).rgb * lightmap_energy;
         #endif
     #endif // BASE PASS
@@ -439,11 +486,11 @@ void main() {
     //
     // Lighting
     //
-    #ifdef USE_LIGHTING
+    #if defined(USE_LIGHTING)
         vec3 L;
         vec3 light_att = vec3(1.0);
 
-        #ifdef LIGHT_MODE_OMNI
+        #if defined(LIGHT_MODE_OMNI)
             vec3 light_vec = LIGHT_POSITION - vertex;
             float light_length = length(light_vec);
 
@@ -490,7 +537,7 @@ void main() {
             #endif
         #endif
 
-        #ifdef LIGHT_MODE_SPOT
+        #if defined(LIGHT_MODE_SPOT)
             light_att = vec3(1.0);
 
             vec3 light_rel_vec = LIGHT_POSITION - vertex;
@@ -531,7 +578,7 @@ void main() {
             #endif
         #endif
 
-        #ifdef LIGHT_MODE_DIRECTIONAL
+        #if defined(LIGHT_MODE_DIRECTIONAL)
             vec3 light_vec = -LIGHT_DIRECTION;
             L = normalize(light_vec);
 
@@ -539,10 +586,94 @@ void main() {
 
             #if !defined(SHADOWS_DISABLED)
                 #if defined(USE_SHADOW)
-                    if (depth_z < light_split_offsets.x) {
-                        float shadow = sample_shadow(light_directional_shadow, shadow_coord);
-                        light_att *= mix(shadow_color.rgb, vec3(1.0), shadow);
-                    }
+                    #if defined(LIGHT_USE_PSSM4)
+                        if (depth_z < light_split_offsets.w) {
+                    #elif defined(LIGHT_USE_PSSM2)
+                        if (depth_z < light_split_offsets.y) {
+                    #else
+                        if (depth_z < light_split_offsets.x) {
+                    #endif
+
+                            highp vec4 pssm_coord;
+                            float pssm_fade = 0.0;
+
+                            #if defined(LIGHT_USE_PSSM_BLEND)
+                                float pssm_blend;
+                                highp vec4 pssm_coord2;
+                                bool use_blend = true;
+                            #endif
+
+                            #if defined(LIGHT_USE_PSSM4)
+                                if (depth_z < light_split_offsets.y) {
+                                    if (depth_z < light_split_offsets.x) {
+                                        pssm_coord = shadow_coord;
+
+                                        #if defined(LIGHT_USE_PSSM_BLEND)
+                                            pssm_coord2 = shadow_coord2;
+                                            pssm_blend = smoothstep(0.0, light_split_offsets.x, depth_z);
+                                        #endif
+                                    } else {
+                                        pssm_coord = shadow_coord2;
+
+                                        #if defined(LIGHT_USE_PSSM_BLEND)
+                                            pssm_coord2 = shadow_coord3;
+                                            pssm_blend = smoothstep(light_split_offsets.x, light_split_offsets.y, depth_z);
+                                        #endif
+                                    }
+                                } else {
+                                    if (depth_z < light_split_offsets.z) {
+                                        pssm_coord = shadow_coord3;
+
+                                        #if defined(LIGHT_USE_PSSM_BLEND)
+                                            pssm_coord2 = shadow_coord4;
+                                            pssm_blend = smoothstep(light_split_offsets.y, light_split_offsets.z, depth_z);
+                                        #endif
+
+                                    } else {
+                                        pssm_coord = shadow_coord4;
+                                        pssm_fade = smoothstep(light_split_offsets.z, light_split_offsets.w, depth_z);
+
+                                        #if defined(LIGHT_USE_PSSM_BLEND)
+                                            use_blend = false;
+                                        #endif
+                                    }
+                                }
+                            #endif
+
+                            #if defined(LIGHT_USE_PSSM2)
+                                if (depth_z < light_split_offsets.x) {
+                                    pssm_coord = shadow_coord;
+
+                                    #if defined(LIGHT_USE_PSSM_BLEND)
+                                        pssm_coord2 = shadow_coord2;
+                                        pssm_blend = smoothstep(0.0, light_split_offsets.x, depth_z);
+                                    #endif
+                                } else {
+                                    pssm_coord = shadow_coord2;
+                                    pssm_fade = smoothstep(light_split_offsets.x, light_split_offsets.y, depth_z);
+
+                                    #if defined(LIGHT_USE_PSSM_BLEND)
+                                        use_blend = false;
+                                    #endif
+                                }
+                            #endif
+
+                            #if !defined(LIGHT_USE_PSSM4) && !defined(LIGHT_USE_PSSM2)
+                            {
+                                pssm_coord = shadow_coord;
+                            }
+                            #endif
+
+                            float shadow = sample_shadow(light_directional_shadow, pssm_coord);
+
+                            #if defined(LIGHT_USE_PSSM_BLEND)
+                                if (use_blend) {
+                                    shadow = mix(shadow, sample_shadow(light_directional_shadow, pssm_coord2), pssm_blend);
+                                }
+                            #endif
+
+                            light_att *= mix(shadow_color.rgb, vec3(1.0), shadow);
+                        }
                 #endif
             #endif
         #endif
@@ -597,20 +728,20 @@ void main() {
 
             gl_FragColor = vec4(ambient_light + diffuse_light + specular_light, ALPHA);
 
-            #ifdef BASE_PASS
+            #if defined(BASE_PASS)
                 gl_FragColor.rgb += EMISSION;
             #endif
 
             #if defined(FOG_DEPTH_ENABLED) || defined(FOG_HEIGHT_ENABLED)
                 float fog_amount = 0.0;
 
-                #ifdef LIGHT_MODE_DIRECTIONAL
+                #if defined(LIGHT_MODE_DIRECTIONAL)
                     vec3 fog_color = mix(fog_color_base.rgb, fog_sun_color_amount.rgb, fog_sun_color_amount.a * pow(max(dot(eye_position, LIGHT_DIRECTION), 0.0), 8.0));
                 #else
                     vec3 fog_color = fog_color_base.rgb;
                 #endif
 
-                #ifdef FOG_DEPTH_ENABLED
+                #if defined(FOG_DEPTH_ENABLED)
                     {
                         float fog_z = smoothstep(fog_depth_begin, fog_max_distance, length(vertex));
 
@@ -624,7 +755,7 @@ void main() {
                     }
                 #endif
 
-                #ifdef FOG_HEIGHT_ENABLED
+                #if defined(FOG_HEIGHT_ENABLED)
                     {
                         float y = (CAMERA_MATRIX * vec4(vertex, 1.0)).y;
                         fog_amount = max(fog_amount, pow(smoothstep(fog_height_min, fog_height_max, y), fog_height_curve));
@@ -639,7 +770,7 @@ void main() {
             #endif
         #endif
     #else
-        #ifdef USE_RGBA_SHADOWS
+        #if defined(USE_RGBA_SHADOWS)
             highp float depth = ((position_interp.z / position_interp.w) + 1.0) * 0.5 + 0.0; // bias
             highp vec4 comp = fract(depth * vec4(255.0 * 255.0 * 255.0, 255.0 * 255.0, 255.0, 1.0));
             comp -= comp.xxyz * vec4(0.0, 1.0 / 255.0, 1.0 / 255.0, 1.0 / 255.0);
