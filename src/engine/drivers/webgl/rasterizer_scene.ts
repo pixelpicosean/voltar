@@ -369,6 +369,21 @@ const sort_by_reverse_depth_and_priority = (a: Element_t, b: Element_t) => {
     }
 }
 
+type UseAccum = { value: boolean, owner: Element_t };
+const pool_UseAccum: UseAccum[] = [];
+function create_UseAccum(owner: Element_t): UseAccum {
+    let u = pool_UseAccum.pop();
+    if (!u) return { value: false, owner: owner };
+    u.owner = owner;
+    return u;
+}
+function free_UseAccum(u: UseAccum) {
+    if (pool_UseAccum.indexOf(u) < 0) {
+        pool_UseAccum.push(u);
+    }
+}
+
+
 class Element_t {
     get use_accum() {
         return this.use_accum_ptr.value
@@ -383,7 +398,7 @@ class Element_t {
 
     material: Material_t = null;
 
-    use_accum_ptr: { value: boolean; } = { value: false };
+    use_accum_ptr: UseAccum = create_UseAccum(this);
     front_facing = true;
 
     // union: depth key
@@ -399,19 +414,41 @@ class Element_t {
     light_type1 = 0;
     light_mode = 0;
 
-    copy(other: Element_t) {
+    copy(other: Element_t): Element_t {
         this.instance = other.instance;
         this.geometry = other.geometry;
         this.material = other.material;
 
+        free_UseAccum(this.use_accum_ptr);
         this.use_accum_ptr = other.use_accum_ptr;
         this.front_facing = other.front_facing;
 
         this.depth_layer = other.depth_layer;
         this.priority = other.priority;
+
         this.geometry_index = other.geometry_index;
         this.material_index = other.material_index;
         this.light_index = other.light_index;
+
+        return this;
+    }
+
+    reset(): Element_t {
+        this.instance = null;
+        this.geometry = null;
+        this.material = null;
+
+        if (this.use_accum_ptr.owner !== this) {
+            this.use_accum_ptr = create_UseAccum(this);
+        }
+        this.front_facing = true;
+
+        this.depth_layer = 0;
+        this.priority = 0;
+
+        this.geometry_index = 0;
+        this.material_index = 0;
+        this.light_index = 0;
 
         return this;
     }
@@ -446,7 +483,7 @@ class RenderList_t {
             this.base_elements[this.element_count] = new Element_t;
         }
 
-        this.elements[this.element_count] = this.base_elements[this.element_count];
+        this.elements[this.element_count] = this.base_elements[this.element_count].reset();
         return this.elements[this.element_count++];
     }
 
@@ -459,7 +496,7 @@ class RenderList_t {
             this.base_elements[idx] = new Element_t;
         }
 
-        this.elements[idx] = this.base_elements[idx];
+        this.elements[idx] = this.base_elements[idx].reset();
         this.alpha_element_count++;
         return this.elements[idx];
     }
@@ -1541,13 +1578,12 @@ export class RasterizerScene {
             gl.enable(gl.SCISSOR_TEST);
         }
 
-        gl.depthMask(true);
-        this.state.gl.depthMask = true;
         gl.depthFunc(gl.LEQUAL);
         this.state.gl.depthFunc = gl.LEQUAL;
+        gl.depthMask(true);
+        this.state.gl.depthMask = true;
         gl.enable(gl.DEPTH_TEST);
         this.state.gl.DEPTH_TEST = true;
-
         gl.clearDepth(1.0);
         gl.clear(gl.DEPTH_BUFFER_BIT);
 
@@ -1622,7 +1658,6 @@ export class RasterizerScene {
 
         if (this.storage.frame.current_rt && this.state.used_screen_texture) {
             // copy screen texture
-
             this.storage.canvas._copy_screen(Rect2.EMPTY);
         }
 
@@ -1753,7 +1788,6 @@ export class RasterizerScene {
         }
 
         this.render_list.clear();
-
         this._fill_render_list(p_cull_result, p_cull_count, true, true);
 
         this.render_list.sort_by_depth(false);
@@ -2106,41 +2140,36 @@ export class RasterizerScene {
     }
 
     _render_render_list(p_elements: Element_t[], p_element_start: number, p_element_count: number, p_view_transform: Transform, p_projection: CameraMatrix, p_shadow_atlas: ShadowAtlas_t, p_env: Environment_t, p_shadow_bias: number, p_shadow_normal_bias: number, p_reverse_cull: boolean, p_alpha_pass: boolean, p_shadow: boolean) {
-        let view_transform_inverse = p_view_transform.inverse();
-        let projection_inverse = p_projection.inverse();
-
         const gl = this.gl;
-
-        let prev_material: Material_t = null;
-        let prev_geometry: Geometry_t = null;
-        let prev_skeleton: Skeleton_t = null;
 
         let prev_unshaded = false;
         let prev_instancing = false;
         let prev_depth_prepass = false;
-
         this.set_shader_condition("SHADELESS", false);
+        let prev_material: Material_t = null;
+        let prev_geometry: Geometry_t = null;
+        let prev_skeleton: Skeleton_t = null;
+
+        let view_transform_inverse = p_view_transform.inverse();
+        let projection_inverse = p_projection.inverse();
 
         let prev_base_pass = false;
         let prev_light: LightInstance_t = null;
+        let prev_vertex_lit = false;
 
         let prev_blend_mode = -2;
 
-        if (this.state.gl.CULL_FRONT) {
-            gl.cullFace(gl.BACK);
-            this.state.gl.CULL_FRONT = false;
-        }
-        if (!this.state.gl.CULL_FACE) {
-            gl.enable(gl.CULL_FACE);
-            this.state.gl.CULL_FACE = true;
-        }
+        this.state.gl.CULL_FRONT = false;
+        this.state.gl.CULL_FACE = true;
+        gl.cullFace(gl.BACK);
+        gl.enable(gl.CULL_FACE);
 
         if (p_alpha_pass) {
-            gl.enable(gl.BLEND);
             this.state.gl.BLEND = true;
+            gl.enable(gl.BLEND);
         } else {
-            gl.disable(gl.BLEND);
             this.state.gl.BLEND = false;
+            gl.disable(gl.BLEND);
         }
 
         let fog_max_distance = 0;
@@ -2156,7 +2185,6 @@ export class RasterizerScene {
             using_fog = true;
         }
 
-        /** @type {Texture_t} */
         let prev_lightmap: Texture_t = null;
         let lightmap_energy = 1.0;
 
@@ -2172,7 +2200,6 @@ export class RasterizerScene {
             let rebind = false;
             let accum_pass = e.use_accum;
             e.use_accum = true;
-
             let light: LightInstance_t = null;
             let lightmap: Texture_t = null;
             let rebind_light = false;
@@ -2181,7 +2208,7 @@ export class RasterizerScene {
             if (!p_shadow && material.shader) {
                 let unshaded = material.shader.spatial.unshaded;
 
-                if (unshaded != prev_unshaded) {
+                if (unshaded !== prev_unshaded) {
                     rebind = true;
                     if (unshaded) {
                         this.set_shader_condition("SHADELESS", true);
@@ -2194,7 +2221,7 @@ export class RasterizerScene {
 
                 let base_pass = !accum_pass && !unshaded;
 
-                if (base_pass != prev_base_pass) {
+                if (base_pass !== prev_base_pass) {
                     this.set_shader_condition("BASE_PASS", base_pass);
                     rebind = true;
                     prev_base_pass = base_pass;
@@ -2202,6 +2229,7 @@ export class RasterizerScene {
 
                 if (!unshaded && e.light_index < MAX_LIGHTS) {
                     light = this.render_light_instances[e.light_index];
+                    // @Incomplete: do not use light if it is in BAKE_ALL mode
                 }
 
                 if (light != prev_light) {
@@ -2219,13 +2247,17 @@ export class RasterizerScene {
                     }
                 }
 
-                if (prev_blend_mode != blend_mode) {
-                    if (prev_blend_mode == -1 && blend_mode != -1) {
-                        gl.enable(gl.BLEND);
-                        this.state.gl.BLEND = true;
-                    } else if (blend_mode == -1 && prev_blend_mode != -1) {
-                        gl.disable(gl.BLEND);
-                        this.state.gl.BLEND = false;
+                if (prev_blend_mode !== blend_mode) {
+                    if (prev_blend_mode === -1 && blend_mode !== -1) {
+                        if (!this.state.gl.BLEND) {
+                            this.state.gl.BLEND = true;
+                            gl.enable(gl.BLEND);
+                        }
+                    } else if (blend_mode === -1 && prev_blend_mode !== -1) {
+                        if (this.state.gl.BLEND) {
+                            this.state.gl.BLEND = false;
+                            gl.disable(gl.BLEND);
+                        }
                     }
 
                     switch (blend_mode) {
@@ -2271,7 +2303,7 @@ export class RasterizerScene {
                     }
                 }
 
-                if (lightmap !== prev_lightmap) {
+                if (lightmap != prev_lightmap) {
                     this.set_shader_condition("USE_LIGHTMAP", !!lightmap);
 
                     rebind = true;
@@ -2301,23 +2333,24 @@ export class RasterizerScene {
             let skeleton = e.instance.skeleton;
 
             if (skeleton != prev_skeleton) {
-                if (skeleton) {
-                    this.set_shader_condition("USE_SKELETON", true);
-                    this.set_shader_condition("USE_SKELETON_SOFTWARE", VSG.config.use_skeleton_software);
-                } else {
-                    this.set_shader_condition("USE_SKELETON", false);
-                    this.set_shader_condition("USE_SKELETON_SOFTWARE", false);
+                if ((!prev_skeleton) !== (!skeleton)) {
+                    if (skeleton) {
+                        this.set_shader_condition("USE_SKELETON", true);
+                        this.set_shader_condition("USE_SKELETON_SOFTWARE", VSG.config.use_skeleton_software);
+                    } else {
+                        this.set_shader_condition("USE_SKELETON", false);
+                        this.set_shader_condition("USE_SKELETON_SOFTWARE", false);
+                    }
                 }
-
                 rebind = true;
             }
 
-            if (e.geometry !== prev_geometry || skeleton !== prev_skeleton) {
+            if (e.geometry != prev_geometry || skeleton != prev_skeleton) {
                 this._setup_geometry(e, skeleton);
             }
 
             let shader_rebind = false;
-            if (rebind || material !== prev_material) {
+            if (rebind || material != prev_material) {
                 shader_rebind = this._setup_material(material, p_alpha_pass, skeleton ? skeleton.size * 3 : 0);
             }
 
@@ -2373,13 +2406,17 @@ export class RasterizerScene {
                         this.set_uniform_v("fog_transmit_enabled", p_env.fog_transmit_enabled, true, true);
                         this.set_uniform_v("fog_transmit_curve", p_env.fog_transmit_curve, true, true);
 
-                        this.set_uniform_v("fog_depth_begin", p_env.fog_depth_begin, true, true);
-                        this.set_uniform_v("fog_depth_curve", p_env.fog_depth_curve, true, true);
-                        this.set_uniform_n("fog_max_distance", fog_max_distance, true, true);
+                        if (p_env.fog_depth_enabled[0]) {
+                            this.set_uniform_v("fog_depth_begin", p_env.fog_depth_begin, true, true);
+                            this.set_uniform_v("fog_depth_curve", p_env.fog_depth_curve, true, true);
+                            this.set_uniform_n("fog_max_distance", fog_max_distance, true, true);
+                        }
 
-                        this.set_uniform_v("fog_height_min", p_env.fog_height_min, true, true);
-                        this.set_uniform_v("fog_height_max", p_env.fog_height_max, true, true);
-                        this.set_uniform_v("fog_height_curve", p_env.fog_height_curve, true, true);
+                        if (p_env.fog_height_enabled[0]) {
+                            this.set_uniform_v("fog_height_min", p_env.fog_height_min, true, true);
+                            this.set_uniform_v("fog_height_max", p_env.fog_height_max, true, true);
+                            this.set_uniform_v("fog_height_curve", p_env.fog_height_curve, true, true);
+                        }
                     }
                 }
 
@@ -2387,6 +2424,7 @@ export class RasterizerScene {
                 this.set_uniform_v("INV_CAMERA_MATRIX", view_transform_inverse.as_array(), true, true);
                 this.set_uniform_v("PROJECTION_MATRIX", p_projection.as_array(), true, true);
                 this.set_uniform_v("INV_PROJECTION_MATRIX", projection_inverse.as_array(), true, true);
+
                 this.set_uniform_v("TIME", this.storage.frame.time, true, true);
                 this.set_uniform_v("VIEWPORT_SIZE", this.state.viewport_size.as_array(), true, true);
                 this.set_uniform_v("SCREEN_PIXEL_SIZE", this.state.screen_pixel_size.as_array(), true, true);
@@ -2442,13 +2480,13 @@ export class RasterizerScene {
             prev_geometry = e.geometry;
             prev_material = e.material;
             prev_skeleton = skeleton;
+            prev_instancing = instancing;
             prev_light = light;
             prev_lightmap = lightmap;
         }
 
         if (VSG.config.vao) {
             const gl_ext = OS.get_singleton().gl_ext;
-
             gl_ext.bindVertexArray(null);
         }
 
@@ -2457,6 +2495,9 @@ export class RasterizerScene {
         this.set_shader_condition("SHADELESS", false);
         this.set_shader_condition("BASE_PASS", false);
         this.set_shader_condition("USE_INSTANCING", false);
+        this.set_shader_condition("LIGHT_USE_PSSM4", false);
+        this.set_shader_condition("LIGHT_USE_PSSM2", false);
+        this.set_shader_condition("LIGHT_USE_PSSM_BLEND", false);
         this.set_shader_condition("USE_LIGHTMAP", false);
         this.set_shader_condition("FOG_DEPTH_ENABLED", false);
         this.set_shader_condition("FOG_HEIGHT_ENABLED", false);
