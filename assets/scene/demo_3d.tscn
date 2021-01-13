@@ -7,8 +7,13 @@
 
 [sub_resource type="Environment" id=1]
 background_mode = 1
-background_color = Color( 0.45098, 0.847059, 0.792157, 1 )
-ambient_light_color = Color( 0.564706, 0.494118, 0.172549, 1 )
+background_color = Color( 0.458824, 0.658824, 0.709804, 1 )
+ambient_light_color = Color( 0.976471, 0.937255, 0.611765, 1 )
+ambient_light_energy = 2.43
+ambient_light_sky_contribution = 0.0
+adjustment_brightness = 0.91
+adjustment_contrast = 1.15
+adjustment_saturation = 1.11
 
 [sub_resource type="Animation" id=2]
 loop = true
@@ -58,8 +63,11 @@ tracks/0/keys = {
 [node name="world_environment" type="WorldEnvironment" parent="."]
 environment = SubResource( 1 )
 
-[node name="directional_light" type="DirectionalLight" parent="."]
+[node name="directional_light" type="DirectionalLight" parent="world_environment"]
 transform = Transform( -0.581456, 0.521793, -0.624213, 5.73417e-08, 0.767244, 0.641356, 0.813578, 0.37292, -0.446118, 0, 6.76488, -0.117852 )
+light_color = Color( 0.980392, 0.980392, 0.701961, 1 )
+light_energy = 0.89
+light_specular = 0.0
 shadow_enabled = true
 directional_shadow_mode = 0
 

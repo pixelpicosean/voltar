@@ -18,7 +18,9 @@
             "albedo_texture": [
                 "@ext#",
                 "1"
-            ]
+            ],
+            "metallic": 0.68,
+            "metallic_specular": 0
         }
     },
     "res://mesh/plane.tscn": {
@@ -1232,13 +1234,17 @@
         },
         "sub": [
             {
-                "id": 1,
+                "id": 2,
                 "type": "ArrayMesh",
                 "surfaces": [
                     {
                         "blend_shape_data": [],
                         "format": 471,
                         "index_count": 420,
+                        "material": [
+                            "@ext#",
+                            "1"
+                        ],
                         "primitive": 4,
                         "skeleton_aabb": [
                             "-0.101704,0.449234,-0.308757,0.203409,0.269291,0.617525",
@@ -1253,7 +1259,7 @@
                             "-0.101704,-0.00312422,-0.0950707,0.177983,0.721649,0.454073",
                             "-0.0762779,-0.00312422,0.206446,0.152557,0.174946,0.152556"
                         ],
-                        "vertex_count": 398,
+                        "vertex_count": 100,
                         "is_2d": false,
                         "arrays": {
                             "__type__": "b",
@@ -1273,14 +1279,14 @@
                             "vertex": {
                                 "index": 0,
                                 "offset": 102644,
-                                "length": 27064
+                                "length": 6800
                             },
                             "index": {
                                 "index": 0,
-                                "offset": 129708,
+                                "offset": 109444,
                                 "length": 840
                             },
-                            "array_len": 398,
+                            "array_len": 100,
                             "index_array_len": 420,
                             "attribs": [
                                 {
@@ -1349,7 +1355,7 @@
                 ]
             },
             {
-                "id": 2,
+                "id": 3,
                 "type": "Skin",
                 "binds": [
                     {
@@ -1408,7 +1414,7 @@
                     },
                     {
                         "bone": -1,
-                        "name": "upperarml",
+                        "name": "upper-arm-l",
                         "pose": [
                             0.997444,
                             0.00303464,
@@ -1426,7 +1432,7 @@
                     },
                     {
                         "bone": -1,
-                        "name": "lowerarml",
+                        "name": "lower-arm-l",
                         "pose": [
                             0.996293,
                             -0.00186536,
@@ -1444,7 +1450,7 @@
                     },
                     {
                         "bone": -1,
-                        "name": "upperarmr",
+                        "name": "upper-arm-r",
                         "pose": [
                             0.172464,
                             0.982426,
@@ -1462,7 +1468,7 @@
                     },
                     {
                         "bone": -1,
-                        "name": "lowerarmr",
+                        "name": "lower-arm-r",
                         "pose": [
                             -0.59224,
                             -0.801159,
@@ -1480,7 +1486,7 @@
                     },
                     {
                         "bone": -1,
-                        "name": "upperlegl",
+                        "name": "upper-leg-l",
                         "pose": [
                             0.998091,
                             0.0392173,
@@ -1498,7 +1504,7 @@
                     },
                     {
                         "bone": -1,
-                        "name": "lowerlegl",
+                        "name": "lower-leg-l",
                         "pose": [
                             0.994665,
                             -0.0697002,
@@ -1516,7 +1522,7 @@
                     },
                     {
                         "bone": -1,
-                        "name": "upperlegr",
+                        "name": "upper-leg-r",
                         "pose": [
                             0.996823,
                             0.0614578,
@@ -1534,7 +1540,7 @@
                     },
                     {
                         "bone": -1,
-                        "name": "lowerlegr",
+                        "name": "lower-leg-r",
                         "pose": [
                             0.992888,
                             -0.0875174,
@@ -1552,7 +1558,7 @@
                     },
                     {
                         "bone": -1,
-                        "name": "ikhandl",
+                        "name": "ik-hand-l",
                         "pose": [
                             0.0206724,
                             -0.0249885,
@@ -1570,7 +1576,7 @@
                     },
                     {
                         "bone": -1,
-                        "name": "polearml",
+                        "name": "pole-arm-l",
                         "pose": [
                             -6.22693e-9,
                             5.58518e-9,
@@ -1588,7 +1594,7 @@
                     },
                     {
                         "bone": -1,
-                        "name": "ikhandr",
+                        "name": "ik-hand-r",
                         "pose": [
                             0.0147679,
                             0.00618666,
@@ -1606,7 +1612,7 @@
                     },
                     {
                         "bone": -1,
-                        "name": "polearmr",
+                        "name": "pole-arm-r",
                         "pose": [
                             -1.81071e-9,
                             1.13082e-7,
@@ -1624,7 +1630,7 @@
                     },
                     {
                         "bone": -1,
-                        "name": "ikfootr",
+                        "name": "ik-foot-r",
                         "pose": [
                             -0.0483403,
                             -0.0198939,
@@ -1642,7 +1648,7 @@
                     },
                     {
                         "bone": -1,
-                        "name": "poler",
+                        "name": "pole-r",
                         "pose": [
                             -0.191154,
                             -0.0229925,
@@ -1660,7 +1666,7 @@
                     },
                     {
                         "bone": -1,
-                        "name": "ikfootl",
+                        "name": "ik-foot-l",
                         "pose": [
                             0.049191,
                             -0.011931,
@@ -1678,7 +1684,7 @@
                     },
                     {
                         "bone": -1,
-                        "name": "polel",
+                        "name": "pole-l",
                         "pose": [
                             0.193072,
                             -0.00985872,
@@ -1697,7 +1703,7 @@
                 ]
             },
             {
-                "id": 3,
+                "id": 4,
                 "type": "Animation",
                 "name": "idle",
                 "length": 1.25,
@@ -1749,7 +1755,7 @@
                     },
                     {
                         "type": "transform",
-                        "path": "Skeleton:lowerarml",
+                        "path": "Skeleton:lower-arm-l",
                         "interp": 1,
                         "loop_wrap": true,
                         "enabled": true,
@@ -2003,7 +2009,7 @@
                     },
                     {
                         "type": "transform",
-                        "path": "Skeleton:upperarml",
+                        "path": "Skeleton:upper-arm-l",
                         "interp": 1,
                         "loop_wrap": true,
                         "enabled": true,
@@ -2299,7 +2305,7 @@
                     },
                     {
                         "type": "transform",
-                        "path": "Skeleton:lowerarmr",
+                        "path": "Skeleton:lower-arm-r",
                         "interp": 1,
                         "loop_wrap": true,
                         "enabled": true,
@@ -2539,7 +2545,7 @@
                     },
                     {
                         "type": "transform",
-                        "path": "Skeleton:upperarmr",
+                        "path": "Skeleton:upper-arm-r",
                         "interp": 1,
                         "loop_wrap": true,
                         "enabled": true,
@@ -2879,7 +2885,7 @@
                     },
                     {
                         "type": "transform",
-                        "path": "Skeleton:lowerlegl",
+                        "path": "Skeleton:lower-leg-l",
                         "interp": 1,
                         "loop_wrap": true,
                         "enabled": true,
@@ -3175,7 +3181,7 @@
                     },
                     {
                         "type": "transform",
-                        "path": "Skeleton:upperlegl",
+                        "path": "Skeleton:upper-leg-l",
                         "interp": 1,
                         "loop_wrap": true,
                         "enabled": true,
@@ -3429,7 +3435,7 @@
                     },
                     {
                         "type": "transform",
-                        "path": "Skeleton:lowerlegr",
+                        "path": "Skeleton:lower-leg-r",
                         "interp": 1,
                         "loop_wrap": true,
                         "enabled": true,
@@ -3725,7 +3731,7 @@
                     },
                     {
                         "type": "transform",
-                        "path": "Skeleton:upperlegr",
+                        "path": "Skeleton:upper-leg-r",
                         "interp": 1,
                         "loop_wrap": true,
                         "enabled": true,
@@ -4219,7 +4225,7 @@
                     },
                     {
                         "type": "transform",
-                        "path": "Skeleton:polearml",
+                        "path": "Skeleton:pole-arm-l",
                         "interp": 1,
                         "loop_wrap": true,
                         "enabled": true,
@@ -4263,7 +4269,7 @@
                     },
                     {
                         "type": "transform",
-                        "path": "Skeleton:ikhandl",
+                        "path": "Skeleton:ik-hand-l",
                         "interp": 1,
                         "loop_wrap": true,
                         "enabled": true,
@@ -4503,7 +4509,7 @@
                     },
                     {
                         "type": "transform",
-                        "path": "Skeleton:polearmr",
+                        "path": "Skeleton:pole-arm-r",
                         "interp": 1,
                         "loop_wrap": true,
                         "enabled": true,
@@ -4547,7 +4553,7 @@
                     },
                     {
                         "type": "transform",
-                        "path": "Skeleton:ikhandr",
+                        "path": "Skeleton:ik-hand-r",
                         "interp": 1,
                         "loop_wrap": true,
                         "enabled": true,
@@ -4787,7 +4793,7 @@
                     },
                     {
                         "type": "transform",
-                        "path": "Skeleton:poler",
+                        "path": "Skeleton:pole-r",
                         "interp": 1,
                         "loop_wrap": true,
                         "enabled": true,
@@ -4831,7 +4837,7 @@
                     },
                     {
                         "type": "transform",
-                        "path": "Skeleton:ikfootr",
+                        "path": "Skeleton:ik-foot-r",
                         "interp": 1,
                         "loop_wrap": true,
                         "enabled": true,
@@ -4875,7 +4881,7 @@
                     },
                     {
                         "type": "transform",
-                        "path": "Skeleton:polel",
+                        "path": "Skeleton:pole-l",
                         "interp": 1,
                         "loop_wrap": true,
                         "enabled": true,
@@ -4919,7 +4925,7 @@
                     },
                     {
                         "type": "transform",
-                        "path": "Skeleton:ikfootl",
+                        "path": "Skeleton:ik-foot-l",
                         "interp": 1,
                         "loop_wrap": true,
                         "enabled": true,
@@ -4964,7 +4970,7 @@
                 ]
             },
             {
-                "id": 4,
+                "id": 5,
                 "type": "Animation",
                 "name": "run",
                 "length": 1.25,
@@ -5212,7 +5218,7 @@
                     },
                     {
                         "type": "transform",
-                        "path": "Skeleton:lowerarml",
+                        "path": "Skeleton:lower-arm-l",
                         "interp": 1,
                         "loop_wrap": true,
                         "enabled": true,
@@ -5494,7 +5500,7 @@
                     },
                     {
                         "type": "transform",
-                        "path": "Skeleton:upperarml",
+                        "path": "Skeleton:upper-arm-l",
                         "interp": 1,
                         "loop_wrap": true,
                         "enabled": true,
@@ -5790,7 +5796,7 @@
                     },
                     {
                         "type": "transform",
-                        "path": "Skeleton:lowerarmr",
+                        "path": "Skeleton:lower-arm-r",
                         "interp": 1,
                         "loop_wrap": true,
                         "enabled": true,
@@ -6058,7 +6064,7 @@
                     },
                     {
                         "type": "transform",
-                        "path": "Skeleton:upperarmr",
+                        "path": "Skeleton:upper-arm-r",
                         "interp": 1,
                         "loop_wrap": true,
                         "enabled": true,
@@ -6608,7 +6614,7 @@
                     },
                     {
                         "type": "transform",
-                        "path": "Skeleton:lowerlegl",
+                        "path": "Skeleton:lower-leg-l",
                         "interp": 1,
                         "loop_wrap": true,
                         "enabled": true,
@@ -6890,7 +6896,7 @@
                     },
                     {
                         "type": "transform",
-                        "path": "Skeleton:upperlegl",
+                        "path": "Skeleton:upper-leg-l",
                         "interp": 1,
                         "loop_wrap": true,
                         "enabled": true,
@@ -7186,7 +7192,7 @@
                     },
                     {
                         "type": "transform",
-                        "path": "Skeleton:lowerlegr",
+                        "path": "Skeleton:lower-leg-r",
                         "interp": 1,
                         "loop_wrap": true,
                         "enabled": true,
@@ -7482,7 +7488,7 @@
                     },
                     {
                         "type": "transform",
-                        "path": "Skeleton:upperlegr",
+                        "path": "Skeleton:upper-leg-r",
                         "interp": 1,
                         "loop_wrap": true,
                         "enabled": true,
@@ -8004,7 +8010,7 @@
                     },
                     {
                         "type": "transform",
-                        "path": "Skeleton:polearml",
+                        "path": "Skeleton:pole-arm-l",
                         "interp": 1,
                         "loop_wrap": true,
                         "enabled": true,
@@ -8048,7 +8054,7 @@
                     },
                     {
                         "type": "transform",
-                        "path": "Skeleton:ikhandl",
+                        "path": "Skeleton:ik-hand-l",
                         "interp": 1,
                         "loop_wrap": true,
                         "enabled": true,
@@ -8330,7 +8336,7 @@
                     },
                     {
                         "type": "transform",
-                        "path": "Skeleton:polearmr",
+                        "path": "Skeleton:pole-arm-r",
                         "interp": 1,
                         "loop_wrap": true,
                         "enabled": true,
@@ -8374,7 +8380,7 @@
                     },
                     {
                         "type": "transform",
-                        "path": "Skeleton:ikhandr",
+                        "path": "Skeleton:ik-hand-r",
                         "interp": 1,
                         "loop_wrap": true,
                         "enabled": true,
@@ -8656,7 +8662,7 @@
                     },
                     {
                         "type": "transform",
-                        "path": "Skeleton:poler",
+                        "path": "Skeleton:pole-r",
                         "interp": 1,
                         "loop_wrap": true,
                         "enabled": true,
@@ -8700,7 +8706,7 @@
                     },
                     {
                         "type": "transform",
-                        "path": "Skeleton:ikfootr",
+                        "path": "Skeleton:ik-foot-r",
                         "interp": 1,
                         "loop_wrap": true,
                         "enabled": true,
@@ -8982,7 +8988,7 @@
                     },
                     {
                         "type": "transform",
-                        "path": "Skeleton:polel",
+                        "path": "Skeleton:pole-l",
                         "interp": 1,
                         "loop_wrap": true,
                         "enabled": true,
@@ -9026,7 +9032,7 @@
                     },
                     {
                         "type": "transform",
-                        "path": "Skeleton:ikfootl",
+                        "path": "Skeleton:ik-foot-l",
                         "interp": 1,
                         "loop_wrap": true,
                         "enabled": true,
@@ -9329,7 +9335,7 @@
                     0,
                     1,
                     0,
-                    0.5338,
+                    0.531324,
                     0
                 ],
                 "bones": [
@@ -9394,7 +9400,7 @@
                         "bound_children": []
                     },
                     {
-                        "name": "upperarml",
+                        "name": "upper-arm-l",
                         "parent": 1,
                         "enabled": true,
                         "rest": [
@@ -9414,7 +9420,7 @@
                         "bound_children": []
                     },
                     {
-                        "name": "lowerarml",
+                        "name": "lower-arm-l",
                         "parent": 3,
                         "enabled": true,
                         "rest": [
@@ -9434,7 +9440,7 @@
                         "bound_children": []
                     },
                     {
-                        "name": "upperarmr",
+                        "name": "upper-arm-r",
                         "parent": 1,
                         "enabled": true,
                         "rest": [
@@ -9454,7 +9460,7 @@
                         "bound_children": []
                     },
                     {
-                        "name": "lowerarmr",
+                        "name": "lower-arm-r",
                         "parent": 5,
                         "enabled": true,
                         "rest": [
@@ -9474,7 +9480,7 @@
                         "bound_children": []
                     },
                     {
-                        "name": "upperlegl",
+                        "name": "upper-leg-l",
                         "parent": 0,
                         "enabled": true,
                         "rest": [
@@ -9494,7 +9500,7 @@
                         "bound_children": []
                     },
                     {
-                        "name": "lowerlegl",
+                        "name": "lower-leg-l",
                         "parent": 7,
                         "enabled": true,
                         "rest": [
@@ -9514,7 +9520,7 @@
                         "bound_children": []
                     },
                     {
-                        "name": "upperlegr",
+                        "name": "upper-leg-r",
                         "parent": 0,
                         "enabled": true,
                         "rest": [
@@ -9534,7 +9540,7 @@
                         "bound_children": []
                     },
                     {
-                        "name": "lowerlegr",
+                        "name": "lower-leg-r",
                         "parent": 9,
                         "enabled": true,
                         "rest": [
@@ -9554,7 +9560,7 @@
                         "bound_children": []
                     },
                     {
-                        "name": "ikhandl",
+                        "name": "ik-hand-l",
                         "parent": -1,
                         "enabled": true,
                         "rest": [
@@ -9574,7 +9580,7 @@
                         "bound_children": []
                     },
                     {
-                        "name": "polearml",
+                        "name": "pole-arm-l",
                         "parent": 11,
                         "enabled": true,
                         "rest": [
@@ -9594,7 +9600,7 @@
                         "bound_children": []
                     },
                     {
-                        "name": "ikhandr",
+                        "name": "ik-hand-r",
                         "parent": -1,
                         "enabled": true,
                         "rest": [
@@ -9614,7 +9620,7 @@
                         "bound_children": []
                     },
                     {
-                        "name": "polearmr",
+                        "name": "pole-arm-r",
                         "parent": 13,
                         "enabled": true,
                         "rest": [
@@ -9634,7 +9640,7 @@
                         "bound_children": []
                     },
                     {
-                        "name": "ikfootr",
+                        "name": "ik-foot-r",
                         "parent": -1,
                         "enabled": true,
                         "rest": [
@@ -9654,7 +9660,7 @@
                         "bound_children": []
                     },
                     {
-                        "name": "poler",
+                        "name": "pole-r",
                         "parent": 15,
                         "enabled": true,
                         "rest": [
@@ -9674,7 +9680,7 @@
                         "bound_children": []
                     },
                     {
-                        "name": "ikfootl",
+                        "name": "ik-foot-l",
                         "parent": -1,
                         "enabled": true,
                         "rest": [
@@ -9694,7 +9700,7 @@
                         "bound_children": []
                     },
                     {
-                        "name": "polel",
+                        "name": "pole-l",
                         "parent": 17,
                         "enabled": true,
                         "rest": [
@@ -9768,7 +9774,7 @@
                 ],
                 "bones/2/enabled": true,
                 "bones/2/bound_children": [],
-                "bones/3/name": "upperarml",
+                "bones/3/name": "upper-arm-l",
                 "bones/3/parent": 1,
                 "bones/3/rest": [
                     0.580802,
@@ -9786,7 +9792,7 @@
                 ],
                 "bones/3/enabled": true,
                 "bones/3/bound_children": [],
-                "bones/4/name": "lowerarml",
+                "bones/4/name": "lower-arm-l",
                 "bones/4/parent": 3,
                 "bones/4/rest": [
                     0.999969,
@@ -9804,7 +9810,7 @@
                 ],
                 "bones/4/enabled": true,
                 "bones/4/bound_children": [],
-                "bones/5/name": "upperarmr",
+                "bones/5/name": "upper-arm-r",
                 "bones/5/parent": 1,
                 "bones/5/rest": [
                     -0.756942,
@@ -9822,7 +9828,7 @@
                 ],
                 "bones/5/enabled": true,
                 "bones/5/bound_children": [],
-                "bones/6/name": "lowerarmr",
+                "bones/6/name": "lower-arm-r",
                 "bones/6/parent": 5,
                 "bones/6/rest": [
                     -0.894946,
@@ -9840,7 +9846,7 @@
                 ],
                 "bones/6/enabled": true,
                 "bones/6/bound_children": [],
-                "bones/7/name": "upperlegl",
+                "bones/7/name": "upper-leg-l",
                 "bones/7/parent": 0,
                 "bones/7/rest": [
                     0.995457,
@@ -9858,7 +9864,7 @@
                 ],
                 "bones/7/enabled": true,
                 "bones/7/bound_children": [],
-                "bones/8/name": "lowerlegl",
+                "bones/8/name": "lower-leg-l",
                 "bones/8/parent": 7,
                 "bones/8/rest": [
                     0.986404,
@@ -9876,7 +9882,7 @@
                 ],
                 "bones/8/enabled": true,
                 "bones/8/bound_children": [],
-                "bones/9/name": "upperlegr",
+                "bones/9/name": "upper-leg-r",
                 "bones/9/parent": 0,
                 "bones/9/rest": [
                     0.954825,
@@ -9894,7 +9900,7 @@
                 ],
                 "bones/9/enabled": true,
                 "bones/9/bound_children": [],
-                "bones/10/name": "lowerlegr",
+                "bones/10/name": "lower-leg-r",
                 "bones/10/parent": 9,
                 "bones/10/rest": [
                     0.98027,
@@ -9912,7 +9918,7 @@
                 ],
                 "bones/10/enabled": true,
                 "bones/10/bound_children": [],
-                "bones/11/name": "ikhandl",
+                "bones/11/name": "ik-hand-l",
                 "bones/11/parent": -1,
                 "bones/11/rest": [
                     0.0206724,
@@ -9930,7 +9936,7 @@
                 ],
                 "bones/11/enabled": true,
                 "bones/11/bound_children": [],
-                "bones/12/name": "polearml",
+                "bones/12/name": "pole-arm-l",
                 "bones/12/parent": 11,
                 "bones/12/rest": [
                     -0.999652,
@@ -9948,7 +9954,7 @@
                 ],
                 "bones/12/enabled": true,
                 "bones/12/bound_children": [],
-                "bones/13/name": "ikhandr",
+                "bones/13/name": "ik-hand-r",
                 "bones/13/parent": -1,
                 "bones/13/rest": [
                     0.0147678,
@@ -9966,7 +9972,7 @@
                 ],
                 "bones/13/enabled": true,
                 "bones/13/bound_children": [],
-                "bones/14/name": "polearmr",
+                "bones/14/name": "pole-arm-r",
                 "bones/14/parent": 13,
                 "bones/14/rest": [
                     -1.00042,
@@ -9984,7 +9990,7 @@
                 ],
                 "bones/14/enabled": true,
                 "bones/14/bound_children": [],
-                "bones/15/name": "ikfootr",
+                "bones/15/name": "ik-foot-r",
                 "bones/15/parent": -1,
                 "bones/15/rest": [
                     -0.0483403,
@@ -10002,7 +10008,7 @@
                 ],
                 "bones/15/enabled": true,
                 "bones/15/bound_children": [],
-                "bones/16/name": "poler",
+                "bones/16/name": "pole-r",
                 "bones/16/parent": 15,
                 "bones/16/rest": [
                     0.989647,
@@ -10020,7 +10026,7 @@
                 ],
                 "bones/16/enabled": true,
                 "bones/16/bound_children": [],
-                "bones/17/name": "ikfootl",
+                "bones/17/name": "ik-foot-l",
                 "bones/17/parent": -1,
                 "bones/17/rest": [
                     0.0491909,
@@ -10038,7 +10044,7 @@
                 ],
                 "bones/17/enabled": true,
                 "bones/17/bound_children": [],
-                "bones/18/name": "polel",
+                "bones/18/name": "pole-l",
                 "bones/18/parent": 17,
                 "bones/18/rest": [
                     0.989492,
@@ -10063,17 +10069,14 @@
                 "parent": "Skeleton",
                 "mesh": [
                     "@sub#",
-                    "1"
+                    "2"
                 ],
                 "material": [
-                    [
-                        "@ext#",
-                        "1"
-                    ]
+                    null
                 ],
                 "skin": [
                     "@sub#",
-                    "2"
+                    "3"
                 ]
             },
             {
@@ -10084,11 +10087,11 @@
                 "anims": {
                     "idle": [
                         "@sub#",
-                        "3"
+                        "4"
                     ],
                     "run": [
                         "@sub#",
-                        "4"
+                        "5"
                     ]
                 }
             }
@@ -11056,12 +11059,12 @@
                             },
                             "vertex": {
                                 "index": 0,
-                                "offset": 130548,
+                                "offset": 110284,
                                 "length": 10080
                             },
                             "index": {
                                 "index": 0,
-                                "offset": 140628,
+                                "offset": 120364,
                                 "length": 648
                             },
                             "array_len": 210,
@@ -11141,12 +11144,12 @@
                             },
                             "vertex": {
                                 "index": 0,
-                                "offset": 141276,
+                                "offset": 121012,
                                 "length": 24048
                             },
                             "index": {
                                 "index": 0,
-                                "offset": 165324,
+                                "offset": 145060,
                                 "length": 1536
                             },
                             "array_len": 501,
@@ -11293,12 +11296,12 @@
                             },
                             "vertex": {
                                 "index": 0,
-                                "offset": 166860,
+                                "offset": 146596,
                                 "length": 28032
                             },
                             "index": {
                                 "index": 0,
-                                "offset": 194892,
+                                "offset": 174628,
                                 "length": 1176
                             },
                             "array_len": 584,
@@ -11402,12 +11405,12 @@
                             },
                             "vertex": {
                                 "index": 0,
-                                "offset": 196068,
+                                "offset": 175804,
                                 "length": 8640
                             },
                             "index": {
                                 "index": 0,
-                                "offset": 204708,
+                                "offset": 184444,
                                 "length": 696
                             },
                             "array_len": 180,
@@ -11490,17 +11493,21 @@
                 "type": "Environment",
                 "bg_mode": 1,
                 "bg_color": {
-                    "r": 0.45098,
-                    "g": 0.847059,
-                    "b": 0.792157,
+                    "r": 0.458824,
+                    "g": 0.658824,
+                    "b": 0.709804,
                     "a": 1
                 },
+                "ambient_energy": 2.43,
                 "ambient_color": {
-                    "r": 0.564706,
-                    "g": 0.494118,
-                    "b": 0.172549,
+                    "r": 0.976471,
+                    "g": 0.937255,
+                    "b": 0.611765,
                     "a": 1
-                }
+                },
+                "adjustment_brightness": 0.91,
+                "adjustment_contrast": 1.15,
+                "adjustment_saturation": 1.11
             },
             {
                 "id": 2,
@@ -11632,7 +11639,7 @@
             {
                 "type": "DirectionalLight",
                 "name": "directional_light",
-                "parent": ".",
+                "parent": "world_environment",
                 "transform": [
                     -0.581456,
                     0.521793,
@@ -11647,6 +11654,14 @@
                     6.76488,
                     -0.117852
                 ],
+                "light_color": {
+                    "r": 0.980392,
+                    "g": 0.980392,
+                    "b": 0.701961,
+                    "a": 1
+                },
+                "light_energy": 0.89,
+                "light_specular": 0,
                 "shadow_enabled": true,
                 "directional_shadow_mode": 0
             },
