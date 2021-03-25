@@ -5,12 +5,15 @@ const HtmlWebpackPlugin = require("html-webpack-plugin");
 const { TsconfigPathsPlugin } = require("tsconfig-paths-webpack-plugin");
 
 module.exports = {
-    entry: path.resolve(__dirname, "./src/game/main.ts"),
     module: {
         rules: [
             {
                 test: /\.ts$/,
                 loader: "ts-loader",
+                options: {
+                    transpileOnly: true,
+                    experimentalWatchApi: true,
+                },
             },
             // Shaders
             {
@@ -39,6 +42,7 @@ module.exports = {
     output: {
         filename: "[name].js",
         path: path.resolve(__dirname, "dist"),
+        pathinfo: false,
     },
     plugins: [
         new CleanWebpackPlugin,

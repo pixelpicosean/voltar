@@ -7,6 +7,8 @@ const TerserPlugin = require("terser-webpack-plugin");
 const CopyPlugin = require("copy-webpack-plugin");
 
 module.exports = merge(common, {
+    entry: path.resolve(__dirname, "./src/game/main.ts"),
+
     plugins: [
         new CopyPlugin({
             patterns: [
