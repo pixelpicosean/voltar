@@ -480,14 +480,7 @@ function interpolate_track_on_node(nc: NodeCache, anim: Animation, track: ValueT
         };
     }
 }
-/**
- * @param {NodeCache} nc
- * @param {Animation} anim
- * @param {ValueTrack} track
- * @param {number} time
- * @param {boolean} loop_wrap
- */
-function immediate_track_on_node(nc: NodeCache, anim: Animation, track: ValueTrack, time: number, loop_wrap: boolean) {
+function immediate_track_on_node(nc: NodeCache, anim: Animation, track: ValueTrack, time: number, loop_wrap: boolean, setter_cache: { [s: string]: Function; }) {
     let keys = track.values;
     let idx = find_track_key(keys, time);
 
@@ -495,7 +488,13 @@ function immediate_track_on_node(nc: NodeCache, anim: Animation, track: ValueTra
         return;
     }
 
-    apply_immediate_value(nc, track.prop_type, track.prop_key, keys[idx].value);
+    const setter = setter_cache[track.path];
+
+    if (setter) {
+        apply_immediate_value_with_setter(nc, track.prop_type, setter, keys[idx].value);
+    } else {
+        apply_immediate_value(nc, track.prop_type, track.prop_key, keys[idx].value);
+    }
 }
 
 class AnimationData {
@@ -1195,7 +1194,7 @@ export class AnimationPlayer extends Node {
                     if (update_mode === UPDATE_CONTINUOUS || update_mode === UPDATE_CAPTURE || (equals(p_delta, 0) && update_mode === UPDATE_DISCRETE)) { // delta == 0 means seek
                         interpolate_track_on_node(nc, a, t, p_time, update_mode === UPDATE_CONTINUOUS ? t.interp : INTERPOLATION_NEAREST, t.loop_wrap, p_anim.setter_cache);
                     } else if (is_current && !equals(p_delta, CMP_EPSILON)) {
-                        immediate_track_on_node(nc, a, t, p_time, t.loop_wrap);
+                        immediate_track_on_node(nc, a, t, p_time, t.loop_wrap, p_anim.setter_cache);
                     }
                 } break;
                 case TRACK_TYPE_METHOD: {

@@ -32,3 +32,4 @@ node_modules
 
 *.import
 .idea/workspace.xml
+src/gen/data_debug.json
