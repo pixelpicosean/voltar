@@ -209,7 +209,6 @@ export class AnimatedSprite extends Node2D {
      * @param {boolean} value
      */
     set_playing(value: boolean) {
-        this.playing = true;
         this._set_playing(value);
     }
 
