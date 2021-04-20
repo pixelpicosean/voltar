@@ -10,7 +10,7 @@ import { PackedScene } from './resources/packed_scene';
  * @param key  Key of the scene class
  * @param ctor Class to be registered
  */
-export function register_scene_class(key: string, ctor: { new(): Node, instance(): Node }) {
+export function register_scene_class<T extends Node>(key: string, ctor: { new(): T, instance(): T }) {
     if (!scene_class_map[key]) {
         scene_class_map[key] = ctor;
     } else {
@@ -22,13 +22,14 @@ export function register_scene_class(key: string, ctor: { new(): Node, instance(
  * @param url path to the scene (JSON from .tscn)
  * @param scene Scene class
  */
-export function attach_script(url: string, scene: { new(): Node, instance(): Node }) {
+export function attach_script<T extends Node>(url: string, scene: { new(): T, instance(): T, filename?: string }) {
     register_scene_class(url, scene);
     scene["instance"] = () => {
-        return (get_resource_map()[url] as PackedScene).instance();
+        return (get_resource_map()[url] as PackedScene).instance() as T;
     };
+    scene["filename"] = url;
 }
 
-export function instanciate_scene(url: string): Node {
-    return (get_resource_map()[url] as PackedScene).instance();
+export function instanciate_scene<T extends Node>(url: string): T {
+    return (get_resource_map()[url] as PackedScene).instance() as T;
 }
