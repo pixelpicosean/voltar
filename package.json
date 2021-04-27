@@ -10,6 +10,7 @@
     "product": "npm run build && npm run compress"
   },
   "devDependencies": {
+    "@sucrase/webpack-loader": "^2.0.0",
     "base64-inline-loader": "^1.1.1",
     "clean-webpack-plugin": "^3.0.0",
     "copy-webpack-plugin": "^7.0.0",
@@ -21,11 +22,9 @@
     "pako": "^2.0.2",
     "precompress": "^6.3.2",
     "raw-loader": "^4.0.0",
-    "react-dev-utils": "^11.0.1",
+    "sucrase": "^3.18.1",
     "terser-webpack-plugin": "^5.0.3",
-    "ts-loader": "^8.0.12",
     "tsconfig-paths-webpack-plugin": "^3.3.0",
-    "typescript": "^4.1.3",
     "walk": "^2.3.9",
     "webpack": "^5.10.1",
     "webpack-cli": "^4.2.0",

@@ -9,10 +9,11 @@ module.exports = {
         rules: [
             {
                 test: /\.ts$/,
-                loader: "ts-loader",
-                options: {
-                    transpileOnly: true,
-                    experimentalWatchApi: true,
+                use: {
+                    loader: "@sucrase/webpack-loader",
+                    options: {
+                        transforms: ["typescript"],
+                    },
                 },
             },
             // Shaders
