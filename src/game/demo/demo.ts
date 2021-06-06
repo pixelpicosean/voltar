@@ -5,9 +5,9 @@ export class Demo extends v.Spatial {
     sentry_animator: v.AnimationPlayer;
 
     async _ready() {
-        this.get_tree().create_timer(13).connect_once("timeout", () => {
-            this.get_tree().change_scene("res://scene/demo.tscn");
-        });
+        // this.get_tree().create_timer(13).connect_once("timeout", () => {
+        //     this.get_tree().change_scene("res://scene/demo.tscn");
+        // });
 
         this.sentry = this.get_node("scene/player") as v.Spatial;
         this.sentry.set_rotation_degrees_n(0, 100, 0);

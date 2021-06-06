@@ -10,7 +10,7 @@ import { VisualServer } from "engine/servers/visual_server";
 import { Physics2DServer } from "engine/servers/physics_2d/physics_2d_server";
 import { VSG } from "engine/servers/visual/visual_server_globals";
 import { MainTimerSync } from "./main_timer_sync";
-
+import Stats from "engine/utils/stats";
 
 let message_queue: MessageQueue = null;
 
@@ -25,6 +25,8 @@ let fixed_fps = -1;
 
 let physics_process_max = 0;
 let idle_process_max = 0;
+
+const stats = Stats();
 
 export const Main = {
     last_ticks: 0,
@@ -100,8 +102,8 @@ export const Main = {
         this.engine.use_pixel_snap = this.global.display.pixel_snap;
         this.engine.snap_2d_transform = this.global.display.snap_2d_transform;
 
-        // TODO: autoload first pass, load constants
-        // TODO: autoload second pass, instantiate nodes into global constants
+        // @Incomplete: autoload first pass, load constants
+        // @Incomplete: autoload second pass, instantiate nodes into global constants
 
         // read and apply global settings
 
@@ -123,9 +125,13 @@ export const Main = {
         this.start_loop();
 
         console.log(`[Voltar] driver: ${this.global.display.webgl2 ? 'WebGL2' : 'WebGL'}, antialias: ${this.global.display.antialias ? 'ON' : 'OFF'}`)
+
+        document.body.appendChild(stats.dom);
     },
 
     iteration(timestamp: number) {
+        stats.begin();
+
         this.iterating++;
 
         let ticks = OS.get_singleton().get_ticks_usec();
@@ -219,6 +225,8 @@ export const Main = {
         }
 
         this.iterating--;
+
+        stats.end();
 
         this.raf_id = requestAnimationFrame(this.iteration);
     },
