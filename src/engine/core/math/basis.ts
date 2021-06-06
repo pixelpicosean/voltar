@@ -2,37 +2,12 @@ import { Vector3, Vector3Like } from './vector3';
 import { lerp } from './math_funcs';
 import { CMP_EPSILON } from './math_defs';
 
-/** @type {Quat[]} */
-const quat_pool: Quat[] = [];
-
 export class Quat {
-    static create(): Quat {
-        let b = quat_pool.pop();
-        if (!b) b = new Quat;
-        return b.set(0, 0, 0, 1);
-    }
-
-    /**
-     * @param {Quat} obj
-     */
-    static free(obj: Quat) {
-        if (obj && quat_pool.length < 2020) {
-            quat_pool.push(obj);
-        }
-        return Quat;
-    }
-
     x = 0;
     y = 0;
     z = 0;
     w = 1;
 
-    /**
-     * @param {number} x
-     * @param {number} y
-     * @param {number} z
-     * @param {number} w
-     */
     set(x: number, y: number, z: number, w: number) {
         this.x = x;
         this.y = y;
@@ -53,7 +28,7 @@ export class Quat {
     }
 
     clone() {
-        return Quat.create().copy(this);
+        return Quat.new().copy(this);
     }
 
     /**
@@ -80,9 +55,8 @@ export class Quat {
         return this;
     }
 
-    slerp(q: Quat, t: number, out?: Quat) {
-        let to1 = out;
-        if (!to1) to1 = Quat.create();
+    slerp(q: Quat, t: number, r_out?: Quat) {
+        let to1 = r_out || Quat.new();
 
         let omega = 0, cosom = 0, sinom = 0, scale0 = 0, scale1 = 0;
 
@@ -118,138 +92,83 @@ export class Quat {
         )
     }
 
-    /**
-     * @param {Quat | number} q
-     * @param {number} y
-     * @param {number} z
-     * @param {number} w
-     */
-    add(q: Quat | number, y?: number, z?: number, w?: number) {
-        if (y !== undefined) {
-            // @ts-ignore
-            this.x += q;
-            // @ts-ignore
-            this.y += y;
-            // @ts-ignore
-            this.z += z;
-            // @ts-ignore
-            this.w += w;
-        } else {
-            // @ts-ignore
-            this.x += q.x;
-            // @ts-ignore
-            this.y += q.y;
-            // @ts-ignore
-            this.z += q.z;
-            // @ts-ignore
-            this.w += q.w;
-        }
+    add(q: Quat) {
+        this.x += q.x;
+        this.y += q.y;
+        this.z += q.z;
+        this.w += q.w;
+        return this;
+    }
+    add_n(x: number, y: number, z: number, w: number) {
+        this.x += x;
+        this.y += y;
+        this.z += z;
+        this.w += w;
         return this;
     }
 
-    /**
-     * @param {Quat | number} q
-     * @param {number} y
-     * @param {number} z
-     * @param {number} w
-     */
-    subtract(q: Quat | number, y: number, z: number, w: number) {
-        if (y !== undefined) {
-            // @ts-ignore
-            this.x -= q;
-            this.y -= y;
-            this.z -= z;
-            this.w -= w;
-        } else {
-            // @ts-ignore
-            this.x -= q.x;
-            // @ts-ignore
-            this.y -= q.y;
-            // @ts-ignore
-            this.z -= q.z;
-            // @ts-ignore
-            this.w -= q.w;
-        }
+    subtract(q: Quat) {
+        this.x -= q.x;
+        this.y -= q.y;
+        this.z -= q.z;
+        this.w -= q.w;
+        return this;
+    }
+    subtract_n(x: number, y: number, z: number, w: number) {
+        this.x -= x;
+        this.y -= y;
+        this.z -= z;
+        this.w -= w;
         return this;
     }
 
-    /**
-     * @param {Quat | number} q
-     * @param {number} y
-     * @param {number} z
-     * @param {number} w
-     */
-    multiply(q: Quat | number, y: number, z: number, w: number) {
-        if (y !== undefined) {
-            // @ts-ignore
-            this.x *= q;
-            this.y *= y;
-            this.z *= z;
-            this.w *= w;
-        } else {
-            // @ts-ignore
-            this.x *= q.x;
-            // @ts-ignore
-            this.y *= q.y;
-            // @ts-ignore
-            this.z *= q.z;
-            // @ts-ignore
-            this.w *= q.w;
-        }
+    multiply(q: Quat) {
+        this.x *= q.x;
+        this.y *= q.y;
+        this.z *= q.z;
+        this.w *= q.w;
+        return this;
+    }
+    multiply_n(x: number, y: number, z: number, w: number) {
+        this.x *= x;
+        this.y *= y;
+        this.z *= z;
+        this.w *= w;
         return this;
     }
 
-    /**
-     * @param {Quat | number} q
-     * @param {number} y
-     * @param {number} z
-     * @param {number} w
-     */
-    divide(q: Quat | number, y: number, z: number, w: number) {
-        if (y !== undefined) {
-            // @ts-ignore
-            this.x /= q;
-            this.y /= y;
-            this.z /= z;
-            this.w /= w;
-        } else {
-            // @ts-ignore
-            this.x /= q.x;
-            // @ts-ignore
-            this.y /= q.y;
-            // @ts-ignore
-            this.z /= q.z;
-            // @ts-ignore
-            this.w /= q.w;
-        }
+    divide(q: Quat) {
+        this.x /= q.x;
+        this.y /= q.y;
+        this.z /= q.z;
+        this.w /= q.w;
         return this;
+    }
+    divide_n(x: number, y: number, z: number, w: number) {
+        this.x /= x;
+        this.y /= y;
+        this.z /= z;
+        this.w /= w;
+        return this;
+    }
+
+    static new(): Quat {
+        let b = quat_pool.pop();
+        if (!b) b = new Quat;
+        return b.set(0, 0, 0, 1);
+    }
+
+    static free(obj: Quat) {
+        if (obj && quat_pool.length < 2020) {
+            quat_pool.push(obj);
+        }
+        return Quat;
     }
 }
+const quat_pool: Quat[] = [];
 
-/** @type {Basis[]} */
-const basis_pool: Basis[] = [];
 
 export class Basis {
-    static create() {
-        let b = basis_pool.pop();
-        if (!b) b = new Basis;
-        return b.set(
-            1, 0, 0,
-            0, 1, 0,
-            0, 0, 1
-        );
-    }
-
-    /**
-     * @param {Basis} obj
-     */
-    static free(obj: Basis) {
-        if (obj && basis_pool.length < 2020) {
-            basis_pool.push(obj);
-        }
-        return Basis;
-    }
-
     elements = [
         new Vector3(1, 0, 0),
         new Vector3(0, 1, 0),
@@ -267,21 +186,17 @@ export class Basis {
             this.elements[2].exact_equals(other.elements[2])
     }
 
-    /**
-     * @param {number} xx
-     * @param {number} xy
-     * @param {number} xz
-     * @param {number} yx
-     * @param {number} yy
-     * @param {number} yz
-     * @param {number} zx
-     * @param {number} zy
-     * @param {number} zz
-     */
     set(xx: number, xy: number, xz: number, yx: number, yy: number, yz: number, zx: number, zy: number, zz: number) {
         this.elements[0].set(xx, xy, xz);
         this.elements[1].set(yx, yy, yz);
         this.elements[2].set(zx, zy, zz);
+        return this;
+    }
+
+    identity() {
+        this.elements[0].set(1, 0, 0);
+        this.elements[1].set(0, 1, 0);
+        this.elements[2].set(0, 0, 1);
         return this;
     }
 
@@ -311,33 +226,26 @@ export class Basis {
         this.rotate_quat(p_quat);
     }
 
-    /**
-     * @param {Vector3Like} p_euler
-     */
     set_euler(p_euler: Vector3Like) {
         let c = 0.0, s = 0.0;
 
         c = Math.cos(p_euler.x);
         s = Math.sin(p_euler.x);
-        let xmat = Basis.create().set(1.0, 0.0, 0.0, 0.0, c, -s, 0.0, s, c);
+        let xmat = _i_set_euler_basis_1.set(1.0, 0.0, 0.0, 0.0, c, -s, 0.0, s, c);
 
         c = Math.cos(p_euler.y);
         s = Math.sin(p_euler.y);
-        let ymat = Basis.create().set(c, 0.0, s, 0.0, 1.0, 0.0, -s, 0.0, c);
+        let ymat = _i_set_euler_basis_2.set(c, 0.0, s, 0.0, 1.0, 0.0, -s, 0.0, c);
 
         c = Math.cos(p_euler.z);
         s = Math.sin(p_euler.z);
-        let zmat = Basis.create().set(c, -s, 0.0, s, c, 0.0, 0.0, 0.0, 1.0);
+        let zmat = _i_set_euler_basis_3.set(c, -s, 0.0, s, c, 0.0, 0.0, 0.0, 1.0);
 
         return this.copy(ymat).append(xmat).append(zmat);
     }
 
-    /**
-     * @param {Vector3Like} p_axis
-     * @param {number} p_phi
-     */
     set_axis_angle(p_axis: Vector3Like, p_phi: number) {
-        let axis_sq = Vector3.create(
+        let axis_sq = _i_set_axis_angle_vec3.set(
             p_axis.x * p_axis.x,
             p_axis.y * p_axis.y,
             p_axis.z * p_axis.z
@@ -368,15 +276,13 @@ export class Basis {
         return this;
     }
 
-    /**
-     * @param {number} p_axis
-     * @returns new Vector3.
-     */
-    get_axis(p_axis: number) {
+    get_axis(p_axis: number, r_out?: Vector3) {
+        if (!r_out) r_out = Vector3.new();
         switch (p_axis) {
-            case 0: return Vector3.create(this.elements[0].x, this.elements[1].x, this.elements[2].x);
-            case 1: return Vector3.create(this.elements[0].y, this.elements[1].y, this.elements[2].y);
-            case 2: return Vector3.create(this.elements[0].z, this.elements[1].z, this.elements[2].z);
+            case 0: return r_out.set(this.elements[0].x, this.elements[1].x, this.elements[2].x);
+            case 1: return r_out.set(this.elements[0].y, this.elements[1].y, this.elements[2].y);
+            case 2: return r_out.set(this.elements[0].z, this.elements[1].z, this.elements[2].z);
+            default: return r_out.set(0, 0, 0);
         }
     }
 
@@ -429,7 +335,7 @@ export class Basis {
     }
 
     clone() {
-        return Basis.create().copy(this);
+        return Basis.new().copy(this);
     }
 
     /**
@@ -443,32 +349,27 @@ export class Basis {
         )
     }
 
-    /**
-     * @returns new Vector3
-     */
-    get_scale() {
+    get_scale(r_out?: Vector3) {
+        if (!r_out) r_out = Vector3.new();
         let det = this.determinant();
         let det_sign = det < 0 ? -1 : 1;
-        return Vector3.create(
+        return r_out.set(
             Math.hypot(this.elements[0].x, this.elements[1].x, this.elements[2].x),
             Math.hypot(this.elements[0].y, this.elements[1].y, this.elements[2].y),
             Math.hypot(this.elements[0].z, this.elements[1].z, this.elements[2].z)
         ).scale(det_sign);
     }
 
-    /**
-     * @returns new Vector3
-     */
-    get_rotation() {
-        let m = this.clone().orthonormalize();
+    get_rotation(r_out?: Vector3) {
+        let m = _i_get_rotation_basis.copy(this).orthonormalize();
         let det = m.determinant();
         if (det < 0) {
-            let s = Vector3.create(-1, -1, -1);
+            let s = Vector3.new(-1, -1, -1);
             m.scale(s);
             Vector3.free(s);
         }
-
-        return m.get_euler();
+        m.get_euler(r_out);
+        return r_out;
     }
 
     /**
@@ -491,9 +392,9 @@ export class Basis {
     }
 
     orthonormalize() {
-        let x = this.get_axis(0);
-        let y = this.get_axis(1);
-        let z = this.get_axis(2);
+        let x = this.get_axis(0, _i_orthonormalize_vec3_1);
+        let y = this.get_axis(1, _i_orthonormalize_vec3_2);
+        let z = this.get_axis(2, _i_orthonormalize_vec3_3);
 
         x.normalize();
         let x_dot_y = x.dot(y);
@@ -515,10 +416,6 @@ export class Basis {
         this.set_axis(0, x);
         this.set_axis(1, y);
         this.set_axis(2, z);
-
-        Vector3.free(x);
-        Vector3.free(y);
-        Vector3.free(z);
 
         return this;
     }
@@ -575,9 +472,8 @@ export class Basis {
      * @param {number} p_phi
      */
     rotate(p_axis: Vector3Like, p_phi: number) {
-        let b = Basis.create().set_axis_angle(p_axis, p_phi).append(this);
+        let b = _i_rotate_basis.set_axis_angle(p_axis, p_phi).append(this);
         this.copy(b);
-        Basis.free(b);
         return this;
     }
 
@@ -585,9 +481,8 @@ export class Basis {
      * @param {Vector3Like} p_euler
      */
     rotate_euler(p_euler: Vector3Like) {
-        let b = Basis.create().set_euler(p_euler).append(this);
+        let b = _i_rotate_euler_basis.set_euler(p_euler).append(this);
         this.copy(b);
-        Basis.free(b);
         return this;
     }
 
@@ -595,17 +490,13 @@ export class Basis {
      * @param {Quat} p_quat
      */
     rotate_quat(p_quat: Quat) {
-        let b = Basis.create().set_quat(p_quat).append(this);
+        let b = _i_rotate_quat_basis.set_quat(p_quat).append(this);
         this.copy(b);
-        Basis.free(b);
         return this;
     }
 
-    /**
-     * @returns new Vector3
-     */
-    get_euler() {
-        let euler = Vector3.create();
+    get_euler(r_out?: Vector3) {
+        let euler = r_out || Vector3.new();
         let m12 = this.elements[1].z;
 
         if (m12 < (1 - CMP_EPSILON)) {
@@ -633,11 +524,7 @@ export class Basis {
         return euler;
     }
 
-    /**
-     * @returns new Quat
-     */
-    get_quat() {
-        /** @type {number[][]} */
+    get_quat(r_out?: Quat) {
         let m: number[][] = [
             [this.elements[0].x, this.elements[0].y, this.elements[0].z],
             [this.elements[1].x, this.elements[1].y, this.elements[1].z],
@@ -669,19 +556,16 @@ export class Basis {
             temp[j] = (m[j][i] - m[i][j]) * s;
             temp[k] = (m[k][i] - m[i][k]) * s;
         }
-        return Quat.create().set(temp[0], temp[1], temp[2], temp[3]);
+        return (r_out || Quat.new()).set(temp[0], temp[1], temp[2], temp[3]);
     }
 
-    /**
-     * returns new Quat
-     */
-    get_rotation_quat() {
-        let m = this.clone().orthonormalize();
+    get_rotation_quat(r_out?: Quat) {
+        let m = _i_get_rotation_quat_basis.copy(this).orthonormalize();
         let det = m.determinant();
         if (det < 0) {
             m.scale({ x: -1, y: -1, z: -1 });
         }
-        return m.get_quat();
+        return m.get_quat(r_out);
     }
 
     /**
@@ -706,21 +590,16 @@ export class Basis {
         return this;
     }
 
-    /**
-     * @param {Basis} target
-     * @param {number} t
-     */
-    slerp(target: Basis, t: number) {
-        let from = this.get_quat();
-        let to = target.get_quat();
+    slerp(target: Basis, t: number, r_out?: Basis) {
+        let from = this.get_quat(_i_slerp_quat_1);
+        let to = target.get_quat(_i_slerp_quat_2);
 
-        let b = Basis.create().set_quat(from.slerp(to, t));
+        let b = r_out || Basis.new();
+
+        b.set_quat(from.slerp(to, t));
         b.elements[0].scale(lerp(this.elements[0].length(), target.elements[0].length(), t));
         b.elements[1].scale(lerp(this.elements[1].length(), target.elements[1].length(), t));
         b.elements[2].scale(lerp(this.elements[2].length(), target.elements[2].length(), t));
-
-        Quat.free(from);
-        Quat.free(to);
 
         return b;
     }
@@ -746,7 +625,7 @@ export class Basis {
     }
 
     xform(p_vector: Vector3Like, r_out?: Vector3) {
-        r_out = r_out || Vector3.create();
+        r_out = r_out || Vector3.new();
         let x = this.elements[0].dot(p_vector);
         let y = this.elements[1].dot(p_vector);
         let z = this.elements[2].dot(p_vector);
@@ -757,7 +636,7 @@ export class Basis {
     }
 
     xform_inv(p_vector: Vector3Like, r_out?: Vector3) {
-        r_out = r_out || Vector3.create();
+        r_out = r_out || Vector3.new();
         let x = this.elements[0].x * p_vector.x + this.elements[1].x * p_vector.y + this.elements[2].x * p_vector.z;
         let y = this.elements[0].y * p_vector.x + this.elements[1].y * p_vector.y + this.elements[2].y * p_vector.z;
         let z = this.elements[0].z * p_vector.x + this.elements[1].z * p_vector.y + this.elements[2].z * p_vector.z;
@@ -774,7 +653,26 @@ export class Basis {
             &&
             b.elements[2].is_equal_approx(this.elements[0], eps)
     }
+
+    static new() {
+        let b = basis_pool.pop();
+        if (!b) b = new Basis;
+        return b.set(
+            1, 0, 0,
+            0, 1, 0,
+            0, 0, 1
+        );
+    }
+
+    static free(obj: Basis) {
+        if (obj && basis_pool.length < 2020) {
+            basis_pool.push(obj);
+        }
+        return Basis;
+    }
 }
+const basis_pool: Basis[] = [];
+
 
 /**
  * @param {number[][]} elements
@@ -786,3 +684,26 @@ export class Basis {
 function cofac(elements: number[][], row1: number, col1: number, row2: number, col2: number) {
     return elements[row1][col1] * elements[row2][col2] - elements[row1][col2] * elements[row2][col1];
 }
+
+const _i_get_rotation_basis = new Basis;
+
+const _i_get_rotation_quat_basis = new Basis;
+
+const _i_set_euler_basis_1 = new Basis;
+const _i_set_euler_basis_2 = new Basis;
+const _i_set_euler_basis_3 = new Basis;
+
+const _i_set_axis_angle_vec3 = new Vector3;
+
+const _i_orthonormalize_vec3_1 = new Vector3;
+const _i_orthonormalize_vec3_2 = new Vector3;
+const _i_orthonormalize_vec3_3 = new Vector3;
+
+const _i_rotate_basis = new Basis;
+
+const _i_rotate_euler_basis = new Basis;
+
+const _i_rotate_quat_basis = new Basis;
+
+const _i_slerp_quat_1 = new Quat;
+const _i_slerp_quat_2 = new Quat;

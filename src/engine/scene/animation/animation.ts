@@ -87,7 +87,7 @@ export class ValueTrack extends Track {
             this.values.push(key);
         }
 
-        let t = Transform.create();
+        t.identity();
 
         if (data.value_type === 'Transform') {
             this.prop_type = PROP_TYPE_TRANSFORM;
@@ -158,9 +158,7 @@ export class ValueTrack extends Track {
             }
         }
 
-        Transform.free(t);
-
-        // Fix placeholder keys (Godot uses a placeholder key if it has same value of previous one)
+        // @Incomplete fix placeholder keys (Godot uses a placeholder key if it has same value of previous one)
         // Let's replace the placeholder key with same value of previous one, so it can be
         // easily animated without further more calculation and error check.
         let fixed = false;
@@ -505,3 +503,5 @@ export class Animation {
     }
 }
 res_class_map['Animation'] = Animation
+
+const t = new Transform;

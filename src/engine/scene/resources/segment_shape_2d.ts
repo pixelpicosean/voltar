@@ -57,10 +57,10 @@ export class SegmentShape2D extends Shape2D {
     }
 
     get_rect() {
-        return Rect2.create(this.a.x, this.a.y).expand_to(this.b);
+        return Rect2.new(this.a.x, this.a.y).expand_to(this.b);
     }
     _update_shape() {
-        const r = Rect2.create(this.a.x, this.a.y, this.b.x, this.b.y);
+        const r = Rect2.new(this.a.x, this.a.y, this.b.x, this.b.y);
         this.get_rid().set_data(r);
         Rect2.free(r);
     }
@@ -100,8 +100,8 @@ export class RayShape2D extends Shape2D {
     }
 
     get_rect() {
-        const rect = Rect2.create();
-        const vec = Vector2.create(0, this.length);
+        const rect = Rect2.new();
+        const vec = Vector2.new(0, this.length);
         rect.expand_to(vec).grow_by(0.707 * 4);
         Vector2.free(vec);
         return rect;

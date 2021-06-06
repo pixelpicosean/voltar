@@ -281,7 +281,7 @@ export class CanvasItem extends Node {
      * @param {Vector2Like} p_scale
      */
     draw_set_transform(p_offset: Vector2Like, p_rot: number, p_scale: Vector2Like) {
-        const xform = Transform2D.create();
+        const xform = Transform2D.new();
         const cr = Math.cos(p_rot);
         const sr = Math.sin(p_rot);
         xform.a = cr;
@@ -379,11 +379,8 @@ export class CanvasItem extends Node {
         return (parent.is_canvas_item) ? (parent as CanvasItem) : null;
     }
 
-    /**
-     * return new Transform2D
-     */
-    get_transform() {
-        return Transform2D.create();
+    get_transform(r_out?: Transform2D) {
+        return (r_out || Transform2D.new()).identity();
     }
 
     get_global_transform() {
@@ -403,16 +400,15 @@ export class CanvasItem extends Node {
         return this.global_transform;
     }
 
-    /**
-     * returns new Transform2D
-     */
-    get_global_transform_with_canvas() {
+    get_global_transform_with_canvas(r_out?: Transform2D) {
+        if (!r_out) r_out = Transform2D.new();
+
         if (this.canvas_layer) {
-            return this.canvas_layer.transform.clone().append(this.get_global_transform());
+            return r_out.copy(this.canvas_layer.transform).append(this.get_global_transform());
         } else if (this.is_inside_tree()) {
-            return this.get_viewport().canvas_transform.clone().append(this.get_global_transform());
+            return r_out.copy(this.get_viewport().canvas_transform).append(this.get_global_transform());
         } else {
-            return this.get_global_transform();
+            return r_out.copy(this.get_global_transform());
         }
     }
 
@@ -473,8 +469,8 @@ export class CanvasItem extends Node {
         }
     }
 
-    get_anchorable_rect() {
-        return Rect2.create();
+    get_anchorable_rect(r_out?: Rect2) {
+        return (r_out || Rect2.new()).set(0, 0, 0, 0);
     }
 
     get_global_mouse_position() {

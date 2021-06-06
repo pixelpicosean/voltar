@@ -12,8 +12,6 @@ import { get_extname } from 'engine/utils/string';
 
 import { VSG } from 'engine/servers/visual/visual_server_globals';
 
-import { default_font_name, Theme } from 'engine/scene/resources/theme';
-import { registered_bitmap_fonts } from 'engine/scene/resources/font';
 import { PackedScene } from 'engine/scene/resources/packed_scene';
 import { ImageTexture } from 'engine/scene/resources/texture';
 

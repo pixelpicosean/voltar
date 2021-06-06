@@ -16,12 +16,12 @@ const VIEWPORT_UPDATE_ONCE = 1; //then goes to disabled, must be manually update
 const VIEWPORT_UPDATE_WHEN_VISIBLE = 2; // default
 const VIEWPORT_UPDATE_ALWAYS = 3;
 
-const VIEWPORT_RENDER_INFO_OBJECTS_IN_FRAME = 0;
-const VIEWPORT_RENDER_INFO_VERTICES_IN_FRAME = 1;
-const VIEWPORT_RENDER_INFO_MATERIAL_CHANGES_IN_FRAME = 2;
-const VIEWPORT_RENDER_INFO_SHADER_CHANGES_IN_FRAME = 3;
-const VIEWPORT_RENDER_INFO_SURFACE_CHANGES_IN_FRAME = 4;
-const VIEWPORT_RENDER_INFO_DRAW_CALLS_IN_FRAME = 5;
+// const VIEWPORT_RENDER_INFO_OBJECTS_IN_FRAME = 0;
+// const VIEWPORT_RENDER_INFO_VERTICES_IN_FRAME = 1;
+// const VIEWPORT_RENDER_INFO_MATERIAL_CHANGES_IN_FRAME = 2;
+// const VIEWPORT_RENDER_INFO_SHADER_CHANGES_IN_FRAME = 3;
+// const VIEWPORT_RENDER_INFO_SURFACE_CHANGES_IN_FRAME = 4;
+// const VIEWPORT_RENDER_INFO_DRAW_CALLS_IN_FRAME = 5;
 const VIEWPORT_RENDER_INFO_MAX = 6;
 
 const VIEWPORT_CLEAR_ALWAYS = 0;
@@ -371,8 +371,8 @@ export class VisualServerViewport {
      * @param {CanvasData} p_canvas_data
      * @param {Rect2} p_rect
      */
-    _canvas_get_transform(p_viewport: Viewport_t, p_canvas: Canvas, p_canvas_data: CanvasData, p_rect: Rect2) {
-        const xf = p_viewport.global_transform.clone();
+    _canvas_get_transform(p_viewport: Viewport_t, p_canvas: Canvas, p_canvas_data: CanvasData, p_rect: Rect2, r_out?: Transform2D) {
+        const xf = (r_out || Transform2D.new()).copy(p_viewport.global_transform);
 
         let scale = 1;
         if (p_viewport.canvas_map.has(p_canvas.parent)) {
@@ -383,21 +383,16 @@ export class VisualServerViewport {
         xf.append(p_canvas_data.transform);
 
         if (scale !== 1 && !VSG.canvas.disable_scale) {
-            const pivot = Vector2.create(p_rect.width * 0.5, p_rect.height * 0.5);
-            const xfpivot = Transform2D.create();
+            const pivot = _i_vec2_1.set(p_rect.width * 0.5, p_rect.height * 0.5);
+            const xfpivot = _i_transform2d_1.identity();
             xfpivot.set_origin(pivot);
-            const xfscale = Transform2D.create();
+            const xfscale = _i_transform2d_2.identity();
             xfscale.scale(scale, scale);
 
-            const inv = xfpivot.clone().affine_inverse();
+            const inv = _i_transform2d_3.copy(xfpivot).affine_inverse();
             xf.copy(inv.append(xf));
             xf.copy(xfscale.append(xf));
             xf.copy(xfpivot.append(xf));
-
-            Vector2.free(pivot);
-            Transform2D.free(xfpivot);
-            Transform2D.free(xfscale);
-            Transform2D.free(inv);
         }
 
         return xf;
@@ -438,9 +433,8 @@ export class VisualServerViewport {
 
             let map_list = [...p_viewport.canvas_map.entries()].sort(canvas_sort);
             for (let [canvas, c] of map_list) {
-                let xform = this._canvas_get_transform(p_viewport, canvas, c, clip_rect);
+                let xform = this._canvas_get_transform(p_viewport, canvas, c, clip_rect, _i_transform2d_4);
                 VSG.canvas.render_canvas(canvas, xform, clip_rect, c.layer);
-                Transform2D.free(xform);
             }
         }
     }
@@ -453,3 +447,9 @@ export class VisualServerViewport {
 function canvas_sort(a: [Canvas, CanvasData], b: [Canvas, CanvasData]) {
     return (a[1].layer + a[1].sublayer) - (b[1].layer + b[1].sublayer);
 }
+
+const _i_vec2_1 = new Vector2;
+const _i_transform2d_1 = new Transform2D;
+const _i_transform2d_2 = new Transform2D;
+const _i_transform2d_3 = new Transform2D;
+const _i_transform2d_4 = new Transform2D;

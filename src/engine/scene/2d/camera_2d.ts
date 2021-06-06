@@ -283,10 +283,10 @@ export class Camera2D extends Node2D {
     }
 
     align() {
-        const rect = this.viewport.get_visible_rect();
-        const screen_size = Vector2.create(rect.width, rect.height);
+        const rect = this.viewport.get_visible_rect(_i_align_Rect2_1);
+        const screen_size = _i_align_Vector2_1.set(rect.width, rect.height);
 
-        const current_camera_pos = this.get_global_transform().get_origin();
+        const current_camera_pos = this.get_global_transform().get_origin(_i_align_Vector2_2);
         if (this.anchor_mode === ANCHOR_MODE_DRAG_CENTER) {
             if (this.offset_h < 0) {
                 this.camera_pos.x = current_camera_pos.x + screen_size.x * 0.5 * this.drag_margin[MARGIN_RIGHT] * this.offset_h;
@@ -301,7 +301,6 @@ export class Camera2D extends Node2D {
         } else if (this.anchor_mode === ANCHOR_MODE_FIXED_TOP_LEFT) {
             this.camera_pos.copy(current_camera_pos);
         }
-        Vector2.free(current_camera_pos);
 
         this._update_scroll();
     }
@@ -351,20 +350,18 @@ export class Camera2D extends Node2D {
         this.offset_h = value;
         this.h_offset_changed = true;
 
-        let old_smoothed_camera_pos = this.smoothed_camera_pos.clone();
+        let old_smoothed_camera_pos = _i_set_offset_h_Vector2_1.copy(this.smoothed_camera_pos);
         this._update_scroll();
         this.smoothed_camera_pos.copy(old_smoothed_camera_pos);
-        Vector2.free(old_smoothed_camera_pos);
     }
 
     set_offset_v(value: number) {
         this.offset_v = value;
         this.v_offset_changed = true;
 
-        let old_smoothed_camera_pos = this.smoothed_camera_pos.clone();
+        let old_smoothed_camera_pos = _i_set_offset_v_Vector2_1.copy(this.smoothed_camera_pos);
         this._update_scroll();
         this.smoothed_camera_pos.copy(old_smoothed_camera_pos);
-        Vector2.free(old_smoothed_camera_pos);
     }
 
     /**
@@ -380,10 +377,9 @@ export class Camera2D extends Node2D {
     set_offset_n(x: number, y: number) {
         this.offset.set(x, y);
 
-        let old_smoothed_camera_pos = this.smoothed_camera_pos.clone();
+        let old_smoothed_camera_pos = _i_set_offset_n_Vector2_1.copy(this.smoothed_camera_pos);
         this._update_scroll();
         this.smoothed_camera_pos.copy(old_smoothed_camera_pos);
-        Vector2.free(old_smoothed_camera_pos);
     }
 
     /**
@@ -400,10 +396,9 @@ export class Camera2D extends Node2D {
     set_rotating(p_rotating: boolean) {
         this.rotating = p_rotating;
 
-        let old_smoothed_camera_pos = this.smoothed_camera_pos.clone();
+        let old_smoothed_camera_pos = _i_set_rotating_Vector2_1.copy(this.smoothed_camera_pos);
         this._update_scroll();
         this.smoothed_camera_pos.copy(old_smoothed_camera_pos);
-        Vector2.free(old_smoothed_camera_pos);
     }
 
     /**
@@ -450,10 +445,9 @@ export class Camera2D extends Node2D {
      */
     set_zoom_n(x: number, y: number) {
         this.zoom.set(x, y);
-        let old_smoothed_camera_pos = this.smoothed_camera_pos.clone();
+        let old_smoothed_camera_pos = _i_set_zoom_n_Vector2_1.copy(this.smoothed_camera_pos);
         this._update_scroll();
         this.smoothed_camera_pos.copy(old_smoothed_camera_pos);
-        Vector2.free(old_smoothed_camera_pos);
     }
 
     /* private */
@@ -468,18 +462,14 @@ export class Camera2D extends Node2D {
         }
 
         if (this.current) {
-            const xform = this.get_camera_transform();
+            const xform = this.get_camera_transform(_i_update_scroll_Transform2D_1);
             this.viewport.set_canvas_transform(xform);
-            Transform2D.free(xform);
 
-            const rect = this.viewport.get_visible_rect();
-            const screen_size = Vector2.create(rect.width, rect.height);
-            const screen_offset = (this.anchor_mode === ANCHOR_MODE_DRAG_CENTER ? (screen_size.clone().scale(0.5)) : Vector2.create(0, 0));
+            const rect = this.viewport.get_visible_rect(_i_update_scroll_Rect2_1);
+            const screen_size = _i_update_scroll_Vector2_1.set(rect.width, rect.height);
+            const screen_offset = (this.anchor_mode === ANCHOR_MODE_DRAG_CENTER ? (_i_update_scroll_Vector2_2.copy(screen_size).scale(0.5)) : _i_update_scroll_Vector2_2.set(0, 0));
 
             this.get_tree().call_group_flags(GROUP_CALL_REALTIME, this.group_name, '_camera_moved', xform, screen_offset);
-
-            Vector2.free(screen_size);
-            Vector2.free(screen_offset);
         }
     }
     _update_process_mode() {
@@ -503,16 +493,19 @@ export class Camera2D extends Node2D {
         }
     }
 
-    get_camera_transform() {
+    get_camera_transform(r_out?: Transform2D) {
+        if (!r_out) r_out = Transform2D.new();
+        else r_out.identity();
+
         if (!this.get_tree()) {
-            return Transform2D.create();
+            return r_out;
         }
 
-        const rect = this.viewport.get_visible_rect();
-        const screen_size = Vector2.create(rect.width, rect.height);
+        const rect = this.viewport.get_visible_rect(_i_get_camera_transform_Rect2_1);
+        const screen_size = _i_get_camera_transform_Vector2_1.set(rect.width, rect.height);
 
-        const new_camera_pos = this.get_global_transform().get_origin();
-        const ret_camera_pos = Vector2.create();
+        const new_camera_pos = this.get_global_transform().get_origin(_i_get_camera_transform_Vector2_2);
+        const ret_camera_pos = _i_get_camera_transform_Vector2_3.set(0, 0);
 
         if (!this.first) {
             if (this.anchor_mode === ANCHOR_MODE_DRAG_CENTER) {
@@ -549,8 +542,8 @@ export class Camera2D extends Node2D {
                 this.camera_pos.copy(new_camera_pos);
             }
 
-            const screen_offset = (this.anchor_mode === ANCHOR_MODE_DRAG_CENTER ? (screen_size.clone().scale(0.5).multiply(this.zoom)) : Vector2.create(0, 0));
-            const screen_rect = Rect2.create(
+            const screen_offset = (this.anchor_mode === ANCHOR_MODE_DRAG_CENTER ? (screen_size.clone().scale(0.5).multiply(this.zoom)) : Vector2.new(0, 0));
+            const screen_rect = _i_get_camera_transform_Rect2_2.set(
                 -screen_offset.x + this.camera_pos.x, -screen_offset.y + this.camera_pos.y,
                 screen_size.x * this.zoom.x, screen_size.y * this.zoom.y
             );
@@ -575,9 +568,8 @@ export class Camera2D extends Node2D {
 
             if (this.smoothing_enabled) {
                 const c = this.smoothing_speed * (this.process_mode === CAMERA2D_PROCESS_PHYSICS ? this.get_physics_process_delta_time() : this.get_process_delta_time());
-                const pos = this.camera_pos.clone().subtract(this.smoothed_camera_pos).scale(c)
+                const pos = _i_get_camera_transform_Vector2_4.copy(this.camera_pos).subtract(this.smoothed_camera_pos).scale(c)
                 this.smoothed_camera_pos.add(pos);
-                Vector2.free(pos);
                 ret_camera_pos.copy(this.smoothed_camera_pos);
             } else {
                 ret_camera_pos.copy(this.smoothed_camera_pos.copy(this.camera_pos));
@@ -587,14 +579,14 @@ export class Camera2D extends Node2D {
             this.first = false;
         }
 
-        const screen_offset = (this.anchor_mode === ANCHOR_MODE_DRAG_CENTER ? (screen_size.clone().scale(0.5).multiply(this.zoom)) : Vector2.create(0, 0));
+        const screen_offset = (this.anchor_mode === ANCHOR_MODE_DRAG_CENTER ? (_i_get_camera_transform_Vector2_5.copy(screen_size).scale(0.5).multiply(this.zoom)) : _i_get_camera_transform_Vector2_5.set(0, 0));
 
         let angle = this.get_global_transform().get_rotation();
         if (this.rotating) {
             screen_offset.rotate(angle);
         }
 
-        const screen_rect = Rect2.create(
+        const screen_rect = _i_get_camera_transform_Rect2_3.set(
             -screen_offset.x + ret_camera_pos.x, -screen_offset.y + ret_camera_pos.y,
             screen_size.x * this.zoom.x, screen_size.y * this.zoom.y
         );
@@ -621,7 +613,7 @@ export class Camera2D extends Node2D {
             screen_rect.y + screen_rect.height * 0.5
         );
 
-        const xform = Transform2D.create();
+        const xform = r_out;
         if (this.rotating) {
             xform.set_rotation(angle);
         }
@@ -629,12 +621,33 @@ export class Camera2D extends Node2D {
         xform.tx = screen_rect.x;
         xform.ty = screen_rect.y;
 
-        Rect2.free(screen_rect);
-        Vector2.free(screen_offset);
-        Vector2.free(ret_camera_pos);
-        Vector2.free(screen_size);
-
         return xform.affine_inverse();
     }
 }
 node_class_map['Camera2D'] = GDCLASS(Camera2D, Node2D)
+
+const _i_align_Vector2_1 = new Vector2;
+const _i_align_Vector2_2 = new Vector2;
+const _i_align_Rect2_1 = new Rect2;
+
+const _i_set_offset_h_Vector2_1 = new Vector2;
+const _i_set_offset_v_Vector2_1 = new Vector2;
+const _i_set_offset_n_Vector2_1 = new Vector2;
+
+const _i_set_rotating_Vector2_1 = new Vector2;
+
+const _i_set_zoom_n_Vector2_1 = new Vector2;
+
+const _i_update_scroll_Transform2D_1 = new Transform2D;
+const _i_update_scroll_Rect2_1 = new Rect2;
+const _i_update_scroll_Vector2_1 = new Vector2;
+const _i_update_scroll_Vector2_2 = new Vector2;
+
+const _i_get_camera_transform_Vector2_1 = new Vector2;
+const _i_get_camera_transform_Vector2_2 = new Vector2;
+const _i_get_camera_transform_Vector2_3 = new Vector2;
+const _i_get_camera_transform_Vector2_4 = new Vector2;
+const _i_get_camera_transform_Vector2_5 = new Vector2;
+const _i_get_camera_transform_Rect2_1 = new Rect2;
+const _i_get_camera_transform_Rect2_2 = new Rect2;
+const _i_get_camera_transform_Rect2_3 = new Rect2;

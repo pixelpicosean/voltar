@@ -107,7 +107,7 @@ export class Polygon2D extends Node2D {
                 /** @type {number[]} */
                 let uvs: number[] = [];
                 if (this.texture) {
-                    let texmat = Transform2D.create();
+                    let texmat = Transform2D.new();
 
                     texmat.set_origin(this.texture_offset);
                     texmat.set_rotation_and_scale(this.texture_rotation, this.texture_scale);
@@ -119,7 +119,7 @@ export class Polygon2D extends Node2D {
                     let tex_uv_w = tex_uvs[2] - tex_uvs[0];
                     let tex_uv_h = tex_uvs[3] - tex_uvs[1];
 
-                    let vec = Vector2.create();
+                    let vec = Vector2.new();
                     if (this.uv.length === points.length) {
                         for (let i = 0; i < len * 2; i += 2) {
                             texmat.xform(vec.set(this.uv[i+0], this.uv[i+1]), vec);

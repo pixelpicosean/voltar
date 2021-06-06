@@ -110,7 +110,7 @@ export class PrimitiveMesh extends Mesh {
 
         let v = data.vertices;
         let pc = Math.floor(v.length / VERT_LENGTH);
-        let vec = Vector3.create();
+        let vec = _i_update_vec3;
         for (let i = 0; i < pc; i++) {
             if (i === 0) {
                 this.aabb.position.set(v[0], v[1], v[2]);
@@ -122,9 +122,8 @@ export class PrimitiveMesh extends Mesh {
                 ));
             }
         }
-        Vector3.free(vec);
 
-        // TODO: flip faces
+        // @Incomplete: support flip faces
         if (this.flip_faces) { }
 
         VSG.storage.mesh_clear(this.mesh);
@@ -133,7 +132,7 @@ export class PrimitiveMesh extends Mesh {
 
         this.pending_request = false;
 
-        // FIXME: this.clear_cache();
+        // @Incomplete: this.clear_cache();
     }
 
     /**
@@ -291,13 +290,13 @@ export class PlaneMesh extends PrimitiveMesh {
             (this.subdivide_depth + 2) * (this.subdivide_width + 2)
         ));
         const indices = new Uint16Array(
-            ((this.subdivide_depth + 2) * (this.subdivide_width + 2) - 1) * 2
+            (this.subdivide_depth + 1) * (this.subdivide_width + 1) * 6
         );
 
         let i = 0, j = 0, prevrow = 0, thisrow = 0, point = 0, i_count = 0;
         let x = 0, z = 0;
 
-        let start_pos = this.size.clone().scale(-0.5);
+        let start_pos = _i_create_mesh_data_vec2.copy(this.size).scale(-0.5);
 
         z = start_pos.y;
         thisrow = point;
@@ -340,8 +339,6 @@ export class PlaneMesh extends PrimitiveMesh {
             prevrow = thisrow;
             thisrow = point;
         }
-
-        Vector2.free(start_pos);
 
         /** @type {MeshData} */
         const mesh_data: MeshData = {
@@ -444,7 +441,7 @@ export class CubeMesh extends PrimitiveMesh {
         let onethird = 1 / 3;
         let twothirds = 2 / 3;
 
-        let start_pos = this.size.clone().scale(-0.5);
+        let start_pos = _i_create_mesh_data_vec3.copy(this.size).scale(-0.5);
 
         // front + back
         y = start_pos.y;
@@ -671,9 +668,12 @@ export class CubeMesh extends PrimitiveMesh {
             indices,
         };
 
-        Vector3.free(start_pos);
-
         return mesh_data;
     }
 }
 res_class_map["CubeMesh"] = CubeMesh;
+
+const _i_update_vec3 = new Vector3;
+
+const _i_create_mesh_data_vec2 = new Vector2;
+const _i_create_mesh_data_vec3 = new Vector3;

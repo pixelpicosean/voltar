@@ -79,7 +79,7 @@ export class Texture extends Resource {
      * @param {boolean} [p_transpose]
      */
     draw(p_canvas_item: Item, p_pos: Vector2Like, p_modulate: ColorLike = WHITE, p_transpose: boolean = false) {
-        const rect = Rect2.create(p_pos.x, p_pos.y, this.get_width(), this.get_height());
+        const rect = Rect2.new(p_pos.x, p_pos.y, this.get_width(), this.get_height());
         VSG.canvas.canvas_item_add_texture_rect(p_canvas_item, rect, this, false, p_modulate, p_transpose);
         Rect2.free(rect);
     }
@@ -137,11 +137,8 @@ export class ImageTexture extends Texture {
     get_format() {
         return this.format;
     }
-    /**
-     * returns new Vector2.
-     */
-    get_size() {
-        return Vector2.create(this.width, this.height);
+    get_size(r_out?: Vector2) {
+        return (r_out || Vector2.new()).set(this.width, this.height);
     }
 
     /**

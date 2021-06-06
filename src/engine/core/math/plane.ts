@@ -1,26 +1,7 @@
 import { Vector3, Vector3Like } from "./vector3";
 import { CMP_EPSILON } from "./math_defs";
 
-/** @type {Plane[]} */
-const pool: Plane[] = [];
-
 export class Plane {
-    static create() {
-        let obj = pool.pop();
-        if (!obj) obj = new Plane;
-        obj.set(0, 0, 0, 0);
-        return obj;
-    }
-
-    /**
-     * @param {Plane} obj
-     */
-    static free(obj: Plane) {
-        if (obj && pool.length < 2020) {
-            pool.push(obj);
-        }
-    }
-
     normal = new Vector3;
     d = 0;
 
@@ -56,7 +37,7 @@ export class Plane {
     }
 
     clone() {
-        return Plane.create().copy(this);
+        return Plane.new().copy(this);
     }
 
     normalize() {
@@ -89,7 +70,7 @@ export class Plane {
         let n1 = plane_1.normal;
         let n2 = plane_2.normal;
 
-        let denom = n0.cross(n1).dot(n2);
+        let denom = n0.cross(n1, _i_intersect_3_vec3_1).dot(n2);
 
         if (Math.abs(denom) < CMP_EPSILON) {
             return false;
@@ -97,12 +78,12 @@ export class Plane {
 
         if (result) {
             result.copy(
-                n1.cross(n2).scale(plane_0.d)
+                n1.cross(n2, _i_intersect_3_vec3_2).scale(plane_0.d)
                 .add(
-                    n2.cross(n0).scale(plane_1.d)
+                    n2.cross(n0, _i_intersect_3_vec3_3).scale(plane_1.d)
                 )
                 .add(
-                    n0.cross(n1).scale(plane_2.d)
+                    n0.cross(n1, _i_intersect_3_vec3_4).scale(plane_2.d)
                 )
             ).scale(1 / denom);
         }
@@ -116,7 +97,7 @@ export class Plane {
      * @param {Vector3} r_intersection result is saved in this vector
      */
     intersects_segment(p_begin: Vector3, p_end: Vector3, r_intersection: Vector3) {
-        let segment = p_begin.clone().subtract(p_end);
+        let segment = _i_intersects_segment_vec3.copy(p_begin).subtract(p_end);
         let den = this.normal.dot(segment);
 
         if (Math.abs(den) < CMP_EPSILON) {
@@ -140,4 +121,25 @@ export class Plane {
     is_point_over(p_point: Vector3Like) {
         return this.normal.dot(p_point) > this.d;
     }
+
+    static new() {
+        let obj = pool.pop();
+        if (!obj) obj = new Plane;
+        obj.set(0, 0, 0, 0);
+        return obj;
+    }
+
+    static free(obj: Plane) {
+        if (obj && pool.length < 2020) {
+            pool.push(obj);
+        }
+    }
 }
+const pool: Plane[] = [];
+
+const _i_intersect_3_vec3_1 = new Vector3;
+const _i_intersect_3_vec3_2 = new Vector3;
+const _i_intersect_3_vec3_3 = new Vector3;
+const _i_intersect_3_vec3_4 = new Vector3;
+
+const _i_intersects_segment_vec3 = new Vector3;

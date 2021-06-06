@@ -138,11 +138,8 @@ export class Node2D extends CanvasItem {
         this.set_transform_n(mat.a, mat.b, mat.c, mat.d, mat.tx, mat.ty);
     }
 
-    /**
-     * Returns a new Transform2D
-     */
-    get_transform() {
-        return this._transform.clone();
+    get_transform(r_out?: Transform2D) {
+        return (r_out || Transform2D.new()).copy(this._transform);
     }
 
     /**
@@ -152,9 +149,8 @@ export class Node2D extends CanvasItem {
     set_global_position_n(x: number, y: number) {
         const pi = this.get_parent_item();
         if (pi) {
-            const inv = pi.get_global_transform().clone().affine_inverse();
+            const inv = _i_set_global_position_n_transform2d.copy(pi.get_global_transform()).affine_inverse();
             this.set_position(inv.xform(this._position.set(x, y)));
-            Transform2D.free(inv);
         } else {
             this.set_position_n(x, y);
         }
@@ -205,9 +201,8 @@ export class Node2D extends CanvasItem {
     set_global_scale_n(x: number, y: number) {
         const pi = this.get_parent_item();
         if (pi) {
-            const parent_global_scale = pi.get_global_transform().get_scale();
+            const parent_global_scale = pi.get_global_transform().get_scale(_i_set_global_scale_n_vec2);
             this.set_scale_n(x / parent_global_scale.x, y / parent_global_scale.y);
-            Vector2.free(parent_global_scale);
         } else {
             this.set_scale_n(x, y);
         }
@@ -231,9 +226,7 @@ export class Node2D extends CanvasItem {
      * @param {number} ty
      */
     set_global_transform_n(a: number, b: number, c: number, d: number, tx: number, ty: number) {
-        const mat = Transform2D.create(a, b, c, d, tx, ty);
-        this.set_global_transform(mat);
-        Transform2D.free(mat);
+        this.set_global_transform(_i_set_global_transform_n_transform2d.set(a, b, c, d, tx, ty));
     }
     /**
      * @param {Transform2D} p_transform
@@ -241,9 +234,8 @@ export class Node2D extends CanvasItem {
     set_global_transform(p_transform: Transform2D) {
         const pi = this.get_parent_item();
         if (pi) {
-            const mat = pi.get_global_transform().clone().affine_inverse().append(p_transform);
+            const mat = _i_set_global_transform_transform2d.copy(pi.get_global_transform()).affine_inverse().append(p_transform);
             this.set_transform(mat);
-            Transform2D.free(mat);
         } else {
             this.set_transform(p_transform);
         }
@@ -298,30 +290,25 @@ export class Node2D extends CanvasItem {
      * @param {Vector2} p_pos
      */
     get_angle_to(p_pos: Vector2) {
-        const vec = this.to_local(p_pos).multiply(this._scale);
-        const angle = vec.angle();
-        Vector2.free(vec);
-        return angle;
+        return this.to_local(p_pos, _i_get_angle_to_vec2).multiply(this._scale).angle();
     }
-    /**
-     * return new Transform2D
-     * @param {Node} p_parent
-     * @returns {Transform2D}
-     */
-    get_relative_transform_to_parent(p_parent: Node): Transform2D {
+    get_relative_transform_to_parent(p_parent: Node, r_out?: Transform2D): Transform2D {
+        if (!r_out) r_out = Transform2D.new();
+        else r_out.identity();
+
         if (p_parent === this) {
-            return Transform2D.create();
+            return r_out;
         }
 
         let parent_2d: Node2D = this.get_parent() as Node2D;
         if (!parent_2d.is_node_2d) {
-            return Transform2D.create();
+            return r_out;
         }
 
         if (p_parent === parent_2d) {
             return this._transform;
         } else {
-            return parent_2d.get_relative_transform_to_parent(p_parent).clone().append(this._transform);
+            return r_out.copy(parent_2d.get_relative_transform_to_parent(p_parent)).append(this._transform);
         }
     }
 
@@ -357,13 +344,12 @@ export class Node2D extends CanvasItem {
      */
     move_local_x(p_delta: number, p_scaled: boolean = false) {
         const t = this._transform;
-        const m = Vector2.create(t.a, t.b);
+        const m = _i_move_local_x_vec2.set(t.a, t.b);
         if (!p_scaled) {
             m.normalize();
         }
         m.scale(p_delta);
         this.set_position_n(t.tx + m.x, t.ty + m.y);
-        Vector2.free(m);
     }
     /**
      * @param {number} p_delta
@@ -371,13 +357,12 @@ export class Node2D extends CanvasItem {
      */
     move_local_y(p_delta: number, p_scaled: boolean = false) {
         const t = this._transform;
-        const m = Vector2.create(t.c, t.d);
+        const m = _i_move_local_y_vec2.set(t.c, t.d);
         if (!p_scaled) {
             m.normalize();
         }
         m.scale(p_delta);
         this.set_position_n(t.tx + m.x, t.ty + m.y);
-        Vector2.free(m);
     }
 
     /**
@@ -390,11 +375,9 @@ export class Node2D extends CanvasItem {
     /**
      * @param {Vector2} p_global
      */
-    to_local(p_global: Vector2) {
-        const inv = this.get_global_transform().clone().affine_inverse();
-        const vec = inv.xform(p_global.clone());
-        Transform2D.free(inv);
-        return vec;
+    to_local(p_global: Vector2, r_out?: Vector2) {
+        const inv = _i_to_local_transform2d.copy(this.get_global_transform()).affine_inverse();
+        return inv.xform(p_global.clone(), r_out);
     }
     /**
      * @param {Vector2} p_global
@@ -428,3 +411,19 @@ export class Node2D extends CanvasItem {
     }
 }
 node_class_map['Node2D'] = GDCLASS(Node2D, CanvasItem)
+
+const _i_set_global_position_n_transform2d = new Transform2D;
+
+const _i_set_global_scale_n_vec2 = new Vector2;
+
+const _i_set_global_transform_n_transform2d = new Transform2D;
+
+const _i_set_global_transform_transform2d = new Transform2D;
+
+const _i_get_angle_to_vec2 = new Vector2;
+
+const _i_move_local_x_vec2 = new Vector2;
+
+const _i_move_local_y_vec2 = new Vector2;
+
+const _i_to_local_transform2d = new Transform2D;

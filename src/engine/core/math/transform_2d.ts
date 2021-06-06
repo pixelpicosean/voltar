@@ -12,34 +12,11 @@ import { Rect2 } from './rect2';
  */
 export class Transform2D {
     /**
-     * @param a - x scale
-     * @param b - x skew
-     * @param c - y skew
-     * @param d - y scale
-     * @param tx - x translation
-     * @param ty - y translation
-     */
-    static create(a: number = 1, b: number = 0, c: number = 0, d: number = 1, tx: number = 0, ty: number = 0) {
-        const m = pool.pop();
-        if (m) {
-            return m.set(a, b, c, d, tx, ty);
-        } else {
-            return new Transform2D(a, b, c, d, tx, ty);
-        }
-    }
-    static free(m: Transform2D) {
-        if (m && pool.length < 2021) {
-            pool.push(m);
-        }
-        return Transform2D;
-    }
-
-    /**
      * returns new Vector2
      */
-    get_origin(out?: Vector2) {
-        out = out || Vector2.create();
-        return out.set(this.tx, this.ty);
+    get_origin(r_out?: Vector2) {
+        if (!r_out) r_out = Vector2.new();
+        return r_out.set(this.tx, this.ty);
     }
     set_origin(value: Vector2Like) {
         this.tx = value.x;
@@ -56,47 +33,41 @@ export class Transform2D {
         return Math.atan2(this.b, this.a);
     }
     set_rotation(value: number): Transform2D {
-        const scale = this.get_scale();
         const cr = Math.cos(value);
         const sr = Math.sin(value);
         this.a = cr;
         this.b = sr;
         this.c = -sr;
         this.d = cr;
-        Vector2.free(scale);
         return this;
     }
 
-    /**
-     * returns new Vector2
-     */
-    get_scale(out?: Vector2) {
+    get_scale(r_out?: Vector2) {
+        r_out = r_out || Vector2.new();
+
         const basis_determinant = Math.sign(this.a * this.d - this.b * this.c);
-        out = out || Vector2.create();
-        out.x = Math.sqrt(this.a * this.a + this.b * this.b)
-        out.y = Math.sqrt(this.c * this.c + this.d * this.d) * basis_determinant;
-        return out;
+        r_out.x = Math.sqrt(this.a * this.a + this.b * this.b)
+        r_out.y = Math.sqrt(this.c * this.c + this.d * this.d) * basis_determinant;
+        return r_out;
     }
     set_scale(scale: Vector2Like) {
-        let vec = Vector2.create();
+        const vec = _i_set_scale_vec2.set(0, 0);
         vec.set(this.a, this.b).normalize();
         this.a = vec.x * scale.x;
         this.b = vec.y * scale.x;
         vec.set(this.c, this.d).normalize();
         this.c = vec.x * scale.y;
         this.d = vec.y * scale.y;
-        Vector2.free(vec);
         return this;
     }
     set_scale_n(x: number, y: number) {
-        let vec = Vector2.create();
+        const vec = _i_set_scale_n_vec2.set(0, 0);
         vec.set(this.a, this.b).normalize();
         this.a = vec.x * x;
         this.b = vec.y * x;
         vec.set(this.c, this.d).normalize();
         this.c = vec.x * y;
         this.d = vec.y * y;
-        Vector2.free(vec);
         return this;
     }
 
@@ -123,29 +94,25 @@ export class Transform2D {
     }
 
     get_skew() {
-        let vec = Vector2.create();
-        let vec2 = Vector2.create();
-        let det = this.basis_determinant();
-        let res = Math.acos(
+        const vec = _i_get_skew_vec2_1.set(0, 0);
+        const vec2 = _i_get_skew_vec2_2.set(0, 0);
+        const det = this.basis_determinant();
+        return Math.acos(
             vec.set(this.a, this.b).normalize().dot(
                 vec.set(this.c, this.d).normalize().scale(Math.sign(det))
             )
         ) - Math.PI * 0.5;
-        Vector2.free(vec2);
-        Vector2.free(vec);
-        return res;
     }
 
     set_skew(p_angle: number) {
-        let vec = Vector2.create();
-        let det = this.basis_determinant();
+        const det = this.basis_determinant();
+        const vec = _i_set_skew_vec2.set(0, 0);
         vec.set(this.a, this.b)
             .rotate(Math.PI * 0.5 + p_angle)
             .normalize()
             .scale(Math.sign(det) * Math.hypot(this.c, this.d))
         this.c = vec.x;
         this.d = vec.y;
-        Vector2.free(vec);
         return this;
     }
 
@@ -204,16 +171,6 @@ export class Transform2D {
         this.d = array[3];
         this.tx = array[4];
         this.ty = array[5];
-    }
-
-    reset() {
-        this.a = 1;
-        this.b = 0;
-        this.c = 0;
-        this.d = 1;
-        this.tx = 0;
-        this.ty = 0;
-        return this;
     }
 
     /**
@@ -279,9 +236,9 @@ export class Transform2D {
      */
     get_elements(p_row: number) {
         switch (p_row) {
-            case 0: return Vector2.create(this.a, this.b);
-            case 1: return Vector2.create(this.c, this.d);
-            case 2: return Vector2.create(this.tx, this.ty);
+            case 0: return Vector2.new(this.a, this.b);
+            case 1: return Vector2.new(this.c, this.d);
+            case 2: return Vector2.new(this.tx, this.ty);
         }
     }
 
@@ -290,9 +247,9 @@ export class Transform2D {
      */
     get_axis(p_axis: number) {
         switch (p_axis) {
-            case 0: return Vector2.create(this.a, this.b);
-            case 1: return Vector2.create(this.c, this.d);
-            case 2: return Vector2.create(this.tx, this.ty);
+            case 0: return Vector2.new(this.a, this.b);
+            case 1: return Vector2.new(this.c, this.d);
+            case 2: return Vector2.new(this.tx, this.ty);
         }
     }
 
@@ -325,7 +282,7 @@ export class Transform2D {
      * @return The new point, transformed through this matrix
      */
     basis_xform(p_vec: Vector2Like, r_out?: Vector2): Vector2 {
-        r_out = r_out || Vector2.create();
+        r_out = r_out || Vector2.new();
         const x = (this.a * p_vec.x) + (this.c * p_vec.y);
         const y = (this.b * p_vec.x) + (this.d * p_vec.y);
         return r_out.set(x, y);
@@ -337,7 +294,7 @@ export class Transform2D {
      * @return Return a new Vector2
      */
     basis_xform_inv(p_vec: Vector2Like, r_out?: Vector2): Vector2 {
-        r_out = r_out || Vector2.create();
+        r_out = r_out || Vector2.new();
         const x = (this.a * p_vec.x) + (this.b * p_vec.y);
         const y = (this.c * p_vec.x) + (this.d * p_vec.y);
         return r_out.set(x, y);
@@ -352,7 +309,7 @@ export class Transform2D {
      * @return Return a new Vector2
      */
     xform(p_vec: Vector2Like, r_out?: Vector2): Vector2 {
-        r_out = r_out || Vector2.create();
+        r_out = r_out || Vector2.new();
         const x = (this.a * p_vec.x) + (this.c * p_vec.y) + this.tx;
         const y = (this.b * p_vec.x) + (this.d * p_vec.y) + this.ty;
         return r_out.set(x, y);
@@ -367,40 +324,37 @@ export class Transform2D {
      * @return The new point, inverse-transformed through this matrix
      */
     xform_inv(p_vec: Vector2Like, r_out?: Vector2): Vector2 {
-        r_out = r_out || Vector2.create();
+        r_out = r_out || Vector2.new();
         const x = this.a * (p_vec.x - this.tx) + this.b * (p_vec.y - this.ty);
         const y = this.c * (p_vec.x - this.tx) + this.d * (p_vec.y - this.ty);
         return r_out.set(x, y);
     }
 
     xform_rect(p_rect: Rect2, r_out?: Rect2) {
-        r_out = r_out || Rect2.create();
-        const x = Vector2.create(this.a * p_rect.width, this.b * p_rect.width);
-        const y = Vector2.create(this.c * p_rect.height, this.d * p_rect.height);
-        const pos = Vector2.create(p_rect.x, p_rect.y);
+        r_out = r_out || Rect2.new();
+
+        const x = _i_xform_rect_vec2_1.set(this.a * p_rect.width, this.b * p_rect.width);
+        const y = _i_xform_rect_vec2_2.set(this.c * p_rect.height, this.d * p_rect.height);
+        const pos = _i_xform_rect_vec2_3.set(p_rect.x, p_rect.y);
         this.xform(pos, pos);
 
         r_out.x = pos.x;
         r_out.y = pos.y;
-        const vec = Vector2.create();
+        const vec = _i_xform_rect_vec2_4;
         r_out.expand_to(vec.copy(pos).add(x));
         r_out.expand_to(vec.copy(pos).add(y));
         r_out.expand_to(vec.copy(pos).add(x).add(y));
-
-        Vector2.free(x);
-        Vector2.free(y);
-        Vector2.free(pos);
-        Vector2.free(vec);
 
         return r_out;
     }
 
     xform_inv_rect(p_rect: Rect2, r_out?: Rect2) {
-        r_out = r_out || Rect2.create();
-        const ends_0 = Vector2.create(p_rect.x, p_rect.y);
-        const ends_1 = Vector2.create(p_rect.x, p_rect.y + p_rect.height);
-        const ends_2 = Vector2.create(p_rect.x + p_rect.width, p_rect.y + p_rect.height);
-        const ends_3 = Vector2.create(p_rect.x + p_rect.width, p_rect.y);
+        r_out = r_out || Rect2.new();
+
+        const ends_0 = _i_xform_inv_rect_vec2_1.set(p_rect.x, p_rect.y);
+        const ends_1 = _i_xform_inv_rect_vec2_2.set(p_rect.x, p_rect.y + p_rect.height);
+        const ends_2 = _i_xform_inv_rect_vec2_3.set(p_rect.x + p_rect.width, p_rect.y + p_rect.height);
+        const ends_3 = _i_xform_inv_rect_vec2_4.set(p_rect.x + p_rect.width, p_rect.y);
 
         this.xform_inv(ends_0, ends_0);
         this.xform_inv(ends_1, ends_1);
@@ -412,11 +366,6 @@ export class Transform2D {
         r_out.expand_to(ends_1);
         r_out.expand_to(ends_2);
         r_out.expand_to(ends_3);
-
-        Vector2.free(ends_0);
-        Vector2.free(ends_1);
-        Vector2.free(ends_2);
-        Vector2.free(ends_3);
 
         return r_out;
     }
@@ -522,8 +471,8 @@ export class Transform2D {
     }
 
     orthonormalize() {
-        const x = Vector2.create(this.a, this.b);
-        const y = Vector2.create(this.c, this.d);
+        const x = _i_orthonormalize_vec2_1.set(this.a, this.b);
+        const y = _i_orthonormalize_vec2_2.set(this.c, this.d);
 
         x.normalize();
         this.a = x.x;
@@ -535,15 +484,11 @@ export class Transform2D {
         this.c = y.x;
         this.d = y.y;
 
-        Vector2.free(x);
-        Vector2.free(y);
-
         return this;
     }
 
     orthonormalized() {
-        const on = this.clone();
-        return on.orthonormalize();
+        return this.clone().orthonormalize();
     }
 
     /**
@@ -669,7 +614,7 @@ export class Transform2D {
      * @return A copy of this matrix. Good for chaining method calls.
      */
     clone(): Transform2D {
-        return Transform2D.create(
+        return Transform2D.new(
             this.a,
             this.b,
             this.c,
@@ -696,15 +641,45 @@ export class Transform2D {
         return this;
     }
 
-    /**
-     * A temp matrix
-     */
-    static TEMP_MATRIX = new Transform2D;
+    static IDENTITY = Object.freeze(new Transform2D);
 
-    static IDENTITY = new Transform2D;
+    static new(a: number = 1, b: number = 0, c: number = 0, d: number = 1, tx: number = 0, ty: number = 0) {
+        const m = pool.pop();
+        if (m) {
+            return m.set(a, b, c, d, tx, ty);
+        } else {
+            return new Transform2D(a, b, c, d, tx, ty);
+        }
+    }
+
+    static free(m: Transform2D) {
+        if (m && pool.length < 2021) {
+            pool.push(m);
+        }
+        return Transform2D;
+    }
 }
 
-/**
- * @type {Transform2D[]}
- */
 const pool: Transform2D[] = [];
+
+const _i_xform_inv_rect_vec2_1 = new Vector2;
+const _i_xform_inv_rect_vec2_2 = new Vector2;
+const _i_xform_inv_rect_vec2_3 = new Vector2;
+const _i_xform_inv_rect_vec2_4 = new Vector2;
+
+const _i_set_scale_vec2 = new Vector2;
+
+const _i_set_scale_n_vec2 = new Vector2;
+
+const _i_get_skew_vec2_1 = new Vector2;
+const _i_get_skew_vec2_2 = new Vector2;
+
+const _i_set_skew_vec2 = new Vector2;
+
+const _i_xform_rect_vec2_1 = new Vector2;
+const _i_xform_rect_vec2_2 = new Vector2;
+const _i_xform_rect_vec2_3 = new Vector2;
+const _i_xform_rect_vec2_4 = new Vector2;
+
+const _i_orthonormalize_vec2_1 = new Vector2;
+const _i_orthonormalize_vec2_2 = new Vector2;

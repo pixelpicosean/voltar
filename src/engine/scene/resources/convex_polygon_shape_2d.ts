@@ -19,7 +19,7 @@ export class ConvexPolygonShape2D extends Shape2D {
 
         let pcount = 3;
         for (let i = pcount - 1; i >= 0; i--) {
-            this.points.push(Vector2.create(Math.sin(i * Math.PI * 2 / pcount), -Math.cos(i * Math.PI * 2 / pcount)).scale(10));
+            this.points.push(Vector2.new(Math.sin(i * Math.PI * 2 / pcount), -Math.cos(i * Math.PI * 2 / pcount)).scale(10));
         }
 
         this._update_shape();
@@ -41,7 +41,7 @@ export class ConvexPolygonShape2D extends Shape2D {
             }
         } else if (self_len < new_len) {
             for (let i = 0; i < new_len - self_len; i++) {
-                this.points.push(Vector2.create());
+                this.points.push(Vector2.new());
             }
         }
         for (let i = 0; i < new_len; i++) {
@@ -50,7 +50,7 @@ export class ConvexPolygonShape2D extends Shape2D {
         this._update_shape();
     }
 
-    get_rect(p_rect: Rect2 = Rect2.create()): Rect2 {
+    get_rect(p_rect: Rect2 = Rect2.new()): Rect2 {
         p_rect.set(0, 0, 0, 0);
         for (let i = 0, len = this.points.length; i < len; i++) {
             if (i === 0) {

@@ -596,7 +596,7 @@ export class Body2DSW extends CollisionObject2DSW {
             this.area_linear_damp = this.linear_damp;
         }
 
-        let motion = Vector2.create();
+        let motion = Vector2.new();
         let do_motion = false;
 
         if (this.mode === BodyMode.KINEMATIC) {
@@ -689,7 +689,7 @@ export class Body2DSW extends CollisionObject2DSW {
         const angle = this.transform.get_rotation() + total_angular_velocity * p_step;
         const pos = this.transform.get_origin().add(total_linear_velocity.scale(p_step));
 
-        let t = Transform2D.create().set_rotation_and_pos(angle, pos);
+        let t = Transform2D.new().set_rotation_and_pos(angle, pos);
         this._set_transform(t, this.continuous_cd_mode === CCDMode.DISABLED);
         let inv_transform = this.transform.clone().invert();
         this._set_inv_transform(inv_transform);
@@ -704,20 +704,18 @@ export class Body2DSW extends CollisionObject2DSW {
         Transform2D.free(t);
     }
 
-    /** Returns new Vector2 */
-    get_motion(): Vector2 {
+    get_motion(r_out?: Vector2): Vector2 {
+        if (!r_out) r_out = Vector2.new();
+        else r_out.set(0, 0);
+
         if (this.mode > BodyMode.KINEMATIC) {
-            const origin = this.transform.get_origin();
-            const motion = this.new_transform.get_origin().subtract(origin);
-            Vector2.free(origin);
-            return motion;
+            const origin = this.transform.get_origin(_i_get_motion_vec2);
+            return this.new_transform.get_origin(r_out).subtract(origin);
         } else if (this.mode === BodyMode.KINEMATIC) {
-            const origin = this.new_transform.get_origin();
-            const motion = this.transform.get_origin().subtract(origin);
-            Vector2.free(origin);
-            return motion;
+            const origin = this.new_transform.get_origin(_i_get_motion_vec2);
+            return this.transform.get_origin(r_out).subtract(origin);
         }
-        return Vector2.create(0, 0);
+        return r_out;
     }
 
     call_queries() {
@@ -937,3 +935,5 @@ export class Physics2DDirectBodyStateSW {
 
     static singleton: Physics2DDirectBodyStateSW = null;
 }
+
+const _i_get_motion_vec2 = new Vector2;

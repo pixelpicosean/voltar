@@ -250,9 +250,9 @@ export class BroadPhase2D {
         let pos = p_from.clone().scale(1 / this.cell_size).floor();
         let end = p_to.clone().scale(1 / this.cell_size).floor();
 
-        let step = Vector2.create(Math.sign(dir.x), Math.sign(dir.y));
+        let step = Vector2.new(Math.sign(dir.x), Math.sign(dir.y));
 
-        let max = Vector2.create();
+        let max = Vector2.new();
 
         if (dir.x < 0) {
             max.x = (Math.floor(pos.x) * this.cell_size - p_from.x) / dir.x;
@@ -337,13 +337,13 @@ export class BroadPhase2D {
     cull_aabb(p_aabb: Rect2, p_results: CollisionObject2DSW[], p_max_results: number, p_result_indices: number[] = null) {
         this.pass++;
 
-        let from = Vector2.create(p_aabb.x / this.cell_size, p_aabb.y / this.cell_size).floor();
-        let to = Vector2.create((p_aabb.x + p_aabb.width) / this.cell_size, (p_aabb.y + p_aabb.height) / this.cell_size).floor();
+        let from = Vector2.new(p_aabb.x / this.cell_size, p_aabb.y / this.cell_size).floor();
+        let to = Vector2.new((p_aabb.x + p_aabb.width) / this.cell_size, (p_aabb.y + p_aabb.height) / this.cell_size).floor();
         let cullcount = 0;
 
-        let point = Vector2.create();
-        let tmp_vec_1 = Vector2.create();
-        let tmp_vec_2 = Vector2.create();
+        let point = Vector2.new();
+        let tmp_vec_1 = Vector2.new();
+        let tmp_vec_2 = Vector2.new();
         for (let i = from.x; i <= to.x; i++) {
             for (let j = from.y; j <= to.y; j++) {
                 cullcount = this._cull(
@@ -393,7 +393,7 @@ export class BroadPhase2D {
 
     _enter_grid(p_elem: Element, p_rect: Rect2, p_static: boolean) {
         // use magic number to avoid floating point issues
-        let sz = Vector2.create(
+        let sz = Vector2.new(
             p_rect.width / this.cell_size * LARGE_ELEMENT_FI,
             p_rect.height / this.cell_size * LARGE_ELEMENT_FI
         )
@@ -424,8 +424,8 @@ export class BroadPhase2D {
             return;
         }
 
-        let from = Vector2.create(p_rect.x / this.cell_size, p_rect.y / this.cell_size).floor();
-        let to = Vector2.create((p_rect.x + p_rect.width) / this.cell_size, (p_rect.y + p_rect.height) / this.cell_size).floor();
+        let from = Vector2.new(p_rect.x / this.cell_size, p_rect.y / this.cell_size).floor();
+        let to = Vector2.new((p_rect.x + p_rect.width) / this.cell_size, (p_rect.y + p_rect.height) / this.cell_size).floor();
 
         for (let i = from.x; i <= to.x; i++) {
             for (let j = from.y; j <= to.y; j++) {
@@ -514,7 +514,7 @@ export class BroadPhase2D {
     }
     _exit_grid(p_elem: Element, p_rect: Rect2, p_static: boolean) {
         // use magic number to avoid floating point issues
-        let sz = Vector2.create(
+        let sz = Vector2.new(
             p_rect.width / this.cell_size * LARGE_ELEMENT_FI,
             p_rect.height / this.cell_size * LARGE_ELEMENT_FI
         )
@@ -533,8 +533,8 @@ export class BroadPhase2D {
             return;
         }
 
-        let from = Vector2.create(p_rect.x / this.cell_size, p_rect.y / this.cell_size);
-        let to = Vector2.create((p_rect.x + p_rect.width) / this.cell_size, (p_rect.y + p_rect.height) / this.cell_size);
+        let from = Vector2.new(p_rect.x / this.cell_size, p_rect.y / this.cell_size);
+        let to = Vector2.new((p_rect.x + p_rect.width) / this.cell_size, (p_rect.y + p_rect.height) / this.cell_size);
 
         for (let i = from.x; i <= to.x; i++) {
             for (let j = from.y; j <= to.y; j++) {

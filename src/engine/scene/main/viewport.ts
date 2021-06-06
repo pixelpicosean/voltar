@@ -411,21 +411,21 @@ export class Viewport extends Node {
             this.get_tree()._call_input_pause(this.unhandled_key_input_group, '_unhandled_key_input', p_event);
         }
 
-        // TODO: if (physics_object_picking)
+        // @Incomplete: if (physics_object_picking)
     }
 
     /**
      * returns new Vector2
      */
-    get_mouse_position() {
-        const xform = this.get_final_transform().affine_inverse()
-        const input_pre_xform = this._get_input_pre_xform();
+    get_mouse_position(r_out?: Vector2) {
+        if (!r_out) r_out = Vector2.new();
+
+        const xform = this.get_final_transform(_i_get_mouse_position_Transform2D_1).affine_inverse()
+        const input_pre_xform = this._get_input_pre_xform(_i_get_mouse_position_Transform2D_2);
         xform.append(input_pre_xform);
-        Transform2D.free(input_pre_xform);
-        const pos = Input.get_singleton().get_mouse_position().clone()
+        const pos = r_out.copy(Input.get_singleton().get_mouse_position())
             .subtract(this._get_window_offset())
         xform.xform(pos, pos);
-        Transform2D.free(xform);
         return pos;
     }
     warp_mouse(p_pos: Vector2Like) { }
@@ -748,9 +748,7 @@ export class Viewport extends Node {
         this.gui.roots_order_dirty = false;
     }
     _gui_sort_modal_stack() { }
-    /**
-     * @param {Vector2Like} p_global
-     */
+
     _gui_find_control(p_global: Vector2Like) {
         this._gui_prepare_subwindows();
 
@@ -758,17 +756,15 @@ export class Viewport extends Node {
             let sw = E.value;
             if (!sw.is_visible_in_tree()) continue;
 
-            /** @type {Transform2D} */
-            let xform: Transform2D = null;
+            const xform = _i_gui_find_control_Transform2D_1.identity();
             let pci = sw.get_parent_item();
             if (pci) {
-                xform = pci.get_global_transform_with_canvas();
+                pci.get_global_transform_with_canvas(xform);
             } else {
-                xform = sw.get_canvas_transform().clone();
+                xform.copy(sw.get_canvas_transform());
             }
 
             let ret = this._gui_find_control_at_pos(sw, p_global, xform, this.gui.focus_inv_xform);
-            Transform2D.free(xform);
 
             if (ret) {
                 return ret;
@@ -781,17 +777,15 @@ export class Viewport extends Node {
             let sw = E.value;
             if (!sw.is_visible_in_tree()) continue;
 
-            /** @type {Transform2D} */
-            let xform: Transform2D = null;
+            const xform = _i_gui_find_control_Transform2D_1.identity();
             let pci = sw.get_parent_item();
             if (pci) {
-                xform = pci.get_global_transform_with_canvas();
+                pci.get_global_transform_with_canvas(xform);
             } else {
-                xform = sw.get_canvas_transform().clone();
+                xform.copy(sw.get_canvas_transform());
             }
 
             let ret = this._gui_find_control_at_pos(sw, p_global, xform, this.gui.focus_inv_xform);
-            Transform2D.free(xform);
 
             if (ret) {
                 return ret;
@@ -809,17 +803,15 @@ export class Viewport extends Node {
             return null;
         }
 
-        const node_xform = p_node.get_transform();
-        const matrix = p_xform.clone().append(node_xform);
+        const node_xform = p_node.get_transform(_i_gui_find_control_at_pos_Transform2D_1);
+        const matrix = _i_gui_find_control_at_pos_Transform2D_2.copy(p_xform).append(node_xform);
         if (matrix.basis_determinant() === 0) {
-            Transform2D.free(matrix);
-            Transform2D.free(node_xform);
             return null;
         }
 
         const c: Control = p_node as Control;
-        const matrix_inv = matrix.clone().affine_inverse();
-        const xform_global = matrix_inv.xform(p_global);
+        const matrix_inv = _i_gui_find_control_at_pos_Transform2D_3.copy(matrix).affine_inverse();
+        const xform_global = matrix_inv.xform(p_global, _i_gui_find_control_at_pos_Vector2_1);
         // const has = c._has_point_(xform_global);
         if (!c.is_control || !c.clips_input() || c._has_point_(xform_global)) {
             for (let i = p_node.data.children.length - 1; i >= 0; i--) {
@@ -834,10 +826,6 @@ export class Viewport extends Node {
 
                 const ret = this._gui_find_control_at_pos(ci, p_global, matrix, r_inv_xform);
                 if (ret) {
-                    Vector2.free(xform_global);
-                    Transform2D.free(matrix_inv);
-                    Transform2D.free(matrix);
-                    Transform2D.free(node_xform);
                     return ret;
                 }
             }
@@ -849,24 +837,12 @@ export class Viewport extends Node {
 
         matrix.affine_inverse();
 
-        const xform_global2 = matrix.xform(p_global);
-        const has2 = c._has_point_(xform_global2);
+        const xform_global2 = matrix.xform(p_global, _i_gui_find_control_at_pos_Vector2_2);
+        // const has2 = c._has_point_(xform_global2);
         if (c.c_data.mouse_filter !== MOUSE_FILTER_IGNORE && c._has_point_(xform_global2) && (!this.gui.drag_preview || (c !== this.gui.drag_preview && !this.gui.drag_preview.is_a_parent_of(c)))) {
             r_inv_xform.copy(matrix);
-
-            Vector2.free(xform_global2);
-            Vector2.free(xform_global);
-            Transform2D.free(matrix_inv);
-            Transform2D.free(matrix);
-            Transform2D.free(node_xform);
             return c;
         }
-
-        Vector2.free(xform_global2);
-        Vector2.free(xform_global);
-        Transform2D.free(matrix_inv);
-        Transform2D.free(matrix);
-        Transform2D.free(node_xform);
 
         return null;
     }
@@ -883,7 +859,7 @@ export class Viewport extends Node {
 
             const mpos = mb.position;
             if (mb.is_pressed()) {
-                const pos = mpos.clone();
+                const pos = _i_gui_input_event_Vector2_1.copy(mpos);
 
                 if (gui.mouse_focus_mask) {
                     gui.mouse_focus_mask |= (1 << (mb.button_index - 1));
@@ -893,8 +869,8 @@ export class Viewport extends Node {
                     this._gui_sort_modal_stack();
                     while (!gui.modal_stack.empty()) {
                         const top = gui.modal_stack.back().value;
-                        const gt = top.get_global_transform_with_canvas();
-                        const pos2 = gt.affine_inverse().xform(mpos);
+                        const gt = top.get_global_transform_with_canvas(_i_gui_input_event_Transform2D_1);
+                        const pos2 = gt.affine_inverse().xform(mpos, _i_gui_input_event_Vector2_2);
                         if (!top._has_point_(pos2)) {
                             if (top.c_data.modal_exclusive || top.c_data.modal_frame === Engine.get_singleton().get_frames_drawn()) {
                                 this.set_input_as_handled();
@@ -911,9 +887,6 @@ export class Viewport extends Node {
                         } else {
                             break;
                         }
-
-                        Vector2.free(pos2);
-                        Transform2D.free(gt);
                     }
 
                     if (is_handled) {
@@ -981,26 +954,23 @@ export class Viewport extends Node {
                     gui.dragging = false;
 
                     if (gui.drag_preview) {
-                        // FIXME: should we free this `gui.drag_preview`?
+                        // @Incomplete: should we free this `gui.drag_preview`?
                         gui.drag_preview = null;
                     }
                     this._propagate_viewport_notification(this, NOTIFICATION_DRAG_END);
                 }
 
                 this._gui_cancel_tooltip();
-
-                Vector2.free(pos);
             } else {
                 if (gui.drag_data && mb.button_index === BUTTON_LEFT) {
                     if (gui.mouse_over) {
-                        const pos = mpos.clone();
+                        const pos = _i_gui_input_event_Vector2_3.copy(mpos);
                         gui.focus_inv_xform.xform(pos, pos);
                         this._gui_drop(gui.mouse_over, pos, false);
-                        Vector2.free(pos);
                     }
 
                     if (gui.drag_preview && mb.button_index === BUTTON_LEFT) {
-                        // FIXME: should we free this `gui.drag_preview`?
+                        // @Incomplete: should we free this `gui.drag_preview`?
                         gui.drag_preview = null;
                     }
 
@@ -1015,12 +985,11 @@ export class Viewport extends Node {
                     return;
                 }
 
-                const pos = mpos.clone();
+                const pos = _i_gui_input_event_Vector2_4.copy(mpos);
                 mb = mb.xformed_by(Transform2D.IDENTITY);
                 mb.global_position.copy(pos);
                 gui.focus_inv_xform.xform(pos, pos);
                 mb.position.copy(pos);
-                Vector2.free(pos);
 
                 const mouse_focus = gui.mouse_focus;
 
@@ -1040,7 +1009,7 @@ export class Viewport extends Node {
             let mm = p_event as InputEventMouseMotion;
 
             gui.key_event_accepted = false;
-            const mpos = mm.position.clone();
+            const mpos = _i_gui_input_event_Vector2_5.copy(mm.position);
 
             gui.last_mouse_pos.copy(mpos);
 
@@ -1048,7 +1017,7 @@ export class Viewport extends Node {
             let over: Control = null;
 
             if (!gui.drag_attempted && gui.mouse_focus && mm.button_mask & BUTTON_MASK_LEFT) {
-                // TODO
+                // @Incomplete
             }
 
             if (gui.mouse_focus) {
@@ -1058,7 +1027,7 @@ export class Viewport extends Node {
             }
 
             if (gui.drag_data && !gui.modal_stack.empty()) {
-                // TODO
+                // @Incomplete
             }
 
             if (over !== gui.mouse_over) {
@@ -1080,16 +1049,16 @@ export class Viewport extends Node {
             }
 
             if (!over) {
-                // TODO: OS.get_singleton().set_cursor_shape()
+                // @Incomplete: OS.get_singleton().set_cursor_shape()
                 return;
             }
 
-            const localizer = over.get_global_transform_with_canvas().affine_inverse();
-            const pos = localizer.xform(mpos);
-            const speed = localizer.basis_xform(mm.speed);
-            const rel = localizer.basis_xform(mm.relative);
+            const localizer = over.get_global_transform_with_canvas(_i_gui_input_event_Transform2D_2).affine_inverse();
+            const pos = localizer.xform(mpos, _i_gui_input_event_Vector2_6);
+            const speed = localizer.basis_xform(mm.speed, _i_gui_input_event_Vector2_7);
+            const rel = localizer.basis_xform(mm.relative, _i_gui_input_event_Vector2_8);
 
-            // TODO: recycle input events
+            // @Incomplete: recycle input events
             mm = mm.xformed_by(Transform2D.IDENTITY);
 
             mm.global_position.copy(mpos);
@@ -1110,7 +1079,7 @@ export class Viewport extends Node {
 
                 if (gui.tooltip_popup) {
                     if (can_tooltip && gui.tooltip) {
-                        const p = gui.tooltip.get_global_transform().xform_inv(mpos);
+                        const p = gui.tooltip.get_global_transform().xform_inv(mpos, _i_gui_input_event_Vector2_9);
                         const tooltip = this._gui_get_tooltip(over, p);
 
                         if (tooltip.length === 0) {
@@ -1123,8 +1092,6 @@ export class Viewport extends Node {
                         } else if (tooltip === gui.tooltip_popup.get_tooltip_text()) {
                             is_tooltip_shown = true;
                         }
-
-                        Vector2.free(p);
                     } else {
                         this._gui_cancel_tooltip();
                     }
@@ -1139,7 +1106,7 @@ export class Viewport extends Node {
 
             mm.position.copy(pos);
 
-            // TODO: update cursor
+            // @Incomplete: update cursor
 
             if (over && over.can_process()) {
                 this._gui_call_input(over, mm);
@@ -1150,16 +1117,9 @@ export class Viewport extends Node {
             if (gui.drag_data && mm.button_mask === BUTTON_MASK_LEFT) {
                 const can_drop = this._gui_drop(over, pos, true);
 
-                // TODO: update cursor
+                // @Incomplete: update cursor
                 if (!can_drop) {}
             }
-
-            Vector2.free(rel);
-            Vector2.free(speed);
-            Vector2.free(pos);
-            Transform2D.free(localizer);
-
-            Vector2.free(mpos);
         }
 
         if (p_event.class === 'InputEventScreenTouch') { }
@@ -1172,19 +1132,17 @@ export class Viewport extends Node {
             return;
         }
 
-        const abstracted_rect = this.get_visible_rect();
+        const abstracted_rect = this.get_visible_rect(_i_update_worlds_Rect2_1);
         abstracted_rect.x = abstracted_rect.y = 0;
 
-        const xformed_rect = this.global_canvas_transform.clone()
+        const xformed_rect = _i_update_worlds_Transform2D_1.copy(this.global_canvas_transform)
             .append(this.canvas_transform)
             .affine_inverse()
-            .xform_rect(abstracted_rect);
+            .xform_rect(abstracted_rect, _i_update_worlds_Rect2_2);
         this.find_world_2d()._update_viewport(this, xformed_rect);
         this.find_world_2d()._update();
 
         this.find_world()._update(this.get_tree().current_frame);
-
-        Rect2.free(abstracted_rect);
     }
 
     gui_has_modal_stack() {
@@ -1222,11 +1180,8 @@ export class Viewport extends Node {
         VSG.viewport.viewport_set_keep_3d_linear(this.viewport, this.keep_3d_linear);
     }
 
-    /**
-     * returns new Transform2D
-     */
-    _get_input_pre_xform() {
-        const pre_xf = Transform2D.create();
+    _get_input_pre_xform(r_out?: Transform2D) {
+        const pre_xf = r_out || Transform2D.new();
         if (!this.attach_to_screen_rect.is_zero()) {
             pre_xf.tx = -this.attach_to_screen_rect.x;
             pre_xf.ty = -this.attach_to_screen_rect.y;
@@ -1263,14 +1218,10 @@ export class Viewport extends Node {
      * @param {InputEvent} ev
      */
     _make_input_local(ev: InputEvent) {
-        const vp_ofs = this._get_window_offset().clone().negate();
-        const pre_xform = this._get_input_pre_xform();
-        const ai = this.get_final_transform().affine_inverse().append(pre_xform);
-        const local_ev = ev.xformed_by(ai, vp_ofs);
-        Transform2D.free(pre_xform);
-        Transform2D.free(ai);
-        Vector2.free(vp_ofs);
-        return local_ev;
+        const vp_ofs = _i_make_input_local_Vector2_1.copy(this._get_window_offset()).negate();
+        const pre_xform = this._get_input_pre_xform(_i_make_input_local_Transform2D_1);
+        const ai = this.get_final_transform(_i_make_input_local_Transform2D_2).affine_inverse().append(pre_xform);
+        return ev.xformed_by(ai, vp_ofs);
     }
 
     /**
@@ -1350,8 +1301,8 @@ export class Viewport extends Node {
         this.gui.all_known_subwindows.erase(SI);
     }
 
-    _gui_get_tooltip(p_control: Control, p_pos: Vector2, r_which?: { from: Control; }) {
-        const pos = p_pos.clone();
+    _gui_get_tooltip(p_control: Control, p_pos: Vector2, r_which?: { from: Control }) {
+        const pos = _i_gui_get_tooltip_Vector2_1.copy(p_pos);
         let tooltip = '';
 
         while (p_control) {
@@ -1363,9 +1314,8 @@ export class Viewport extends Node {
             if (tooltip.length > 0) {
                 break;
             }
-            const xform = p_control.get_transform();
+            const xform = p_control.get_transform(_i_gui_get_tooltip_Transform2D_1);
             xform.xform(pos, pos);
-            Transform2D.free(xform);
 
             if (p_control.c_data.mouse_filter === MOUSE_FILTER_STOP) {
                 break;
@@ -1376,8 +1326,6 @@ export class Viewport extends Node {
 
             p_control = p_control.get_parent_control();
         }
-
-        Vector2.free(pos);
 
         return tooltip;
     }
@@ -1516,8 +1464,8 @@ export class Viewport extends Node {
             }
 
             const mask = this.gui.mouse_focus_mask;
-            const xform_inv = this.gui.mouse_focus.get_global_transform_with_canvas().affine_inverse();
-            const click = xform_inv.xform(this.gui.last_mouse_pos);
+            const xform_inv = this.gui.mouse_focus.get_global_transform_with_canvas(_i_post_gui_grab_click_focus_Transform2D_1).affine_inverse();
+            const click = xform_inv.xform(this.gui.last_mouse_pos, _i_post_gui_grab_click_focus_Vector2_1);
 
             for (let i = 0; i < 3; i++) {
                 if (mask & (1 << i)) {
@@ -1531,12 +1479,10 @@ export class Viewport extends Node {
             }
 
             this.gui.mouse_focus = focus_grabber;
-            const focus_xform_inv = this.gui.mouse_focus.get_global_transform_with_canvas().affine_inverse();
+            const focus_xform_inv = this.gui.mouse_focus.get_global_transform_with_canvas(_i_post_gui_grab_click_focus_Transform2D_2).affine_inverse();
             this.gui.focus_inv_xform.copy(focus_xform_inv);
-            const xform_last_pos = focus_xform_inv.xform(this.gui.last_mouse_pos);
+            const xform_last_pos = focus_xform_inv.xform(this.gui.last_mouse_pos, _i_post_gui_grab_click_focus_Vector2_2);
             click.copy(xform_last_pos);
-            Vector2.free(xform_last_pos);
-            Transform2D.free(focus_xform_inv);
 
             for (let i = 0; i < 3; i++) {
                 if (mask & (1 << i)) {
@@ -1561,7 +1507,7 @@ export class Viewport extends Node {
         return this.gui.key_focus;
     }
 
-    _get_window_offset() {
+    _get_window_offset(): Vector2 {
         const parent = this.get_parent();
         if (parent && 'get_global_position' in parent) {
             // @ts-ignore
@@ -1576,7 +1522,7 @@ export class Viewport extends Node {
      * @param {boolean} p_just_check
      */
     _gui_drop(p_at_control: Control, p_at_pos: Vector2, p_just_check: boolean) {
-        let at_pos = p_at_pos.clone();
+        let at_pos = _i_gui_drop_Vector2_1.copy(p_at_pos);
 
         /** @type {CanvasItem} */
         let ci: CanvasItem = p_at_control;
@@ -1596,9 +1542,8 @@ export class Viewport extends Node {
                 }
             }
 
-            const xform = ci.get_transform();
+            const xform = ci.get_transform(_i_gui_drop_Transform2D_1);
             xform.xform(at_pos, at_pos);
-            Transform2D.free(xform);
 
             if (ci.is_set_as_toplevel()) {
                 break;
@@ -1606,8 +1551,6 @@ export class Viewport extends Node {
 
             ci = ci.get_parent_item();
         }
-
-        Vector2.free(at_pos);
 
         return false;
     }
@@ -1655,24 +1598,25 @@ export class Viewport extends Node {
         }
     }
 
-    get_visible_rect() {
-        let r = Rect2.create();
+    get_visible_rect(r_out?: Rect2) {
+        if (!r_out) r_out = Rect2.new();
+        else r_out.set(0, 0, 0, 0);
 
         if (this.size.is_zero()) {
             const window_size = OS.get_singleton().get_window_size();
-            r.width = window_size.x;
-            r.height = window_size.y;
+            r_out.width = window_size.x;
+            r_out.height = window_size.y;
         } else {
-            r.width = this.size.width;
-            r.height = this.size.height;
+            r_out.width = this.size.width;
+            r_out.height = this.size.height;
         }
 
         if (this.size_override) {
-            r.width = this.size_override_size.width;
-            r.height = this.size_override_size.height;
+            r_out.width = this.size_override_size.width;
+            r_out.height = this.size_override_size.height;
         }
 
-        return r;
+        return r_out;
     }
 
     /**
@@ -1805,11 +1749,9 @@ export class Viewport extends Node {
         return this.size_override_stretch;
     }
 
-    /**
-     * returns new Transform2D
-     */
-    get_final_transform() {
-        return this.stretch_transform.clone().append(this.global_canvas_transform);
+    get_final_transform(r_out?: Transform2D) {
+        return (r_out || Transform2D.new()).copy(this.stretch_transform)
+            .append(this.global_canvas_transform);
     }
 
     /**
@@ -1870,26 +1812,24 @@ export class Viewport extends Node {
 
     _update_stretch_transform() {
         if (this.size_override_stretch && this.size_override) {
-            this.stretch_transform.reset();
-            const scale = Vector2.create(
+            this.stretch_transform.identity();
+            const scale = _i_update_stretch_transform_Vector2_1.set(
                 this.size.x / (this.size_override_size.x + this.size_override_margin.x * 2),
                 this.size.y / (this.size_override_size.y + this.size_override_margin.y * 2)
             );
             this.stretch_transform.scale(scale.x, scale.y);
             this.stretch_transform.tx = this.size_override_margin.x * scale.x;
             this.stretch_transform.ty = this.size_override_margin.y * scale.y;
-            Vector2.free(scale);
         } else {
-            this.stretch_transform.reset();
+            this.stretch_transform.identity();
         }
 
         this._update_global_transform();
     }
     _update_global_transform() {
-        let sxform = this.stretch_transform.clone()
+        let sxform = _i_update_global_transform_Transform2D_1.copy(this.stretch_transform)
             .append(this.global_canvas_transform);
         VSG.viewport.viewport_set_global_canvas_transform(this.viewport, sxform);
-        Transform2D.free(sxform);
     }
 
     _subwindow_visibility_changed() {
@@ -1913,3 +1853,49 @@ export class Viewport extends Node {
     }
 }
 node_class_map['Viewport'] = GDCLASS(Viewport, Node)
+
+const _i_get_mouse_position_Transform2D_1 = new Transform2D;
+const _i_get_mouse_position_Transform2D_2 = new Transform2D;
+
+const _i_update_global_transform_Transform2D_1 = new Transform2D;
+
+const _i_gui_find_control_Transform2D_1 = new Transform2D;
+
+const _i_gui_find_control_at_pos_Transform2D_1 = new Transform2D;
+const _i_gui_find_control_at_pos_Transform2D_2 = new Transform2D;
+const _i_gui_find_control_at_pos_Transform2D_3 = new Transform2D;
+const _i_gui_find_control_at_pos_Vector2_1 = new Vector2;
+const _i_gui_find_control_at_pos_Vector2_2 = new Vector2;
+
+const _i_gui_input_event_Vector2_1 = new Vector2;
+const _i_gui_input_event_Vector2_2 = new Vector2;
+const _i_gui_input_event_Vector2_3 = new Vector2;
+const _i_gui_input_event_Vector2_4 = new Vector2;
+const _i_gui_input_event_Vector2_5 = new Vector2;
+const _i_gui_input_event_Vector2_6 = new Vector2;
+const _i_gui_input_event_Vector2_7 = new Vector2;
+const _i_gui_input_event_Vector2_8 = new Vector2;
+const _i_gui_input_event_Vector2_9 = new Vector2;
+const _i_gui_input_event_Transform2D_1 = new Transform2D;
+const _i_gui_input_event_Transform2D_2 = new Transform2D;
+
+const _i_update_worlds_Rect2_1 = new Rect2;
+const _i_update_worlds_Rect2_2 = new Rect2;
+const _i_update_worlds_Transform2D_1 = new Transform2D;
+
+const _i_make_input_local_Vector2_1 = new Vector2;
+const _i_make_input_local_Transform2D_1 = new Transform2D;
+const _i_make_input_local_Transform2D_2 = new Transform2D;
+
+const _i_gui_get_tooltip_Vector2_1 = new Vector2;
+const _i_gui_get_tooltip_Transform2D_1 = new Transform2D;
+
+const _i_post_gui_grab_click_focus_Vector2_1 = new Vector2;
+const _i_post_gui_grab_click_focus_Vector2_2 = new Vector2;
+const _i_post_gui_grab_click_focus_Transform2D_1 = new Transform2D;
+const _i_post_gui_grab_click_focus_Transform2D_2 = new Transform2D;
+
+const _i_gui_drop_Vector2_1 = new Vector2;
+const _i_gui_drop_Transform2D_1 = new Transform2D;
+
+const _i_update_stretch_transform_Vector2_1 = new Vector2;

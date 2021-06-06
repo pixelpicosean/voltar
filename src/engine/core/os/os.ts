@@ -243,7 +243,7 @@ export class OS {
             driver_config.max_texture_image_units = gl.getParameter(gl.MAX_COMBINED_TEXTURE_IMAGE_UNITS);
             driver_config.max_texture_size = gl.getParameter(gl.MAX_TEXTURE_SIZE);
 
-            // TODO: support huge uniform based hardware skin instead
+            // @Incomplete: support huge uniform based hardware skin instead
             driver_config.use_skeleton_software = !driver_config.support_float_texture || (driver_config.max_vertex_texture_image_units === 0);
         }
 
@@ -264,7 +264,7 @@ export class OS {
         const on_pointer_move = (/** @type {MouseEvent | PointerEvent} */e: MouseEvent | PointerEvent) => {
             const input_mask = this.input.get_mouse_button_mask();
             map_position_to_canvas_local(mouse_pos, canvas, e.clientX, e.clientY);
-            // FIXME: should we only care about mouse motion when cursor is inside canvas?
+            // @Question: should we only care about mouse motion when cursor is inside canvas?
             // if (!cursor_inside_canvas && !input_mask) {
             //     return false;
             // }
@@ -279,6 +279,8 @@ export class OS {
             ev.speed.copy(this.input.get_last_mouse_speed());
 
             this.input.parse_input_event(ev);
+            ev._free();
+
             return false;
         };
         const on_pointer_button = (/** @type {MouseEvent | PointerEvent} */e: MouseEvent | PointerEvent, /** @type {boolean} */is_down: boolean) => {
@@ -327,7 +329,10 @@ export class OS {
             ev.button_mask = mask;
 
             this.input.parse_input_event(ev);
-            // TODO: resume audio driver after input in case autoplay was denied
+            // @Incomplete: resume audio driver after input in case autoplay was denied
+
+            ev._free();
+
             return true;
         }
 
@@ -394,6 +399,8 @@ export class OS {
             this.main_loop.notification(NOTIFICATION_WM_FOCUS_OUT);
         })
 
+        const game_size = new Vector2;
+        const window_size = new Vector2;
         const resize_canvas = () => {
             if (this.video_mode.resizable) {
                 this.canvas.width = window.innerWidth;
@@ -402,8 +409,8 @@ export class OS {
                 this.canvas.style.height = `${window.innerHeight}px`;
             } else {
                 // adjust the canvas style, to fit the window
-                const window_size = Vector2.create(window.innerWidth, window.innerHeight);
-                const game_size = Vector2.create(this.video_mode.width, this.video_mode.height);
+                window_size.set(window.innerWidth, window.innerHeight);
+                game_size.set(this.video_mode.width, this.video_mode.height);
                 const window_aspect = window_size.aspect();
                 const game_aspect = game_size.aspect();
                 VSG.canvas_render.resize(game_size.x, game_size.y);
@@ -422,8 +429,6 @@ export class OS {
                     canvas.style.width = `${window_size.x}px`;
                     canvas.style.height = `${window_size.y}px`;
                 }
-                Vector2.free(game_size);
-                Vector2.free(window_size);
             }
         }
         window.addEventListener('resize', resize_canvas)

@@ -71,6 +71,7 @@ import {
 import { Rect2 } from 'engine/core/math/rect2';
 import { ARRAY_MAX } from 'engine/scene/const';
 import { parse_attributes_from_code, parse_uniforms_from_code } from './shader_parser';
+import { NoShrinkArray } from 'engine/core/v_array';
 
 type Material_t = import('./rasterizer_storage').Material_t;
 type Texture_t = import('./rasterizer_storage').Texture_t;
@@ -489,7 +490,7 @@ export class RasterizerCanvas extends VObject {
         this.reset_canvas();
 
         // update general uniform data
-        let canvas_transform = Transform.create();
+        let canvas_transform = Transform.new();
 
         if (frame.current_rt) {
             let csy = 1;
@@ -538,6 +539,11 @@ export class RasterizerCanvas extends VObject {
         while (p_item_list) {
             this._canvas_item_render_commands(p_item_list, p_modulate, p_base_transform);
             p_item_list = /** @type {Item} */(p_item_list.next);
+        }
+    }
+    canvas_render_items_array(p_item_array: NoShrinkArray<import('engine/servers/visual/visual_server_canvas').Item>, p_modulate: Color, p_base_transform: Transform2D) {
+        for (let i = 0, len = p_item_array.length; i < len; i++) {
+            this._canvas_item_render_commands(p_item_array.buffer[i], p_modulate, p_base_transform);
         }
     }
 
@@ -618,7 +624,7 @@ export class RasterizerCanvas extends VObject {
         if (material.shader.canvas_item.uses_screen_texture && !this.states.canvas_texscreen_used) {
             this.states.canvas_texscreen_used = true;
 
-            let rect = Rect2.create();
+            let rect = Rect2.new();
             this._copy_screen(rect);
             Rect2.free(rect);
 
@@ -684,9 +690,9 @@ export class RasterizerCanvas extends VObject {
      * @param {Transform2D} p_transform
      */
     _canvas_item_render_commands(p_item: Item, p_modulate: Color, p_transform: Transform2D) {
-        let color = Color.create();
+        let color = Color.new();
 
-        let full_xform = Transform2D.create();
+        let full_xform = Transform2D.new();
         /** @type {Transform2D} */
         let extra_xform: Transform2D = null;
 

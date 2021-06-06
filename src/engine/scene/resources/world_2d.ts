@@ -105,9 +105,9 @@ class SpatialIndexer2D {
      * @param {boolean} p_add
      */
     _notifier_update_cells(p_notifier: VisibilityNotifier2D, p_rect: Rect2, p_add: boolean) {
-        let begin = Vector2.create(p_rect.x, p_rect.y);
+        let begin = Vector2.new(p_rect.x, p_rect.y);
         begin.scale(1 / this.cell_size).floor();
-        let end = Vector2.create(p_rect.x + p_rect.width, p_rect.y + p_rect.height);
+        let end = Vector2.new(p_rect.x + p_rect.width, p_rect.y + p_rect.height);
         end.scale(1 / this.cell_size).floor();
         for (let i = begin.x; i <= end.x; i++) {
             for (let j = begin.y; j <= end.y; j++) {
@@ -250,8 +250,8 @@ class SpatialIndexer2D {
             return;
         }
 
-        let begin = Vector2.create();
-        let end = Vector2.create();
+        let begin = Vector2.new();
+        let end = Vector2.new();
         for (let id in this.viewports) {
             let vd = this.viewports[id];
             begin.set(vd.rect.x, vd.rect.y);

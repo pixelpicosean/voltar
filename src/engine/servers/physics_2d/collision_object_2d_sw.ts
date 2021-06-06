@@ -118,7 +118,7 @@ export class CollisionObject2DSW {
             let xform = this.transform.clone().append(s.xform);
             xform.xform_rect(shape_aabb, shape_aabb);
             s.aabb_cache.copy(shape_aabb);
-            let rect = Rect2.create(shape_aabb.x + p_motion.x, shape_aabb.y + p_motion.y, shape_aabb.width, shape_aabb.height);
+            let rect = Rect2.new(shape_aabb.x + p_motion.x, shape_aabb.y + p_motion.y, shape_aabb.width, shape_aabb.height);
             s.aabb_cache.merge_with(rect);
             Rect2.free(rect);
             Transform2D.free(xform);

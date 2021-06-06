@@ -65,7 +65,7 @@ export class BoxContainer extends Container {
     }
 
     get_minimum_size() {
-        const minimum = Vector2.create(0, 0);
+        const minimum = Vector2.new(0, 0);
         const sep = this.get_constant('separation');
 
         let first = true;
@@ -273,7 +273,7 @@ export class BoxContainer extends Container {
 
             let size = to - from;
 
-            const rect = Rect2.create();
+            const rect = Rect2.new();
 
             if (this.vertical) {
                 rect.x = 0;

@@ -382,7 +382,7 @@ export class Space2DSW {
             r_result.collider_id = null;
             r_result.collider_shape = 0;
         }
-        let body_aabb = Rect2.create();
+        let body_aabb = Rect2.new();
 
         let shapes_found = false;
 
@@ -531,7 +531,7 @@ export class Space2DSW {
                     break;
                 }
 
-                let recover_motion = Vector2.create();
+                let recover_motion = Vector2.new();
 
                 for (let i = 0; i < cbk.amount; i++) {
                     recover_motion.add(
@@ -854,7 +854,7 @@ export class Space2DSW {
         return collided;
     }
     test_body_ray_separation(p_body: Body2DSW, p_transform: Transform2D, p_infinite_inertia: boolean, r_recover_motion: Vector2, r_results: SeparationResult[], p_result_max: number, p_margin: number) {
-        let body_aabb = Rect2.create();
+        let body_aabb = Rect2.new();
 
         let shapes_found = false;
 
@@ -901,7 +901,7 @@ export class Space2DSW {
             cbk.max = max_results;
             const cbkres = _shape_col_cbk;
 
-            let recover_motion = Vector2.create();
+            let recover_motion = Vector2.new();
 
             do {
                 recover_motion.set(0, 0);
@@ -1162,18 +1162,18 @@ export class Physics2DDirectSpaceStateSW {
         let amount = this.space.broadphase.cull_segment(begin, end, this.space.intersection_query_results, INTERSECTION_QUERY_MAX, this.space.intersection_query_subindex_results);
 
         let collided = false;
-        let res_point = Vector2.create();
-        let res_normal = Vector2.create();
+        let res_point = Vector2.new();
+        let res_normal = Vector2.new();
         let res_shape = 0;
         let res_obj: CollisionObject2DSW = null;
         let min_d = 1e10;
 
-        let inv_xform = Transform2D.create();
-        let local_from = Vector2.create();
-        let local_to = Vector2.create();
-        let shape_point = Vector2.create();
-        let shape_normal = Vector2.create();
-        let xform = Transform2D.create();
+        let inv_xform = Transform2D.new();
+        let local_from = Vector2.new();
+        let local_to = Vector2.new();
+        let shape_point = Vector2.new();
+        let shape_normal = Vector2.new();
+        let xform = Transform2D.new();
         for (let i = 0; i < amount; i++) {
             if (!_can_collide_with(this.space.intersection_query_results[i], p_collision_mask, p_collide_with_bodies, p_collide_with_areas)) {
                 continue;
@@ -1292,7 +1292,7 @@ export class Physics2DDirectSpaceStateSW {
 
     cast_motion(p_shape: Shape2DSW, p_xform: Transform2D, p_motion: Vector2, p_margin: number, p_closest: { safe: number, unsafe: number }, p_result_max: number, p_exclude: CollisionObject2DSW[] = undefined, p_collision_mask: number = 0xFFFFFFFF, p_collide_with_bodies: boolean = true, p_collide_with_areas: boolean = false) {
         let aabb = p_xform.xform_rect(p_shape.aabb);
-        let ext = Rect2.create(aabb.x + p_motion.x, aabb.y + p_motion.y, aabb.width, aabb.height);
+        let ext = Rect2.new(aabb.x + p_motion.x, aabb.y + p_motion.y, aabb.width, aabb.height);
         aabb.merge_with(ext);
         Rect2.free(ext);
         aabb.grow_by(p_margin);
@@ -1302,7 +1302,7 @@ export class Physics2DDirectSpaceStateSW {
         let best_safe = 1;
         let best_unsafe = 1;
 
-        let col_obj_xform = Transform2D.create();
+        let col_obj_xform = Transform2D.new();
         for (let i = 0; i < amount; i++) {
             if (!_can_collide_with(this.space.intersection_query_results[i], p_collision_mask, p_collide_with_bodies, p_collide_with_areas)) {
                 continue;
@@ -1331,7 +1331,7 @@ export class Physics2DDirectSpaceStateSW {
             let hi = 1;
             let mnormal = p_motion.normalized();
 
-            let motion_with_ofs = Vector2.create();
+            let motion_with_ofs = Vector2.new();
             for (let j = 0; j < 8; j++) {
                 let ofs = (low + hi) * 0.5;
 
@@ -1368,7 +1368,7 @@ export class Physics2DDirectSpaceStateSW {
         if (p_result_max <= 0) return 0;
 
         let aabb = p_shape_xform.xform_rect(p_shape.aabb);
-        let ext = Rect2.create(aabb.x + p_motion.x, aabb.y + p_motion.y, aabb.width, aabb.height);
+        let ext = Rect2.new(aabb.x + p_motion.x, aabb.y + p_motion.y, aabb.width, aabb.height);
         aabb.merge_with(ext);
         Rect2.free(ext);
         aabb.grow_by(p_margin);
@@ -1416,7 +1416,7 @@ export class Physics2DDirectSpaceStateSW {
 
     rest_info(p_shape: Shape2DSW, p_shape_xform: Transform2D, p_motion: Vector2, p_margin: number, r_info: ShapeRestInfo, p_exclude: CollisionObject2DSW[] = undefined, p_collision_mask: number = 0xFFFFFFFF, p_collide_with_bodies: boolean = true, p_collide_with_areas: boolean = false) {
         let aabb = p_shape_xform.xform_rect(p_shape.aabb);
-        let ext = Rect2.create(aabb.x + p_motion.x, aabb.y + p_motion.y, aabb.width, aabb.height);
+        let ext = Rect2.new(aabb.x + p_motion.x, aabb.y + p_motion.y, aabb.width, aabb.height);
         aabb.merge_with(ext);
         Rect2.free(ext);
         aabb.grow_by(p_margin);
@@ -1490,7 +1490,7 @@ export class Physics2DDirectSpaceStateSW {
             return 0;
         }
 
-        let aabb = Rect2.create(
+        let aabb = Rect2.new(
             p_point.x - 0.00001,
             p_point.y - 0.00001,
             0.00002,
@@ -1503,7 +1503,7 @@ export class Physics2DDirectSpaceStateSW {
 
         let cc = 0;
 
-        let local_point = Vector2.create();
+        let local_point = Vector2.new();
         for (let i = 0; i < amount; i++) {
             if (!_can_collide_with(space.intersection_query_results[i], p_collision_mask, p_collide_with_bodies, p_collide_with_areas)) {
                 continue;

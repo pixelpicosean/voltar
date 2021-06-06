@@ -55,7 +55,7 @@ export class TextureRect extends Control {
         if (!this.expand && this.texture) {
             return this.texture.get_size();
         } else {
-            return Vector2.create(0, 0);
+            return Vector2.new(0, 0);
         }
     }
 
@@ -70,8 +70,8 @@ export class TextureRect extends Control {
 
             /** @type {Vector2} */
             let size: Vector2 = null;
-            const offset = Vector2.create();
-            const region = Rect2.create();
+            const offset = Vector2.new();
+            const region = Rect2.new();
             let tile = false;
 
             switch (this.stretch_mode) {
@@ -132,7 +132,7 @@ export class TextureRect extends Control {
             size.x *= this.flip_h ? -1 : 1;
             size.y *= this.flip_v ? -1 : 1;
 
-            const rect = Rect2.create(offset.x, offset.y, size.x, size.y);
+            const rect = Rect2.new(offset.x, offset.y, size.x, size.y);
             if (region.has_no_area()) {
                 this.draw_texture_rect(this.texture, rect, tile);
             } else {

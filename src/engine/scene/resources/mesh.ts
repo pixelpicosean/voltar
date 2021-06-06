@@ -131,7 +131,7 @@ export class ArrayMesh extends Mesh {
         // AABB
         if (!is_2d) {
             let vertices = p_arrays[ARRAY_VERTEX].array;
-            let vec = Vector3.create();
+            let vec = _i_add_surface_from_arrays_vec3.set(0, 0, 0);
             for (let i = 0, len = Math.floor(vertices.length / 3); i < len; i += 3) {
                 if (i === 0) {
                     s.aabb.position.set(vertices[i+0], vertices[i+1], vertices[i+2]);
@@ -139,7 +139,6 @@ export class ArrayMesh extends Mesh {
                     s.aabb.expand_to(vec.set(vertices[i+0], vertices[i+1], vertices[i+2]));
                 }
             }
-            Vector3.free(vec);
         }
         this.surfaces.push(s);
 
@@ -302,3 +301,5 @@ export class ArrayMesh extends Mesh {
     }
 }
 res_class_map["ArrayMesh"] = ArrayMesh;
+
+const _i_add_surface_from_arrays_vec3 = new Vector3;

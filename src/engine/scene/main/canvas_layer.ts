@@ -247,14 +247,13 @@ export class CanvasLayer extends Node {
     get_viewport() {
         return this.viewport;
     }
-    get_viewport_size() {
+    get_viewport_size(r_out?: Vector2) {
         if (!this.is_inside_tree()) {
-            return Vector2.create(1, 1);
+            return r_out.set(1, 1);
         }
-        const rect = this.vp.get_visible_rect();
-        const r = Vector2.create(rect.width, rect.height);
-        Rect2.free(rect);
-        return r;
+        this.vp.get_visible_rect(rect);
+        return (r_out || Vector2.new())
+            .set(rect.width, rect.height);
     }
 
     /* private */
@@ -284,3 +283,5 @@ export class CanvasLayer extends Node {
     }
 }
 node_class_map['CanvasLayer'] = GDCLASS(CanvasLayer, Node)
+
+const rect = new Rect2;

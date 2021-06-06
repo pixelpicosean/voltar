@@ -1502,17 +1502,16 @@ export class RasterizerScene {
     }
 
     render_scene(p_cam_transform: Transform, p_cam_projection: CameraMatrix, p_cam_ortho: boolean, p_cull_result: Instance_t[], p_cull_count: number, p_light_cull_result: LightInstance_t[], p_light_cull_count: number, p_env: Environment_t, p_shadow_atlas: ShadowAtlas_t) {
-        let cam_transform = p_cam_transform.clone();
+        const cam_transform = _i_render_scene_Transform_1.copy(p_cam_transform);
 
         let viewport_width = 0, viewport_height = 0;
         let viewport_x = 0, viewport_y = 0;
         let reverse_cull = false;
 
         if (this.storage.frame.current_rt && this.storage.frame.current_rt.flags.VFLIP) {
-            let negate_axis = cam_transform.basis.get_axis(1).negate();
+            let negate_axis = cam_transform.basis.get_axis(1, _i_render_scene_Vector3_1).negate();
             cam_transform.basis.set_axis(1, negate_axis);
             reverse_cull = true;
-            Vector3.free(negate_axis);
         }
 
         this.state.render_no_shadows = false;
@@ -1589,7 +1588,7 @@ export class RasterizerScene {
 
         // clear color
 
-        let clear_color = Color.create(0, 0, 0, 1);
+        const clear_color = _i_render_scene_Color_1.set(0, 0, 0, 1);
 
         if (this.storage.frame.current_rt && this.storage.frame.current_rt.flags.TRANSPARENT) {
             clear_color.set(0, 0, 0, 0);
@@ -1669,9 +1668,6 @@ export class RasterizerScene {
         this._render_render_list(this.render_list.elements, this.render_list.max_elements - this.render_list.alpha_element_count, this.render_list.alpha_element_count, cam_transform, p_cam_projection, p_shadow_atlas, p_env, 0, 0, reverse_cull, true, false);
 
         this._post_process(p_env, p_cam_projection);
-
-        Color.free(clear_color);
-        Transform.free(cam_transform);
     }
 
     render_shadow(light_instance: LightInstance_t, p_shadow_atlas: ShadowAtlas_t, p_pass: number, p_cull_result: Instance_t[], p_cull_count: number) {
@@ -1690,8 +1686,8 @@ export class RasterizerScene {
         let bias = 0;
         let normal_bias = 0;
 
-        let light_projection = CameraMatrix.create();
-        let light_transform = Transform.create();
+        const light_projection = _i_render_shadow_CameraMatrix_1.identity();
+        const light_transform = _i_render_shadow_Transform_1.identity();
 
         this.state.current_shader = null;
         this.state.prev_conditions.length = 0;
@@ -1753,7 +1749,7 @@ export class RasterizerScene {
 
             if (light.type === LIGHT_OMNI) {
                 if (light.omni_shadow_mode === LIGHT_OMNI_SHADOW_CUBE) {
-                    // TODO: cubemap omni shadow
+                    // @Incomplete: cubemap omni shadow
                 } else {
                     this.state.shadow_is_dual_paraboloid = true;
                     light_projection.copy(light_instance.shadow_transforms[0].camera);
@@ -1841,9 +1837,6 @@ export class RasterizerScene {
         if (!VSG.config.use_rgba_3d_shadows) {
             gl.colorMask(true, true, true, true);
         }
-
-        CameraMatrix.free(light_projection);
-        Transform.free(light_transform);
     }
 
     init_shader_material(shader_material: ShaderMaterial, vs: string, fs: string, conditions: number[]) {
@@ -2150,8 +2143,8 @@ export class RasterizerScene {
         let prev_geometry: Geometry_t = null;
         let prev_skeleton: Skeleton_t = null;
 
-        let view_transform_inverse = p_view_transform.inverse();
-        let projection_inverse = p_projection.inverse();
+        const view_transform_inverse = _i_render_render_list_Transform_1.copy(p_view_transform).invert();
+        const projection_inverse = _i_render_render_list_CameraMatrix_1.copy(p_projection).invert();
 
         let prev_base_pass = false;
         let prev_light: LightInstance_t = null;
@@ -2504,9 +2497,6 @@ export class RasterizerScene {
         this.set_shader_condition("USE_DEPTH_PREPASS", false);
 
         this.set_shader_condition("ENABLE_UV_INTERP", false);
-
-        Transform.free(view_transform_inverse);
-        CameraMatrix.free(projection_inverse);
     }
 
     /**
@@ -2542,7 +2532,7 @@ export class RasterizerScene {
             this.state.gl.depthFunc = gl.LEQUAL;
         }
 
-        let camera = CameraMatrix.create();
+        const camera = _i_draw_sky_CameraMatrix_1.identity();
 
         if (p_custom_fov) {
             let near_plane = p_projection.get_z_near();
@@ -2591,7 +2581,7 @@ export class RasterizerScene {
         let vp_he = camera.get_viewport_half_extents();
         let zn = p_projection.get_z_near();
 
-        let uv = Vector3.create();
+        const uv = _i_draw_sky_Vector3_1;
         for (let i = 0; i < 4; i++) {
             let idx = (i * 2 + 1) * 3;
 
@@ -2632,11 +2622,10 @@ export class RasterizerScene {
         // set uniforms
         copy.set_uniform_float("multiplier", p_energy);
 
-        let t = Transform.create();
+        const t = _i_draw_sky_Transform_1.identity();
         t.basis.copy(p_sky_orientation);
         t.affine_invert();
         copy.set_uniform("sky_transform", t.as_array(sky_transform_arr))
-        Transform.free(t);
 
         // set textures
         let tex = p_sky.panorama;
@@ -2652,9 +2641,6 @@ export class RasterizerScene {
         copy.set_conditional("USE_PANORAMA", false);
         copy.set_conditional("USE_MULTIPLIER", false);
         copy.set_conditional("USE_CUBEMAP", false);
-
-        Vector3.free(uv);
-        CameraMatrix.free(camera);
     }
 
     /**
@@ -2801,14 +2787,12 @@ export class RasterizerScene {
         // specific parameters
         switch (light.type) {
             case LIGHT_DIRECTIONAL: {
-                let direction = Vector3.create(0, 0, -1);
+                const direction = _i_setup_light_Vector3_1.set(0, 0, -1);
                 p_light.transform.basis.xform(direction, direction);
                 p_view_transform.basis.xform_inv(direction, direction);
                 direction.normalize();
 
                 this.set_uniform_v("LIGHT_DIRECTION", direction.as_array(), true, true);
-
-                Vector3.free(direction);
 
                 if (!this.state.render_no_shadows && light.shadow && this.directional_shadow.gl_depth) {
                     let shadow_count = 0;
@@ -2827,10 +2811,10 @@ export class RasterizerScene {
                     }
 
                     let matrices = [
-                        CameraMatrix.create(),
-                        CameraMatrix.create(),
-                        CameraMatrix.create(),
-                        CameraMatrix.create(),
+                        _i_setup_light_CameraMatrix_1.identity(),
+                        _i_setup_light_CameraMatrix_2.identity(),
+                        _i_setup_light_CameraMatrix_3.identity(),
+                        _i_setup_light_CameraMatrix_4.identity(),
                     ];
 
                     for (let k = 0; k < shadow_count; k++) {
@@ -2861,15 +2845,15 @@ export class RasterizerScene {
 
                         split_offsets[k] = p_light.shadow_transforms[k].split;
 
-                        let _modelview = p_view_transform.inverse()
+                        const _modelview = _i_setup_light_Transform_1.copy(p_view_transform).invert()
                             .append(p_light.shadow_transforms[k].transform)
                             .affine_invert()
-                        let modelview = CameraMatrix.create().set_transform(_modelview);
+                        const modelview = _i_setup_light_CameraMatrix_5.set_transform(_modelview);
 
-                        let bias = CameraMatrix.create();
+                        const bias = _i_setup_light_CameraMatrix_6.identity();
                         bias.set_light_bias();
-                        let rectm = CameraMatrix.create();
-                        let atlas_rect = Rect2.create(
+                        const rectm = _i_setup_light_CameraMatrix_7.identity();
+                        const atlas_rect = _i_setup_light_Rect2.set(
                             x / this.directional_shadow.size,
                             y / this.directional_shadow.size,
                             width / this.directional_shadow.size,
@@ -2881,11 +2865,6 @@ export class RasterizerScene {
                             .append(bias)
                             .append(p_light.shadow_transforms[k].camera)
                             .append(modelview)
-
-                        Transform.free(_modelview);
-                        CameraMatrix.free(modelview);
-                        CameraMatrix.free(rectm);
-                        CameraMatrix.free(bias);
                     }
 
                     this.set_uniform_n2("shadow_pixel_size", 1 / this.directional_shadow.size, 1 / this.directional_shadow.size, true, true);
@@ -2894,15 +2873,10 @@ export class RasterizerScene {
                     this.set_uniform_v("light_shadow_matrix3", matrices[2].as_array(), true, true);
                     this.set_uniform_v("light_shadow_matrix4", matrices[3].as_array(), true, true);
                     this.set_uniform_v("light_split_offsets", split_offsets, true, true);
-
-                    CameraMatrix.free(matrices[0]);
-                    CameraMatrix.free(matrices[1]);
-                    CameraMatrix.free(matrices[2]);
-                    CameraMatrix.free(matrices[3]);
                 }
             } break;
             case LIGHT_OMNI: {
-                let position = p_view_transform.xform_inv(p_light.transform.origin);
+                const position = p_view_transform.xform_inv(p_light.transform.origin, _i_setup_light_Vector3_2);
 
                 this.set_uniform_v("LIGHT_POSITION", position.as_array(), true, true);
 
@@ -2934,7 +2908,7 @@ export class RasterizerScene {
                         width /= 2;
                     }
 
-                    let proj = p_view_transform.inverse().append(p_light.transform).invert();
+                    const proj = _i_setup_light_Transform_2.copy(p_view_transform).invert().append(p_light.transform).invert();
 
                     this.set_uniform_n2("shadow_pixel_size", 1 / shadow_atlas.size, 1 / shadow_atlas.size, true, true);
                     this.set_uniform_v("light_shadow_matrix", proj.as_array(), true, true);
@@ -2950,12 +2924,12 @@ export class RasterizerScene {
                 }
             } break;
             case LIGHT_SPOT: {
-                let position = p_view_transform.xform_inv(p_light.transform.origin);
+                const position = p_view_transform.xform_inv(p_light.transform.origin, _i_setup_light_Vector3_3);
 
                 this.set_uniform_v("LIGHT_POSITION", position.as_array(), true, true);
 
-                let direction = p_view_transform.inverse()
-                    .basis.xform(p_light.transform.basis.xform(Vector3.create(0, 0, -1)))
+                const direction = _i_setup_light_Transform_3.copy(p_view_transform).invert()
+                    .basis.xform(p_light.transform.basis.xform(_i_setup_light_Vector3_4.set(0, 0, -1), _i_setup_light_Vector3_4))
                     .normalize()
                 this.set_uniform_v("LIGHT_DIRECTION", direction.as_array(), true, true);
 
@@ -2970,11 +2944,8 @@ export class RasterizerScene {
                 this.set_uniform_n("LIGHT_SPOT_ANGLE", angle, true, true);
                 this.set_uniform_n("light_range", range, true, true);
 
-                Vector3.free(direction);
-                Vector3.free(position);
-
                 if (!this.state.render_no_shadows && light.shadow && shadow_atlas && shadow_atlas.shadow_owners.has(p_light)) {
-                    // FIXME: GLES2 spot shadow not work in Godot 3.2, maybe there"s a bug
+                    // @Incomplete: GLES2 spot shadow not work in Godot 3.2, maybe there"s a bug
                 }
             } break;
         }
@@ -3623,3 +3594,34 @@ function create_shader_config_key(config: MaterialInstanceConfig) {
     }
     return key;
 }
+
+const _i_render_scene_Vector3_1 = new Vector3;
+const _i_render_scene_Color_1 = new Color;
+const _i_render_scene_Transform_1 = new Transform;
+
+const _i_render_shadow_CameraMatrix_1 = new CameraMatrix;
+const _i_render_shadow_Transform_1 = new Transform;
+
+const _i_render_render_list_CameraMatrix_1 = new CameraMatrix;
+const _i_render_render_list_Transform_1 = new Transform;
+
+const _i_draw_sky_CameraMatrix_1 = new CameraMatrix;
+const _i_draw_sky_Transform_1 = new Transform;
+const _i_draw_sky_Vector3_1 = new Vector3;
+
+const _i_setup_light_Vector3_1 = new Vector3;
+const _i_setup_light_Vector3_2 = new Vector3;
+const _i_setup_light_Vector3_3 = new Vector3;
+const _i_setup_light_Vector3_4 = new Vector3;
+const _i_setup_light_Vector3_5 = new Vector3;
+const _i_setup_light_CameraMatrix_1 = new CameraMatrix;
+const _i_setup_light_CameraMatrix_2 = new CameraMatrix;
+const _i_setup_light_CameraMatrix_3 = new CameraMatrix;
+const _i_setup_light_CameraMatrix_4 = new CameraMatrix;
+const _i_setup_light_CameraMatrix_5 = new CameraMatrix;
+const _i_setup_light_CameraMatrix_6 = new CameraMatrix;
+const _i_setup_light_CameraMatrix_7 = new CameraMatrix;
+const _i_setup_light_Transform_1 = new Transform;
+const _i_setup_light_Transform_2 = new Transform;
+const _i_setup_light_Transform_3 = new Transform;
+const _i_setup_light_Rect2 = new Rect2;

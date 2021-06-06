@@ -61,3 +61,36 @@ export function range_sort<T>(array: T[], start: number, end: number, compareFn:
     }
     return array;
 }
+
+export class NoShrinkArray<T> {
+    buffer: T[] = [];
+
+    length = 0;
+
+    clear() {
+        this.length = 0;
+    }
+
+    push(e: T) {
+        this.buffer[this.length++] = e;
+    }
+    pop(): T {
+        this.length--;
+        return this.buffer[this.length];
+    }
+    unshift(e: T) {
+        for (let i = 0; i < this.length; i++) {
+            this.buffer[i + 1] = this.buffer[i];
+        }
+        this.buffer[0] = e;
+        this.length++;
+    }
+    shift(): T {
+        let first = this.buffer[0];
+        for (let i = 0; i < this.length - 1; i++) {
+            this.buffer[i] = this.buffer[i + 1];
+        }
+        this.length--;
+        return first;
+    }
+}

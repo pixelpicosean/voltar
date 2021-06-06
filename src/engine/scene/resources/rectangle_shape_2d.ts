@@ -44,7 +44,7 @@ export class RectangleShape2D extends Shape2D {
      * @param {Rect2} [p_rect]
      * @returns {Rect2}
      */
-    get_rect(p_rect: Rect2 = Rect2.create()): Rect2 {
+    get_rect(p_rect: Rect2 = Rect2.new()): Rect2 {
         p_rect.x = -this.extents.width;
         p_rect.y = -this.extents.height;
         p_rect.width = this.extents.width * 2;

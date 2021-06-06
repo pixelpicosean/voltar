@@ -36,6 +36,14 @@ interface DisplaySettings {
 
     directional_shadow_size?: number,
     shadow_filter_mode?: 0 | 1 | 2,
+
+    /**
+     * Fast 2D rendering mode:
+     * 1. do not support custom z-index
+     * 2. do not support `behind` flag
+     * 3. do not support y-sort
+     */
+    fast2d?: boolean,
 }
 
 interface PhysicsSettings {
@@ -97,6 +105,8 @@ const DefaultSettings: Settings = {
 
         directional_shadow_size: 4096,
         shadow_filter_mode: 1,
+
+        fast2d: true,
     },
     physics: {
         physics_fps: 60,

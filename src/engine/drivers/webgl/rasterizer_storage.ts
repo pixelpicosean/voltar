@@ -1611,7 +1611,7 @@ export class RasterizerStorage {
         if (!p_aabb && vertices instanceof Float32Array) {
             if (use_3d_vertices) {
                 let aabb = surface.aabb;
-                let vec = Vector3.create();
+                let vec = _i_mesh_add_surface_from_data_vec3.set(0, 0, 0);
                 aabb.set(0, 0, 0, 0, 0, 0);
                 let vert_length = Math.floor(stride / 4);
                 for (let i = 0; i < array_len; i++) {
@@ -1632,9 +1632,8 @@ export class RasterizerStorage {
                         ))
                     }
                 }
-                Vector3.free(vec);
             } else {
-                // TODO: calculate 2D AABB (Rect2)
+                // @Incomplete: calculate 2D AABB (Rect2)
             }
         } else {
             surface.aabb.copy(p_aabb);
@@ -1715,19 +1714,17 @@ export class RasterizerStorage {
         mesh.surfaces[surface].material = material;
     }
 
-    /**
-     * @param {Mesh_t} mesh
-     */
-    mesh_get_aabb(mesh: Mesh_t) {
-        let aabb = AABB.create();
+    mesh_get_aabb(mesh: Mesh_t, r_out?: AABB) {
+        if (!r_out) r_out = AABB.new();
+
         for (let i = 0; i < mesh.surfaces.length; i++) {
             if (i === 0) {
-                aabb.copy(mesh.surfaces[i].aabb);
+                r_out.copy(mesh.surfaces[i].aabb);
             } else {
-                aabb.merge_with(mesh.surfaces[i].aabb);
+                r_out.merge_with(mesh.surfaces[i].aabb);
             }
         }
-        return aabb;
+        return r_out;
     }
 
     /**
@@ -1825,10 +1822,9 @@ export class RasterizerStorage {
             multimesh.data = new_float32array(format_floats * instances);
             const data = multimesh.data;
 
-            const c = Color.create();
+            const c = _i_multimesh_allocate_color;
             const c_8bit = c.set(1, 1, 1, 1).as_rgba8();
             const d_8bit = c.set(0, 0, 0, 0).as_rgba8();
-            Color.free(c);
 
             for (let i = 0, len = instances * format_floats; i < len; i += format_floats) {
                 let color_from = 0;
@@ -2078,30 +2074,25 @@ export class RasterizerStorage {
         p_light.instance_change_notify(true, false);
     }
 
-    /**
-     * @param {Light_t} p_light
-     */
-    light_get_aabb(p_light: Light_t) {
+    light_get_aabb(p_light: Light_t, r_out?: AABB) {
+        if (!r_out) r_out = AABB.new();
+
         switch (p_light.type) {
             case LIGHT_SPOT: {
                 let len = p_light.param[LIGHT_PARAM_RANGE];
                 let size = Math.tan(deg2rad(p_light.param[LIGHT_PARAM_SPOT_ANGLE])) * len;
-                let aabb = AABB.create();
-                aabb.set(-size, -size, -len, size * 2, size * 2, len);
-                return aabb;
+                return r_out.set(-size, -size, -len, size * 2, size * 2, len);
             };
             case LIGHT_OMNI: {
                 let r = p_light.param[LIGHT_PARAM_RANGE];
-                let aabb = AABB.create();
-                aabb.set(-r, -r, -r, r * 2, r * 2, r * 2);
-                return aabb;
+                return r_out.set(-r, -r, -r, r * 2, r * 2, r * 2);
             };
             case LIGHT_DIRECTIONAL: {
-                return AABB.create();
+                return r_out.set(0, 0, 0, 0, 0, 0);
             };
         }
 
-        return AABB.create();
+        return r_out.set(0, 0, 0, 0, 0, 0);
     }
 
     /* light map API */
@@ -2119,11 +2110,8 @@ export class RasterizerStorage {
         p_capture.instance_change_notify(true, false);
     }
 
-    /**
-     * @param {LightmapCapture_t} p_capture
-     */
-    lightmap_capture_get_bounds(p_capture: LightmapCapture_t) {
-        return p_capture.bounds;
+    lightmap_capture_get_bounds(p_capture: LightmapCapture_t, r_out?: AABB) {
+        return (r_out || AABB.new()).copy(p_capture.bounds);
     }
 
     /* skeleton API */
@@ -2390,3 +2378,7 @@ export class RasterizerStorage {
         return buffer;
     }
 }
+
+const _i_mesh_add_surface_from_data_vec3 = new Vector3;
+
+const _i_multimesh_allocate_color = new Color;

@@ -147,8 +147,8 @@ const dvec = [
 const _generate_contacts_Pair_sort = (a: _generate_contacts_Pair, b: _generate_contacts_Pair): number => (a.d - b.d);
 
 function _generate_contacts_edge_edge(p_points_A: Vector2[], p_point_count_A: number, p_points_B: Vector2[], p_point_count_B: number, p_collector: _CollectorCallback2D) {
-    let n = p_collector.normal.clone();
-    let t = n.tangent();
+    let n = _i_generate_contacts_edge_edge_Vector2_3.copy(p_collector.normal);
+    let t = n.tangent(_i_generate_contacts_edge_edge_Vector2_4);
     let dA = n.dot(p_points_A[0]);
     let dB = n.dot(p_points_B[0]);
 
@@ -170,30 +170,26 @@ function _generate_contacts_edge_edge(p_points_A: Vector2[], p_point_count_A: nu
     for (let i = 1; i <= 2; i++) {
         if (dvec[i].a) {
             let a = p_points_A[dvec[i].idx];
-            let b = n.plane_project(dB, a);
+            let b = n.plane_project(dB, a, _i_generate_contacts_edge_edge_Vector2_1);
             if (n.dot(a) > n.dot(b) - CMP_EPSILON) {
-                Vector2.free(b);
                 continue;
             }
             p_collector.call(a, b);
-
-            Vector2.free(b);
         } else {
             let b = p_points_B[dvec[i].idx];
-            let a = n.plane_project(dA, b);
+            let a = n.plane_project(dA, b, _i_generate_contacts_edge_edge_Vector2_2);
             if (n.dot(a) > n.dot(b) - CMP_EPSILON) {
-                Vector2.free(a);
                 continue;
             }
             p_collector.call(a, b);
-
-            Vector2.free(a);
         }
     }
-
-    Vector2.free(t);
-    Vector2.free(n);
 }
+
+const _i_generate_contacts_edge_edge_Vector2_1 = new Vector2;
+const _i_generate_contacts_edge_edge_Vector2_2 = new Vector2;
+const _i_generate_contacts_edge_edge_Vector2_3 = new Vector2;
+const _i_generate_contacts_edge_edge_Vector2_4 = new Vector2;
 
 const generate_contacts_func_table = [
     [
@@ -275,43 +271,31 @@ class SeparatorAxisTest2D<ShapeA, ShapeB> {
     }
     test_cast(): boolean {
         if (this.cast_A) {
-            let na = this.motion_A.normalized();
+            let na = _i_test_cast_Vector2_1.copy(this.motion_A).normalize();
             if (!this.test_axis(na)) {
-                Vector2.free(na);
                 return false;
             }
-            let tangent = na.tangent();
+            let tangent = na.tangent(_i_test_cast_Vector2_2);
             if (!this.test_axis(tangent)) {
-                Vector2.free(tangent);
-                Vector2.free(na);
                 return false;
             }
-
-            Vector2.free(tangent);
-            Vector2.free(na);
         }
 
         if (this.cast_B) {
-            let nb = this.motion_B.normalized();
+            let nb = _i_test_cast_Vector2_3.copy(this.motion_B).normalize();
             if (!this.test_axis(nb)) {
-                Vector2.free(nb);
                 return false;
             }
-            let tangent = nb.tangent();
+            let tangent = nb.tangent(_i_test_cast_Vector2_4);
             if (!this.test_axis(tangent)) {
-                Vector2.free(tangent);
-                Vector2.free(nb);
                 return false;
             }
-
-            Vector2.free(tangent);
-            Vector2.free(nb);
         }
 
         return true;
     }
     test_axis(p_axis: Vector2): boolean {
-        let axis = p_axis.clone();
+        let axis = _i_test_axis_Vector2_1.copy(p_axis);
 
         if (
             Math.abs(axis.x) < CMP_EPSILON
@@ -358,7 +342,6 @@ class SeparatorAxisTest2D<ShapeA, ShapeB> {
                 this.callback.sep_axis[0].copy(axis);
             }
 
-            Vector2.free(axis);
             return false;
         }
 
@@ -376,7 +359,6 @@ class SeparatorAxisTest2D<ShapeA, ShapeB> {
             }
         }
 
-        Vector2.free(axis);
         return true;
     }
     generate_contacts() {
@@ -395,7 +377,7 @@ class SeparatorAxisTest2D<ShapeA, ShapeB> {
         }
 
         let negate_best_axis = this.best_axis.clone().negate();
-        let negate_best_axis_inv = Vector2.create();
+        let negate_best_axis_inv = Vector2.new();
 
         let supports_A = reset_vec_array(supports_vec_1);
         let support_count_A = 0;
@@ -445,8 +427,15 @@ class SeparatorAxisTest2D<ShapeA, ShapeB> {
     }
 }
 
+const _i_test_cast_Vector2_1 = new Vector2;
+const _i_test_cast_Vector2_2 = new Vector2;
+const _i_test_cast_Vector2_3 = new Vector2;
+const _i_test_cast_Vector2_4 = new Vector2;
+
+const _i_test_axis_Vector2_1 = new Vector2;
+
 const TEST_POINT = <ShapeA, ShapeB>(separator: SeparatorAxisTest2D<ShapeA, ShapeB>, cast_A: boolean, cast_B: boolean, p_motion_A: Vector2, p_motion_B: Vector2, m_a: Vector2, m_b: Vector2) => {
-    let vec = Vector2.create();
+    let vec = Vector2.new();
     const result = (
         (!separator.test_axis((vec.copy(m_a).subtract(m_b).normalize())))
         ||
@@ -958,7 +947,7 @@ const _collision_circle_capsule = (cast_A: boolean, cast_B: boolean, with_margin
             return;
         }
 
-        let vec = Vector2.create(p_transform_B.a, p_transform_B.b).normalize();
+        let vec = Vector2.new(p_transform_B.a, p_transform_B.b).normalize();
         if (!separator.test_axis(vec)) {
             Vector2.free(vec);
             return;
@@ -1029,7 +1018,7 @@ const _collision_circle_convex_polygon = (cast_A: boolean, cast_B: boolean, with
         }
 
         // poly faces and poly points vs circle
-        const point = Vector2.create();
+        const point = Vector2.new();
         for (let i = 0, len = p_convex_B.get_point_count(); i < len; i++) {
             const A_origin = p_transform_A.get_origin();
             if (TEST_POINT(separator, cast_A, cast_B, p_motion_A, p_motion_B, A_origin, p_transform_B.xform(p_convex_B._points[i].pos, point))) {
@@ -1205,7 +1194,7 @@ const _collision_rectangle_capsule = (cast_A: boolean, cast_B: boolean, with_mar
         }
 
         // box faces
-        const vec = Vector2.create(p_transform_A.a, p_transform_A.b).normalize();
+        const vec = Vector2.new(p_transform_A.a, p_transform_A.b).normalize();
         if (!separator.test_axis(vec)) {
             Vector2.free(vec);
             return;
@@ -1347,7 +1336,7 @@ const _collision_rectangle_convex_polygon = (cast_A: boolean, cast_B: boolean, w
             return;
         }
 
-        const vec = Vector2.create();
+        const vec = Vector2.new();
 
         // box faces
         if (!separator.test_axis(vec.set(p_transform_A.a, p_transform_A.b).normalize())) {
@@ -1361,7 +1350,7 @@ const _collision_rectangle_convex_polygon = (cast_A: boolean, cast_B: boolean, w
         }
 
         // convex faces
-        const boxinv = Transform2D.create();
+        const boxinv = Transform2D.new();
         if (with_margin) {
             boxinv.copy(p_transform_A).affine_inverse();
         }
@@ -1447,7 +1436,7 @@ const _collision_capsule_capsule = (cast_A: boolean, cast_B: boolean, with_margi
 
         // capsule axis
 
-        let vec = Vector2.create(p_transform_B.a, p_transform_B.b).normalize();
+        let vec = Vector2.new(p_transform_B.a, p_transform_B.b).normalize();
         if (!separator.test_axis(vec)) {
             Vector2.free(vec);
             return;
@@ -1508,7 +1497,7 @@ const _collision_capsule_convex_polygon = (cast_A: boolean, cast_B: boolean, wit
 
         // capsule axis
 
-        let vec = Vector2.create(p_transform_B.a, p_transform_B.b).normalize();
+        let vec = Vector2.new(p_transform_B.a, p_transform_B.b).normalize();
         if (!separator.test_axis(vec)) {
             Vector2.free(vec);
             return;

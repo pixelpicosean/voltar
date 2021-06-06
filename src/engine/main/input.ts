@@ -139,9 +139,8 @@ export class Input extends VObject {
      * @param {Vector2Like} p_pos
      */
     set_mouse_position(p_pos: Vector2Like) {
-        const tmp = Vector2.create(p_pos.x, p_pos.y);
+        const tmp = _i_vec2.set(p_pos.x, p_pos.y);
         this.mouse_speed_track.update(tmp.subtract(this.mouse_pos));
-        Vector2.free(tmp);
         this.mouse_pos.x = p_pos.x;
         this.mouse_pos.y = p_pos.y;
     }
@@ -253,6 +252,8 @@ export class Input extends VObject {
                     sd.speed.copy(mm.speed);
 
                     this.main_loop.input_event(sd);
+
+                    sd._free();
                 }
             } break;
             case 'InputEventScreenTouch': { } break;
@@ -289,3 +290,5 @@ GDCLASS(Input, VObject)
 
 /** @type {Input} */
 let singleton: Input = null;
+
+const _i_vec2 = new Vector2;

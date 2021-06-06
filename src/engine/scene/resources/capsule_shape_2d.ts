@@ -51,7 +51,7 @@ export class CapsuleShape2D extends Shape2D {
     /* private */
 
     _update_shape() {
-        let data = Vector2.create(this.radius, this.height);
+        let data = Vector2.new(this.radius, this.height);
         this.shape.set_data(data);
         Vector2.free(data);
     }

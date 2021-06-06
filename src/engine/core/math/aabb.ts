@@ -2,54 +2,16 @@ import { Vector3, Vector3Like } from "./vector3";
 
 type Plane = import('./plane').Plane;
 
-const pool: AABB[] = [];
-
 export class AABB {
-    /**
-     * @param {number} [x]
-     * @param {number} [y]
-     * @param {number} [z]
-     * @param {number} [w]
-     * @param {number} [h]
-     * @param {number} [d]
-     */
-    static create(x: number = 0, y: number = 0, z: number = 0, w: number = 0, h: number = 0, d: number = 0) {
-        let obj = pool.pop();
-        if (!obj) obj = new AABB;
-        obj.set(x, y, z, w, h, d);
-        return obj;
-    }
-
-    /**
-     * @param {AABB} aabb
-     */
-    static free(aabb: AABB) {
-        if (aabb && pool.length < 2020) {
-            pool.push(aabb);
-        }
-        return AABB;
-    }
-
     position = new Vector3;
     size = new Vector3;
 
-    /**
-     * @param {number} x
-     * @param {number} y
-     * @param {number} z
-     * @param {number} width
-     * @param {number} height
-     * @param {number} depth
-     */
     set(x: number, y: number, z: number, width: number, height: number, depth: number) {
         this.position.set(x, y, z);
         this.size.set(width, height, depth);
         return this;
     }
 
-    /**
-     * @param {AABB} aabb
-     */
     copy(aabb: AABB) {
         this.position.copy(aabb.position);
         this.size.copy(aabb.size);
@@ -57,17 +19,14 @@ export class AABB {
     }
 
     clone() {
-        return AABB.create().copy(this);
+        return AABB.new().copy(this);
     }
 
-    /**
-     * @param {AABB} aabb
-     */
     encloses(aabb: AABB) {
         let src_min = this.position;
-        let src_max = this.position.clone().add(this.size);
+        let src_max = _i_enclose_vec3_1.copy(this.position).add(this.size);
         let dst_min = aabb.position;
-        let dst_max = aabb.position.clone().add(aabb.size);
+        let dst_max = _i_enclose_vec3_2.copy(aabb.position).add(aabb.size);
 
         let result = (
             src_min.x <= dst_min.x
@@ -83,25 +42,16 @@ export class AABB {
             src_max.z > dst_max.z
         );
 
-        Vector3.free(src_max);
-        Vector3.free(dst_max);
-
         return result;
     }
 
-    /**
-     * @param {Vector3Like} p_vec
-     */
     expand(p_vec: Vector3Like) {
         return this.clone().expand_to(p_vec);
     }
 
-    /**
-     * @param {Vector3Like} p_vec
-     */
     expand_to(p_vec: Vector3Like) {
         let begin = this.position;
-        let end = this.position.clone().add(this.size);
+        let end = _i_expand_to_vec3.copy(this.position).add(this.size);
 
         if (p_vec.x < begin.x) {
             begin.x = p_vec.x;
@@ -125,8 +75,6 @@ export class AABB {
 
         this.size.copy(end).subtract(begin);
 
-        Vector3.free(end);
-
         return this;
     }
 
@@ -134,48 +82,37 @@ export class AABB {
         return this.size.x * this.size.y * this.size.z;
     }
 
-    /**
-     * @param {number} idx
-     */
-    get_endpoint(idx: number) {
+    get_endpoint(idx: number, r_out?: Vector3): Vector3 {
+        if (!r_out) r_out = Vector3.new();
         switch (idx) {
-            case 0: return Vector3.create(this.position.x, this.position.y, this.position.z);
-            case 1: return Vector3.create(this.position.x, this.position.y, this.position.z + this.size.z);
-            case 2: return Vector3.create(this.position.x, this.position.y + this.size.y, this.position.z);
-            case 3: return Vector3.create(this.position.x, this.position.y + this.size.y, this.position.z + this.size.z);
-            case 4: return Vector3.create(this.position.x + this.size.x, this.position.y, this.position.z);
-            case 5: return Vector3.create(this.position.x + this.size.x, this.position.y, this.position.z + this.size.z);
-            case 6: return Vector3.create(this.position.x + this.size.x, this.position.y + this.size.y, this.position.z);
-            case 7: return Vector3.create(this.position.x + this.size.x, this.position.y + this.size.y, this.position.z + this.size.z);
+            case 0: return r_out.set(this.position.x, this.position.y, this.position.z);
+            case 1: return r_out.set(this.position.x, this.position.y, this.position.z + this.size.z);
+            case 2: return r_out.set(this.position.x, this.position.y + this.size.y, this.position.z);
+            case 3: return r_out.set(this.position.x, this.position.y + this.size.y, this.position.z + this.size.z);
+            case 4: return r_out.set(this.position.x + this.size.x, this.position.y, this.position.z);
+            case 5: return r_out.set(this.position.x + this.size.x, this.position.y, this.position.z + this.size.z);
+            case 6: return r_out.set(this.position.x + this.size.x, this.position.y + this.size.y, this.position.z);
+            case 7: return r_out.set(this.position.x + this.size.x, this.position.y + this.size.y, this.position.z + this.size.z);
         }
     }
 
-    /**
-     * @param {Vector3Like} p_normal
-     */
-    get_support(p_normal: Vector3Like) {
-        let half_extents = this.size.clone().scale(0.5);
-        let ofs = this.position.clone().add(half_extents);
-        let result = Vector3.create(
+    get_support(p_normal: Vector3Like, r_out?: Vector3): Vector3 {
+        const half_extents = _i_get_support_vec3_1.copy(this.size).scale(0.5);
+        const ofs = _i_get_support_vec3_2.copy(this.position).add(half_extents);
+        return (r_out || Vector3.new()).set(
             (p_normal.x > 0) ? -half_extents.x : half_extents.x,
             (p_normal.y > 0) ? -half_extents.y : half_extents.y,
             (p_normal.z > 0) ? -half_extents.z : half_extents.z
         ).add(ofs);
-        Vector3.free(half_extents);
-        Vector3.free(ofs);
-        return result;
     }
 
     /**
-     * @param {number} p_by
+     * Returns new "AABB"
      */
     grow(p_by: number) {
         return this.clone().grow_by(p_by);
     }
 
-    /**
-     * @param {number} p_by
-     */
     grow_by(p_by: number) {
         this.position.subtract(p_by, p_by, p_by);
         this.size.add(p_by * 2, p_by * 2, p_by * 2);
@@ -183,19 +120,16 @@ export class AABB {
     }
 
     /**
-     * @param {AABB} aabb
+     * Returns new "AABB"
      */
     merged(aabb: AABB) {
         return this.clone().merge_with(aabb);
     }
 
-    /**
-     * @param {AABB} aabb
-     */
     merge_with(aabb: AABB) {
-        let beg_1 = Vector3.create(), beg_2 = Vector3.create();
-        let end_1 = Vector3.create(), end_2 = Vector3.create();
-        let min = Vector3.create(), max = Vector3.create();
+        let beg_1 = _i_merge_with_vec3_1.set(0, 0, 0), beg_2 = _i_merge_with_vec3_2.set(0, 0, 0);
+        let end_1 = _i_merge_with_vec3_3.set(0, 0, 0), end_2 = _i_merge_with_vec3_4.set(0, 0, 0);
+        let min = _i_merge_with_vec3_5.set(0, 0, 0), max = _i_merge_with_vec3_6.set(0, 0, 0);
 
         beg_1.copy(this.position);
         beg_2.copy(aabb.position);
@@ -212,13 +146,6 @@ export class AABB {
 
         this.position.copy(min);
         this.size.copy(max).subtract(min);
-
-        Vector3.free(beg_1);
-        Vector3.free(beg_2);
-        Vector3.free(end_1);
-        Vector3.free(end_2);
-        Vector3.free(min);
-        Vector3.free(max);
 
         return this;
     }
@@ -255,65 +182,43 @@ export class AABB {
         return max_size;
     }
 
-    /**
-     * @param {AABB} p_aabb
-     */
-    intersection(p_aabb: AABB) {
-        let src_min = this.position;
-        let src_max = this.position.clone().add(this.size);
-        let dst_min = p_aabb.position;
-        let dst_max = p_aabb.position.add(p_aabb.size);
+    intersection(p_aabb: AABB, r_out?: AABB) {
+        let result = r_out || AABB.new();
 
-        let min = Vector3.create(), max = Vector3.create();
+        let src_min = this.position;
+        let src_max = _i_intersection_vec3_1.copy(this.position).add(this.size);
+        let dst_min = p_aabb.position;
+        let dst_max = _i_intersection_vec3_2.copy(p_aabb.position).add(p_aabb.size);
+
+        let min = _i_intersection_vec3_3.set(0, 0, 0), max = _i_intersection_vec3_4.set(0, 0, 0);
 
         if (src_min.x > dst_max.x || src_max.x < dst_min.x) {
-            Vector3.free(src_max);
-            Vector3.free(dst_max);
-            Vector3.free(min);
-            Vector3.free(max);
-            return AABB.create();
+            return result.set(0, 0, 0, 0, 0, 0);
         } else {
             min.x = (src_min.x > dst_min.x) ? src_min.x : dst_min.x;
             max.x = (src_max.x < dst_max.x) ? src_max.x : dst_max.x;
         }
 
         if (src_min.y > dst_max.y || src_max.y < dst_min.y) {
-            Vector3.free(src_max);
-            Vector3.free(dst_max);
-            Vector3.free(min);
-            Vector3.free(max);
-            return AABB.create();
+            return result.set(0, 0, 0, 0, 0, 0);
         } else {
             min.y = (src_min.y > dst_min.y) ? src_min.y : dst_min.y;
             max.y = (src_max.y < dst_max.y) ? src_max.y : dst_max.y;
         }
 
         if (src_min.z > dst_max.z || src_max.z < dst_min.z) {
-            Vector3.free(src_max);
-            Vector3.free(dst_max);
-            Vector3.free(min);
-            Vector3.free(max);
-            return AABB.create();
+            return result.set(0, 0, 0, 0, 0, 0);
         } else {
             min.z = (src_min.z > dst_min.z) ? src_min.z : dst_min.z;
             max.z = (src_max.z < dst_max.z) ? src_max.z : dst_max.z;
         }
 
-        let result = AABB.create();
         result.position.copy(min)
         result.size.copy(max).subtract(min);
-
-        Vector3.free(src_max);
-        Vector3.free(dst_max);
-        Vector3.free(min);
-        Vector3.free(max);
 
         return result;
     }
 
-    /**
-     * @param {AABB} p_aabb
-     */
     intersects(p_aabb: AABB) {
         if (this.position.x >= (p_aabb.position.x + p_aabb.size.x))
             return false;
@@ -331,9 +236,6 @@ export class AABB {
         return true;
     }
 
-    /**
-     * @param {AABB} p_aabb
-     */
     intersects_inclusive(p_aabb: AABB) {
         if (this.position.x > (p_aabb.position.x + p_aabb.size.x))
             return false;
@@ -351,10 +253,6 @@ export class AABB {
         return true;
     }
 
-    /**
-     * @param {Vector3Like} from
-     * @param {Vector3Like} to
-     */
     intersects_segment(from: Vector3Like, to: Vector3Like) {
         let min = 0, max = 1;
         let axis = 0;
@@ -419,10 +317,10 @@ export class AABB {
     }
 
     intersects_convex_shape(p_planes: Plane[], p_points: Vector3[]) {
-        let half_extents = this.size.clone().scale(0.5);
-        let ofs = this.position.clone().add(half_extents);
+        let half_extents = _i_intersects_convex_shape_vec3_1.copy(this.size).scale(0.5);
+        let ofs = _i_intersects_convex_shape_vec3_2.copy(this.position).add(half_extents);
 
-        let point = Vector3.create();
+        let point = _i_intersects_convex_shape_vec3_3.set(0, 0, 0);
 
         for (let i = 0; i < p_planes.length; i++) {
             let p = p_planes[i];
@@ -432,9 +330,6 @@ export class AABB {
                 (p.normal.z > 0) ? -half_extents.z : half_extents.z
             ).add(ofs);
             if (p.is_point_over(point)) {
-                Vector3.free(ofs);
-                Vector3.free(half_extents);
-                Vector3.free(point);
                 return false;
             }
         }
@@ -493,9 +388,6 @@ export class AABB {
             }
         }
 
-        Vector3.free(ofs);
-        Vector3.free(half_extents);
-        Vector3.free(point);
         return true;
     }
 
@@ -509,23 +401,62 @@ export class AABB {
     }
 
     project_range_in_plane(p_plane: Plane, result: { min: number; max: number; }) {
-        let half_extents = this.size.clone().scale(0.5);
-        let center = this.position.clone().add(half_extents);
+        let half_extents = _i_project_range_in_plane_vec3_1.copy(this.size).scale(0.5);
+        let center = _i_project_range_in_plane_vec3_2.copy(this.position).add(half_extents);
 
-        let normal_abs = p_plane.normal.clone().abs();
+        let normal_abs = _i_project_range_in_plane_vec3_3.copy(p_plane.normal).abs();
         let length = normal_abs.dot(half_extents);
         let distance = p_plane.distance_to(center);
         result.min = distance - length;
         result.max = distance + length;
-
-        Vector3.free(half_extents);
-        Vector3.free(center);
-        Vector3.free(normal_abs);
     }
 
-    static EMPTY = new AABB;
-}
+    static EMPTY = Object.freeze(new AABB);
 
+    static new(x: number = 0, y: number = 0, z: number = 0, w: number = 0, h: number = 0, d: number = 0) {
+        let obj = pool.pop();
+        if (!obj) obj = new AABB;
+        obj.set(x, y, z, w, h, d);
+        return obj;
+    }
+
+    static free(aabb: AABB) {
+        if (aabb && pool.length < 2020) {
+            pool.push(aabb);
+        }
+        return AABB;
+    }
+}
+const pool: AABB[] = [];
 
 const bad_point_counts_positive = [0, 0, 0];
 const bad_point_counts_negative = [0, 0, 0];
+
+// tmp var used internally
+const _i_enclose_vec3_1 = new Vector3;
+const _i_enclose_vec3_2 = new Vector3;
+
+const _i_expand_to_vec3 = new Vector3;
+
+const _i_get_support_vec3_1 = new Vector3;
+const _i_get_support_vec3_2 = new Vector3;
+
+const _i_merge_with_vec3_1 = new Vector3;
+const _i_merge_with_vec3_2 = new Vector3;
+const _i_merge_with_vec3_3 = new Vector3;
+const _i_merge_with_vec3_4 = new Vector3;
+const _i_merge_with_vec3_5 = new Vector3;
+const _i_merge_with_vec3_6 = new Vector3;
+
+const _i_intersection_vec3_1 = new Vector3;
+const _i_intersection_vec3_2 = new Vector3;
+const _i_intersection_vec3_3 = new Vector3;
+const _i_intersection_vec3_4 = new Vector3;
+
+const _i_intersects_convex_shape_vec3_1 = new Vector3;
+const _i_intersects_convex_shape_vec3_2 = new Vector3;
+const _i_intersects_convex_shape_vec3_3 = new Vector3;
+
+const _i_project_range_in_plane_vec3_1 = new Vector3;
+const _i_project_range_in_plane_vec3_2 = new Vector3;
+const _i_project_range_in_plane_vec3_3 = new Vector3;

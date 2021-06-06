@@ -3,31 +3,7 @@ import { Basis, Quat } from "./basis";
 import { Plane } from "./plane";
 import { AABB } from "./aabb";
 
-/** @type {Transform[]} */
-const pool: Transform[] = [];
-
 export class Transform {
-    static create() {
-        let b = pool.pop();
-        if (!b) b = new Transform;
-        return b.set(
-            1, 0, 0,
-            0, 1, 0,
-            0, 0, 1,
-            0, 0, 0
-        );
-    }
-
-    /**
-     * @param {Transform} obj
-     */
-    static free(obj: Transform) {
-        if (obj && pool.length < 2020) {
-            pool.push(obj);
-        }
-        return Transform;
-    }
-
     basis = new Basis;
     origin = new Vector3;
 
@@ -113,22 +89,21 @@ export class Transform {
     }
 
     clone() {
-        return Transform.create().copy(this);
+        return Transform.new().copy(this);
     }
 
     affine_invert() {
         this.basis.invert();
-        let v = this.origin.clone().negate();
+        let v = _i_affine_invert_vec3.copy(this.origin).negate();
         this.basis.xform(v, this.origin);
-        Vector3.free(v);
         return this;
     }
 
     /**
-     * @returns new Transform
+     * Returns new "Transform"
      */
     affine_inverse() {
-        return Transform.create().copy(this).affine_invert();
+        return Transform.new().copy(this).affine_invert();
     }
 
     invert() {
@@ -138,10 +113,10 @@ export class Transform {
     }
 
     /**
-     * @returns new Transform
+     * Returns new "Transform"
      */
     inverse() {
-        return Transform.create().copy(this).invert();
+        return Transform.new().copy(this).invert();
     }
 
     /**
@@ -159,11 +134,43 @@ export class Transform {
      * @param {number} z
      */
     translate_n(x: number, y: number, z: number) {
-        let vec = Vector3.create(x, y, z);
+        let vec = _i_translate_n_vec3.set(x, y, z);
         this.origin.x += this.basis.elements[0].dot(vec);
         this.origin.y += this.basis.elements[1].dot(vec);
         this.origin.z += this.basis.elements[2].dot(vec);
-        Vector3.free(vec);
+    }
+
+    looking_at_n(x: number, y: number, z: number, up_x = 0, up_y = 1, up_z = 0) {
+        let target = _i_looking_at_n_vec3_1.set(x, y, z);
+        let up = _i_looking_at_n_vec3_2.set(up_x, up_y, up_z);
+        this.set_look_at(this.origin, target, up);
+        return this;
+    }
+
+    set_look_at(eye: Vector3Like, target: Vector3Like, up: Vector3Like) {
+        let v_y = _i_set_look_at_vec3_1.set(0, 0, 0);
+        let v_z = _i_set_look_at_vec3_2.set(0, 0, 0);
+
+        v_z.copy(eye).subtract(target).normalize();
+
+        v_y.copy(up);
+
+        let v_x = v_y.cross(v_z, _i_set_look_at_vec3_3);
+        let v_y2 = v_z.cross(v_x, _i_set_look_at_vec3_4);
+        v_y = v_y2;
+
+        v_x.normalize();
+        v_y.normalize();
+
+        this.basis.set(
+            v_x.x, v_y.x, v_z.x,
+            v_x.y, v_y.y, v_z.y,
+            v_x.z, v_y.z, v_z.z
+        );
+
+        this.origin.copy(eye);
+
+        return this;
     }
 
     /**
@@ -181,7 +188,7 @@ export class Transform {
      * @param {Vector3} [out]
      */
     xform(vec: Vector3Like, out: Vector3) {
-        if (!out) out = Vector3.create();
+        if (!out) out = Vector3.new();
         return out.set(
             this.basis.row_dot(0, vec) + this.origin.x,
             this.basis.row_dot(1, vec) + this.origin.y,
@@ -190,42 +197,37 @@ export class Transform {
     }
 
     xform_inv(vec: Vector3Like, r_out?: Vector3) {
-        r_out = r_out || Vector3.create();
-        let v = Vector3.create().copy(vec).subtract(this.origin);
+        r_out = r_out || Vector3.new();
+        let v = _i_xform_inv_vec3.copy(vec).subtract(this.origin);
         r_out.set(
             this.basis.elements[0].x * v.x + this.basis.elements[1].x * v.y + this.basis.elements[2].x * v.z,
             this.basis.elements[0].y * v.x + this.basis.elements[1].y * v.y + this.basis.elements[2].y * v.z,
             this.basis.elements[0].z * v.x + this.basis.elements[1].z * v.y + this.basis.elements[2].z * v.z
         );
-        Vector3.free(v);
         return r_out;
     }
 
-    xform_plane(p_plane: Plane, out?: Plane) {
-        if (!out) out = Plane.create();
+    xform_plane(p_plane: Plane, r_out?: Plane) {
+        if (!r_out) r_out = Plane.new();
 
-        let point = p_plane.normal.clone().scale(p_plane.d);
-        let point_dir = point.clone().add(p_plane.normal);
+        let point = _i_xform_plane_vec3_1.copy(p_plane.normal).scale(p_plane.d);
+        let point_dir = _i_xform_plane_vec3_2.copy(point).add(p_plane.normal);
         this.xform(point, point);
         this.xform(point_dir, point_dir);
 
-        let normal = point_dir.clone().subtract(point);
+        let normal = _i_xform_plane_vec3_3.copy(point_dir).subtract(point);
         normal.normalize();
         let d = normal.dot(point);
 
-        out.set(normal.x, normal.y, normal.z, d);
+        r_out.set(normal.x, normal.y, normal.z, d);
 
-        Vector3.free(point);
-        Vector3.free(point_dir);
-        Vector3.free(normal);
-
-        return out;
+        return r_out;
     }
 
-    xform_aabb(p_aabb: AABB, out?: AABB) {
-        if (!out) out = AABB.create();
+    xform_aabb(p_aabb: AABB, r_out?: AABB) {
+        if (!r_out) r_out = AABB.new();
         let min = [p_aabb.position.x, p_aabb.position.y, p_aabb.position.z];
-        let max_v = p_aabb.position.clone().add(p_aabb.size);
+        let max_v = _i_xform_aabb_vec3.copy(p_aabb.position).add(p_aabb.size);
         let max = [max_v.x, max_v.y, max_v.z];
         let tmin = [0, 0, 0], tmax = [0, 0, 0];
         let basis = [
@@ -248,10 +250,9 @@ export class Transform {
                 }
             }
         }
-        out.position.set(tmin[0], tmin[1], tmin[2]);
-        out.size.set(tmax[0] - tmin[0], tmax[1] - tmin[1], tmax[2] - tmin[2]);
-        Vector3.free(max_v);
-        return out;
+        r_out.position.set(tmin[0], tmin[1], tmin[2]);
+        r_out.size.set(tmax[0] - tmin[0], tmax[1] - tmin[1], tmax[2] - tmin[2]);
+        return r_out;
     }
 
     append(other: Transform) {
@@ -265,8 +266,11 @@ export class Transform {
         return this;
     }
 
+    /**
+     * Returns new "Transform"
+     */
     orthonormalized() {
-        return Transform.create().copy(this).orthonormalize();
+        return Transform.new().copy(this).orthonormalize();
     }
 
     /**
@@ -276,39 +280,73 @@ export class Transform {
         return this.basis.exact_equals(other.basis) && this.origin.exact_equals(other.origin);
     }
 
-    /**
-     * returns new Transform
-     * @param {Transform} p_transform
-     * @param {number} p_c
-     */
-    interpolate_with(p_transform: Transform, p_c: number) {
-        let src_scale = this.basis.get_scale();
-        let src_rot = this.basis.get_rotation_quat();
+    interpolate_with(p_transform: Transform, p_c: number, r_out?: Transform) {
+        let interp = r_out || Transform.new();
+
+        let src_scale = this.basis.get_scale(_i_interpolate_with_vec3_1);
+        let src_rot = this.basis.get_rotation_quat(_i_interpolate_with_quat_1);
         let src_loc = this.origin;
 
-        let dst_scale = p_transform.basis.get_scale();
-        let dst_rot = p_transform.basis.get_rotation_quat();
+        let dst_scale = p_transform.basis.get_scale(_i_interpolate_with_vec3_2);
+        let dst_rot = p_transform.basis.get_rotation_quat(_i_interpolate_with_quat_2);
         let dst_loc = p_transform.origin;
 
-        let i_rot = Quat.create();
-        let i_scale = Vector3.create();
+        let i_rot = _i_interpolate_with_quat_3.set(0, 0, 0, 1);
+        let i_scale = _i_interpolate_with_vec3_3.set(0, 0, 0);
 
-        let interp = Transform.create();
         interp.basis.set_quat_scale(src_rot.slerp(dst_rot, p_c, i_rot).normalize(), src_scale.linear_interpolate(dst_scale, p_c, i_scale));
         src_loc.linear_interpolate(dst_loc, p_c, interp.origin);
-
-        Quat.free(i_rot);
-        Vector3.free(i_scale);
-
-        Quat.free(dst_rot);
-        Vector3.free(dst_scale);
-
-        Quat.free(src_rot);
-        Vector3.free(src_scale);
 
         return interp;
     }
 
-    static IDENTITY = new Transform;
-}
+    static IDENTITY = Object.freeze(new Transform);
 
+    static new() {
+        let b = pool.pop();
+        if (!b) b = new Transform;
+        return b.set(
+            1, 0, 0,
+            0, 1, 0,
+            0, 0, 1,
+            0, 0, 0
+        );
+    }
+
+    static free(obj: Transform) {
+        if (obj && pool.length < 2020) {
+            pool.push(obj);
+        }
+        return Transform;
+    }
+}
+const pool: Transform[] = [];
+
+
+// tmp var used internally
+const _i_affine_invert_vec3 = new Vector3;
+
+const _i_translate_n_vec3 = new Vector3;
+
+const _i_looking_at_n_vec3_1 = new Vector3;
+const _i_looking_at_n_vec3_2 = new Vector3;
+
+const _i_set_look_at_vec3_1 = new Vector3;
+const _i_set_look_at_vec3_2 = new Vector3;
+const _i_set_look_at_vec3_3 = new Vector3;
+const _i_set_look_at_vec3_4 = new Vector3;
+
+const _i_xform_inv_vec3 = new Vector3;
+
+const _i_xform_plane_vec3_1 = new Vector3;
+const _i_xform_plane_vec3_2 = new Vector3;
+const _i_xform_plane_vec3_3 = new Vector3;
+
+const _i_xform_aabb_vec3 = new Vector3;
+
+const _i_interpolate_with_vec3_1 = new Vector3;
+const _i_interpolate_with_vec3_2 = new Vector3;
+const _i_interpolate_with_vec3_3 = new Vector3;
+const _i_interpolate_with_quat_1 = new Quat;
+const _i_interpolate_with_quat_2 = new Quat;
+const _i_interpolate_with_quat_3 = new Quat;

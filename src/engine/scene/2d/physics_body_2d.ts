@@ -486,7 +486,7 @@ export class KinematicBody2D extends PhysicsBody2D {
 
         const gt = this.get_global_transform().clone();
 
-        const recover = Vector2.create();
+        const recover = Vector2.new();
         const hits = this.rid.space.test_body_ray_separation(this.rid, gt, p_infinite_inertia, recover, sep_res, 8, this.margin);
         let deepest = -1;
         let deepest_depth = 0;
@@ -606,7 +606,7 @@ export class KinematicBody2D extends PhysicsBody2D {
                                     Vector2.free(body_velocity_normal);
                                     Vector2.free(body_velocity);
 
-                                    return Vector2.create(0, 0);
+                                    return Vector2.new(0, 0);
                                 }
                             }
                         } else if (Math.acos(collision.normal.dot(negate_floor_direction)) <= p_floor_max_angle + FLOOR_ANGLE_THRESHOLD) { // ceiling

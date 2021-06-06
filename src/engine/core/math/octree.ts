@@ -713,7 +713,7 @@ export class Octree<T> {
                         splits++;
                     }
                 } else {
-                    let aabb = p_octant.aabb.clone();
+                    const aabb = _i_insert_element_aabb.copy(p_octant.aabb);
                     aabb.size.scale(0.5);
 
                     if (i & 1) aabb.position.x += aabb.size.x;
@@ -734,8 +734,6 @@ export class Octree<T> {
                         this.octant_count++;
                         splits++;
                     }
-
-                    AABB.free(aabb);
                 }
             }
 
@@ -1079,3 +1077,5 @@ function compute_convex_mesh_points(planes: Plane[]) {
 function create_pair_key(a_id: number, b_id: number) {
     return (a_id <= b_id) ? `${a_id}.${b_id}` : `${b_id}.${a_id}`;
 }
+
+const _i_insert_element_aabb = new AABB;

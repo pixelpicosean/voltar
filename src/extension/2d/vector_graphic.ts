@@ -1,4 +1,16 @@
-import * as v from 'engine/index';
+import {
+    Vector2,
+    Vector2Like,
+    Rect2,
+    Color,
+    ColorLike,
+    PoolVector2Array,
+
+    node_class_map,
+    GDCLASS,
+
+    Node2D,
+} from 'engine/index';
 
 const MaxStepsPerHalfCircle = 32;
 const MinStepsPerHalfCircle = 10;
@@ -7,20 +19,20 @@ const RECT = 0;
 const CIRCLE = 1;
 const CAPSULE = 2;
 
-const rect = new v.Rect2;
+const rect = new Rect2;
 
 interface VGShape {
     type: number;
-    extents?: v.Vector2Like;
+    extents?: Vector2Like;
     radius?: number;
     height?: number;
 }
 
-export class VectorGraphic extends v.Node2D {
+export class VectorGraphic extends Node2D {
     static instance() { return new VectorGraphic }
 
     _shape: VGShape = null;
-    color = new v.Color(1, 1, 1, 1);
+    color = new Color(1, 1, 1, 1);
 
     /* public */
 
@@ -28,7 +40,7 @@ export class VectorGraphic extends v.Node2D {
         this._shape = p_shape;
         this.update();
     }
-    set_color(color: v.ColorLike) {
+    set_color(color: ColorLike) {
         this.color.copy(color);
         this.update();
     }
@@ -60,15 +72,15 @@ export class VectorGraphic extends v.Node2D {
                 this.draw_rect(rect.set(-shape.extents.x, -shape.extents.y, shape.extents.x * 2, shape.extents.y * 2), this.color);
             } break;
             case CIRCLE: {
-                this.draw_circle(v.Vector2.ZERO, shape.radius, this.color);
+                this.draw_circle(Vector2.ZERO, shape.radius, this.color);
             } break;
             case CAPSULE: {
                 const radius = shape.radius;
 
-                const p0 = v.Vector2.create(0, -shape.height / 2);
-                const p1 = v.Vector2.create(0, +shape.height / 2);
+                const p0 = _i_vec2_1.set(0, -shape.height / 2);
+                const p1 = _i_vec2_2.set(0, +shape.height / 2);
 
-                const points = new v.PoolVector2Array;
+                const points = new PoolVector2Array;
                 const indices: number[] = [];
 
                 /* round cap */
@@ -76,7 +88,7 @@ export class VectorGraphic extends v.Node2D {
                 const angle_per_step = Math.PI / steps;
                 points.resize(steps * 2 + 2);
                 let start_angle = Math.PI;
-                const vec = v.Vector2.create();
+                const vec = _i_vec2_3;
                 for (let i = 0; i < steps + 1; i++) {
                     points.set(i, vec.set(radius, 0).rotate(start_angle + angle_per_step * i).add(p0));
                 }
@@ -84,7 +96,6 @@ export class VectorGraphic extends v.Node2D {
                 for (let i = 0; i < steps + 1; i++) {
                     points.set(steps + 1 + i, vec.set(radius, 0).rotate(start_angle + angle_per_step * i).add(p1));
                 }
-                v.Vector2.free(vec);
 
                 let cursor = 0;
                 // - body
@@ -110,12 +121,13 @@ export class VectorGraphic extends v.Node2D {
                 }
 
                 this.draw_colored_polygon(points, this.color, null, null, indices);
-
-                v.Vector2.free(p0);
-                v.Vector2.free(p1);
             } break;
         }
     }
 }
 
-v.node_class_map['VectorGraphic'] = v.GDCLASS(VectorGraphic, v.Node2D)
+node_class_map['VectorGraphic'] = GDCLASS(VectorGraphic, Node2D)
+
+const _i_vec2_1 = new Vector2;
+const _i_vec2_2 = new Vector2;
+const _i_vec2_3 = new Vector2;

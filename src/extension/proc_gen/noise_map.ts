@@ -101,7 +101,7 @@ export class NoiseMapViewer extends Node2D {
         const width = this.noise_map.length;
         const height = this.noise_map[0].length;
 
-        let rect = Rect2.create();
+        let rect = Rect2.new();
 
         for (let y = 0; y < height; y++) {
             for (let x = 0; x < width; x++) {

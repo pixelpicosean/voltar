@@ -11,8 +11,7 @@ import {
     VALIGN_BOTTOM,
     VALIGN_FILL,
 } from "engine/core/math/math_defs";
-import { Vector2, Vector2Like } from "engine/core/math/vector2";
-import { Rect2 } from "engine/core/math/rect2";
+import { Vector2 } from "engine/core/math/vector2";
 import { Color } from "engine/core/color";
 
 import { VSG } from "engine/servers/visual/visual_server_globals";
@@ -26,8 +25,6 @@ import {
     NOTIFICATION_RESIZED,
 } from "./control";
 import { DynamicFont, BitmapFont } from "../resources/font";
-
-let pos = new Vector2;
 
 const tmp_vec = new Vector2();
 const tmp_vec2 = new Vector2();
@@ -128,7 +125,7 @@ export class Label extends Control {
     }
 
     get_minimum_size() {
-        const size = Vector2.create();
+        const size = Vector2.new();
         const min_style = this.get_stylebox('normal').get_minimum_size(tmp_vec);
 
         const f = this.get_font('font');

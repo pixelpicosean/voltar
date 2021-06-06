@@ -336,29 +336,29 @@ export class ProceduralSky extends Sky {
 
         let imgdata = new Uint8Array(w * h * 4);
 
-        let sky_top_linear = this.sky_top_color.to_linear();
-        let sky_horizon_linear = this.sky_horizon_color.to_linear();
+        let sky_top_linear = this.sky_top_color.to_linear(_i_generate_sky_color_1);
+        let sky_horizon_linear = this.sky_horizon_color.to_linear(_i_generate_sky_color_2);
 
-        let ground_bottom_linear = this.ground_bottom_color.to_linear();
-        let ground_horizon_linear = this.ground_horizon_color.to_linear();
+        let ground_bottom_linear = this.ground_bottom_color.to_linear(_i_generate_sky_color_3);
+        let ground_horizon_linear = this.ground_horizon_color.to_linear(_i_generate_sky_color_4);
 
-        let sun_linear = this.sun_color.clone();
+        let sun_linear = _i_generate_sky_color_5.copy(this.sun_color);
         sun_linear.r *= this.sun_energy;
         sun_linear.g *= this.sun_energy;
         sun_linear.b *= this.sun_energy;
 
-        let sun = Vector3.create(0, 0, -1);
+        let sun = _i_generate_sky_vec3_1.set(0, 0, -1);
 
-        let axis = Vector3.create();
-        let basis = Basis.create();
+        let axis = _i_generate_sky_vec3_2.set(0, 0, 0);
+        let basis = _i_generate_sky_basis.identity();
 
         basis.set_axis_angle(axis.set(1, 0, 0), deg2rad(this.sun_latitude)).xform(sun, sun);
         basis.set_axis_angle(axis.set(0, 1, 0), deg2rad(this.sun_longitude)).xform(sun, sun);
 
         sun.normalize();
 
-        let normal = Vector3.create();
-        let color = Color.create();
+        let normal = _i_generate_sky_vec3_3.set(0, 0, 0);
+        let color = _i_generate_sky_color_6.set(1, 1, 1, 1);
 
         for (let i = 0; i < w; i++) {
             let u = i / (w - 1);
@@ -414,17 +414,6 @@ export class ProceduralSky extends Sky {
             }
         }
 
-        Color.free(color);
-        Vector3.free(normal);
-        Basis.free(basis);
-        Vector3.free(axis);
-        Vector3.free(sun);
-        Color.free(sun_linear);
-        Color.free(ground_horizon_linear);
-        Color.free(ground_bottom_linear);
-        Color.free(sky_horizon_linear);
-        Color.free(sky_top_linear);
-
         return {
             width: w,
             height: h,
@@ -449,3 +438,16 @@ export class ProceduralSky extends Sky {
     }
 }
 res_class_map["ProceduralSky"] = GDCLASS(ProceduralSky, Sky)
+
+const _i_generate_sky_color_1 = new Color;
+const _i_generate_sky_color_2 = new Color;
+const _i_generate_sky_color_3 = new Color;
+const _i_generate_sky_color_4 = new Color;
+const _i_generate_sky_color_5 = new Color;
+const _i_generate_sky_color_6 = new Color;
+
+const _i_generate_sky_vec3_1 = new Vector3;
+const _i_generate_sky_vec3_2 = new Vector3;
+const _i_generate_sky_vec3_3 = new Vector3;
+
+const _i_generate_sky_basis = new Basis;

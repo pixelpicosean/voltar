@@ -9,7 +9,7 @@ export function earcut(data: number[], hole_indices?: number[], dim?: number) {
 
     if (!outerNode || outerNode.next === outerNode.prev) return triangles;
 
-    var minX, minY, maxX, maxY, x, y, invSize;
+    var minX = 0, minY = 0, maxX = 0, maxY = 0, x = 0, y = 0, invSize = 0;
 
     if (hasHoles) outerNode = eliminateHoles(data, hole_indices, outerNode, dim);
 

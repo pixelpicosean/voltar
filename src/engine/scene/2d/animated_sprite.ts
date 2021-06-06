@@ -342,8 +342,8 @@ export class AnimatedSprite extends Node2D {
                 const texture = this.frames.get_frame(this.animation, this.frame);
                 if (!texture) return;
 
-                const s = texture.get_size();
-                const ofs = this.offset.clone();
+                const s = texture.get_size(_i_notification_Vector2_1);
+                const ofs = _i_notification_Vector2_2.copy(this.offset);
                 if (this.centered) {
                     ofs.subtract(s.x * 0.5, s.y * 0.5);
                 }
@@ -351,7 +351,7 @@ export class AnimatedSprite extends Node2D {
                 if (Engine.get_singleton().use_pixel_snap) {
                     ofs.floor();
                 }
-                const dst_rect = Rect2.create(ofs.x, ofs.y, s.x, s.y);
+                const dst_rect = _i_notification_Rect2_1.set(ofs.x, ofs.y, s.x, s.y);
 
                 if (this.flip_h) {
                     dst_rect.width = -dst_rect.width;
@@ -360,13 +360,8 @@ export class AnimatedSprite extends Node2D {
                     dst_rect.height = -dst_rect.height;
                 }
 
-                const src_rect = Rect2.create(0, 0, s.x, s.y);
+                const src_rect = _i_notification_Rect2_2.set(0, 0, s.x, s.y);
                 texture.draw_rect_region(this.canvas_item, dst_rect, src_rect, White, false);
-
-                Rect2.free(src_rect);
-                Rect2.free(dst_rect);
-                Vector2.free(ofs);
-                Vector2.free(s);
             } break;
         }
     }
@@ -427,3 +422,8 @@ export class AnimatedSprite extends Node2D {
     }
 }
 node_class_map['AnimatedSprite'] = GDCLASS(AnimatedSprite, Node2D);
+
+const _i_notification_Vector2_1 = new Vector2;
+const _i_notification_Vector2_2 = new Vector2;
+const _i_notification_Rect2_1 = new Rect2;
+const _i_notification_Rect2_2 = new Rect2;

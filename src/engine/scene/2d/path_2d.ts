@@ -187,7 +187,7 @@ export class PathFollow2D extends Node2D {
 
             const ahead_pos = c.interpolate_baked(ahead, this.cubic_interp);
 
-            const tangent_to_curve = Vector2.create();
+            const tangent_to_curve = Vector2.new();
             if (ahead_pos.equals(pos)) {
                 tangent_to_curve.copy(pos)
                     .subtract(c.interpolate_baked(this.offset - this.lookahead, this.cubic_interp))

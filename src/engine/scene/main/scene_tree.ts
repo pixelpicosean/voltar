@@ -847,28 +847,26 @@ export class SceneTree extends MainLoop {
 
     _update_root_rect() {
         if (this.stretch_mode === STRETCH_MODE_DISABLED) {
-            const vec = Vector2.create();
+            const vec = _i_update_root_rect_Vector2_1.set(0, 0);
             this.root.set_size(
                 vec.copy(this.last_screen_size)
                     .scale(1 / this.stretch_shrink)
                     .floor()
             );
-            const rect = Rect2.create(0, 0, this.last_screen_size.x, this.last_screen_size.y);
+            const rect = _i_update_root_rect_Rect2_1.set(0, 0, this.last_screen_size.x, this.last_screen_size.y);
             this.root.set_attach_to_screen_rect(rect);
             this.root.set_size_override_stretch(false);
             this.root.set_size_override(false, Vector2.ZERO);
             this.root.update_canvas_items();
-            Rect2.free(rect);
-            Vector2.free(vec);
             return;
         }
 
         // actual screen video mode
-        const video_mode = Vector2.create(OS.get_singleton().get_window_size().width, OS.get_singleton().get_window_size().height);
+        const video_mode = _i_update_root_rect_Vector2_2.set(OS.get_singleton().get_window_size().width, OS.get_singleton().get_window_size().height);
         const desired_res = this.stretch_min.clone();
 
-        const viewport_size = Vector2.create();
-        const screen_size = Vector2.create();
+        const viewport_size = _i_update_root_rect_Vector2_3.set(0, 0);
+        const screen_size = _i_update_root_rect_Vector2_4.set(0, 0);
 
         const viewport_aspect = desired_res.aspect();
         const video_mode_aspect = video_mode.aspect();
@@ -908,8 +906,8 @@ export class SceneTree extends MainLoop {
         screen_size.floor();
         viewport_size.floor();
 
-        const margin = Vector2.create();
-        const offset = Vector2.create();
+        const margin = _i_update_root_rect_Vector2_5.set(0, 0);
+        const offset = _i_update_root_rect_Vector2_6.set(0, 0);
         // black bars and margin
         if (this.stretch_aspect !== STRETCH_ASPECT_EXPAND && screen_size.x < video_mode.x) {
             margin.x = Math.round((video_mode.x - screen_size.x) / 2);
@@ -927,37 +925,24 @@ export class SceneTree extends MainLoop {
             case STRETCH_MODE_DISABLED: {
             } break;
             case STRETCH_MODE_2D: {
-                let shrink_size = screen_size.clone().divide(this.stretch_shrink).floor();
-                let rect = Rect2.create(margin.x, margin.y, screen_size.x, screen_size.y);
+                let shrink_size = _i_update_root_rect_Vector2_7.copy(screen_size).divide(this.stretch_shrink).floor();
+                let rect = _i_update_root_rect_Rect2_2.set(margin.x, margin.y, screen_size.x, screen_size.y);
                 this.root.set_size(shrink_size);
                 this.root.set_attach_to_screen_rect(rect);
                 this.root.set_size_override_stretch(true);
                 this.root.set_size_override(true, shrink_size);
                 this.root.update_canvas_items();
-                Rect2.free(rect);
-                Vector2.free(shrink_size);
             } break;
             case STRETCH_MODE_VIEWPORT: {
-                let shrink_size = screen_size.clone().divide(this.stretch_shrink).floor();
-                let rect = Rect2.create(margin.x, margin.y, screen_size.x, screen_size.y);
+                let shrink_size = _i_update_root_rect_Vector2_8.copy(screen_size).divide(this.stretch_shrink).floor();
+                let rect = _i_update_root_rect_Rect2_3.set(margin.x, margin.y, screen_size.x, screen_size.y);
                 this.root.set_size(shrink_size);
                 this.root.set_attach_to_screen_rect(rect);
                 this.root.set_size_override_stretch(false);
                 this.root.set_size_override(false, Vector2.ZERO);
                 this.root.update_canvas_items();
-                Rect2.free(rect);
-                Vector2.free(shrink_size);
             } break;
         }
-
-        Vector2.free(offset);
-        Vector2.free(margin);
-
-        Vector2.free(screen_size);
-        Vector2.free(viewport_size);
-
-        Vector2.free(desired_res);
-        Vector2.free(video_mode);
     }
 
     _flush_ugc() {
@@ -1007,3 +992,15 @@ GDCLASS(SceneTree, MainLoop)
 
 /** @type {SceneTree} */
 let singleton: SceneTree = null;
+
+const _i_update_root_rect_Vector2_1 = new Vector2;
+const _i_update_root_rect_Vector2_2 = new Vector2;
+const _i_update_root_rect_Vector2_3 = new Vector2;
+const _i_update_root_rect_Vector2_4 = new Vector2;
+const _i_update_root_rect_Vector2_5 = new Vector2;
+const _i_update_root_rect_Vector2_6 = new Vector2;
+const _i_update_root_rect_Vector2_7 = new Vector2;
+const _i_update_root_rect_Vector2_8 = new Vector2;
+const _i_update_root_rect_Rect2_1 = new Rect2;
+const _i_update_root_rect_Rect2_2 = new Rect2;
+const _i_update_root_rect_Rect2_3 = new Rect2;

@@ -11,22 +11,17 @@ export interface Vector3Like {
  * the horizontal axis and y represents the vertical axis.
  */
 export class Vector3 {
-    static create(p_x: number = 0, p_y: number = 0, p_z: number = 0) {
-        const vec = pool.pop();
-        if (!vec) {
-            return new Vector3(p_x, p_y, p_z);
-        } else {
-            return vec.set(p_x, p_y, p_z);
-        }
-    }
-    /**
-     * @param {Vector3} vec
-     */
-    static free(vec: Vector3) {
-        if (vec && pool.length < 2020) {
-            pool.push(vec);
-        }
-        return Vector3;
+    x: number;
+    y: number;
+    z: number;
+    _array: [number, number, number];
+
+    constructor(x: number = 0, y: number = 0, z: number = 0) {
+        this.x = x;
+        this.y = y;
+        this.z = z;
+
+        this._array = [x, y, z];
     }
 
     /**
@@ -48,19 +43,6 @@ export class Vector3 {
      */
     set_z(value: number) {
         this.z = value;
-    }
-
-    x: number;
-    y: number;
-    z: number;
-    _array: [number, number, number];
-
-    constructor(x: number = 0, y: number = 0, z: number = 0) {
-        this.x = x;
-        this.y = y;
-        this.z = z;
-
-        this._array = [x, y, z];
     }
 
     as_array(r_out?: [number, number, number]) {
@@ -109,7 +91,7 @@ export class Vector3 {
      * Returns new Vector3 with same value.
      */
     clone() {
-        return Vector3.create(this.x, this.y, this.z);
+        return Vector3.new(this.x, this.y, this.z);
     }
     /**
      * Returns new Vector3 but normalized.
@@ -118,13 +100,8 @@ export class Vector3 {
         return this.clone().normalize();
     }
 
-    /**
-     * @param {Vector3Like} p_b
-     * @param {number} p_t
-     * @param {Vector3} [r_out]
-     */
-    linear_interpolate(p_b: Vector3Like, p_t: number, r_out: Vector3) {
-        if (!r_out) r_out = Vector3.create();
+    linear_interpolate(p_b: Vector3Like, p_t: number, r_out?: Vector3) {
+        if (!r_out) r_out = Vector3.new();
 
         return r_out.set(
             this.x + (p_t * (p_b.x - this.x)),
@@ -293,15 +270,15 @@ export class Vector3 {
 
     /**
      * Cross multiply another vector.
-     *
-     * @param {Vector3Like} p_b
      */
-    cross(p_b: Vector3Like) {
-        return Vector3.create(
+    cross(p_b: Vector3Like, r_out?: Vector3) {
+        if (!r_out) r_out = Vector3.new();
+
+        return r_out.set(
             (this.y * p_b.z) - (this.z * p_b.y),
             (this.z * p_b.x) - (this.x * p_b.z),
             (this.x * p_b.y) - (this.y * p_b.x)
-        )
+        );
     }
 
     /**
@@ -402,15 +379,33 @@ export class Vector3 {
         return this;
     }
 
-    static ZERO = new Vector3(0, 0, 0);
-    static ONE = new Vector3(1, 1, 1);
-    static INF = new Vector3(Infinity, Infinity, Infinity);
-    static LEFT = new Vector3(-1, 0, 0);
-    static RIGHT = new Vector3(1, 0, 0);
-    static UP = new Vector3(0, 1, 0);
-    static DOWN = new Vector3(0, -1, 0);
-    static FORWARD = new Vector3(0, 0, -1);
-    static BACK = new Vector3(0, 0, 1);
+    static ZERO = Object.freeze(new Vector3(0, 0, 0));
+    static ONE = Object.freeze(new Vector3(1, 1, 1));
+    static INF = Object.freeze(new Vector3(Infinity, Infinity, Infinity));
+    static LEFT = Object.freeze(new Vector3(-1, 0, 0));
+    static RIGHT = Object.freeze(new Vector3(1, 0, 0));
+    static UP = Object.freeze(new Vector3(0, 1, 0));
+    static DOWN = Object.freeze(new Vector3(0, -1, 0));
+    static FORWARD = Object.freeze(new Vector3(0, 0, -1));
+    static BACK = Object.freeze(new Vector3(0, 0, 1));
+
+    static new(p_x: number = 0, p_y: number = 0, p_z: number = 0) {
+        const vec = pool.pop();
+        if (!vec) {
+            return new Vector3(p_x, p_y, p_z);
+        } else {
+            return vec.set(p_x, p_y, p_z);
+        }
+    }
+    /**
+     * @param {Vector3} vec
+     */
+    static free(vec: Vector3) {
+        if (vec && pool.length < 2020) {
+            pool.push(vec);
+        }
+        return Vector3;
+    }
 }
 
 /**

@@ -325,11 +325,11 @@ export class RichTextLabel extends Control {
                 const base_color = this.get_color('default_color');
                 const font_color_shadow = this.get_color('font_color_shadow');
                 const use_outline = this.get_constant('shadow_as_outline');
-                const shadow_ofs = Vector2.create(this.get_constant('shadow_offset_x'), this.get_constant('shadow_offset_y'));
+                const shadow_ofs = Vector2.new(this.get_constant('shadow_offset_x'), this.get_constant('shadow_offset_y'));
 
                 this.visible_line_count = 0;
                 while (y < size.y && from_line < this.main.lines.length) {
-                    const text_pos = Vector2.create(text_rect.x, text_rect.y)
+                    const text_pos = Vector2.new(text_rect.x, text_rect.y)
                     // this.visible_line_count += this._process_line(this.main, text_pos, y, text_rect.width - this.scroll_w, from_line, PROCESS_DRAW, base_font, base_color, font_color_shadow, use_outline, shadow_ofs, Vector2.ZERO, null, null, null, total_chars);
                     total_chars += this.main.lines[from_line].char_count;
 

@@ -115,7 +115,7 @@ export class Gradient extends VObject {
      */
     interpolate(p_offset: number) {
         if (this.points.length === 0) {
-            return Color.create(0, 0, 0, 1);
+            return Color.new(0, 0, 0, 1);
         }
 
         if (!this.is_sorted) {

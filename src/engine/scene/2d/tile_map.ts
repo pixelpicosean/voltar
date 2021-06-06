@@ -511,44 +511,38 @@ export class TileMap extends Node2D {
         return E.id;
     }
 
-    /**
-     * Returns new Transform2D
-     */
-    get_cell_transform() {
-        const out = Transform2D.create();
-        out.reset();
+    get_cell_transform(r_out?: Transform2D) {
+        if (!r_out) r_out = Transform2D.new();
+        else r_out.identity();
 
         const cell_size_x = this.cell_size.x;
         const cell_size_y = this.cell_size.y;
 
         switch (this.mode) {
             case MODE_SQUARE: {
-                out.a *= cell_size_x;
-                out.b *= cell_size_x;
-                out.c *= cell_size_y;
-                out.d *= cell_size_y;
+                r_out.a *= cell_size_x;
+                r_out.b *= cell_size_x;
+                r_out.c *= cell_size_y;
+                r_out.d *= cell_size_y;
             } break;
             case MODE_ISOMETRIC: {
                 // isometric only makes sense when y is positive in both x and y vectors, otherwise
                 // the drawing of tiles will overlap
-                out.a = cell_size_x * 0.5;
-                out.b = cell_size_y * 0.5;
-                out.c = -cell_size_x * 0.5;
-                out.d = cell_size_y * 0.5;
+                r_out.a = cell_size_x * 0.5;
+                r_out.b = cell_size_y * 0.5;
+                r_out.c = -cell_size_x * 0.5;
+                r_out.d = cell_size_y * 0.5;
             } break;
             case MODE_CUSTOM: {
-                out.copy(this.cell_custom_transform);
+                r_out.copy(this.cell_custom_transform);
             } break;
         }
 
-        return out;
+        return r_out;
     }
 
-    /**
-     * Returns new Vector2.
-     */
-    get_cell_draw_offset() {
-        const out = Vector2.create();
+    get_cell_draw_offset(out?: Vector2) {
+        if (!out) out = Vector2.new();
 
         switch (this.mode) {
             case MODE_SQUARE: {
@@ -570,7 +564,7 @@ export class TileMap extends Node2D {
     get_used_rect() {
         if (this.used_size_cache_dirty) {
             let first = true;
-            const vec = Vector2.create();
+            const vec = Vector2.new();
             for (const pk in this.tile_map) {
                 const cell = this.tile_map[pk];
                 const _x = cell._x;
@@ -610,9 +604,9 @@ export class TileMap extends Node2D {
 
         const ps = Physics2DServer.get_singleton();
         const tofs = this.get_cell_draw_offset();
-        const qofs = Vector2.create();
+        const qofs = Vector2.new();
 
-        const xform = Transform2D.create();
+        const xform = Transform2D.new();
 
         const vs = VSG.canvas;
 
@@ -690,7 +684,7 @@ export class TileMap extends Node2D {
                     r.y += (r.height + spacing) * c.autotile_coord_y;
                 }
 
-                const s = Vector2.create();
+                const s = Vector2.new();
                 if (r.is_zero()) {
                     s.x = tex.get_width();
                     s.y = tex.get_height();
@@ -699,7 +693,7 @@ export class TileMap extends Node2D {
                     s.y = r.height;
                 }
 
-                const rect = Rect2.create();
+                const rect = Rect2.new();
                 rect.x = offset.x;
                 rect.y = offset.y;
                 rect.width = s.x + 0.00001;
@@ -747,7 +741,7 @@ export class TileMap extends Node2D {
                 for (const sd of tile.shapes_data) {
                     if (sd.shape) {
                         if (tile.tile_mode === SINGLE_TILE || (sd.autotile_coord.x == c.autotile_coord_x && sd.autotile_coord.y === c.autotile_coord_y)) {
-                            const xform = Transform2D.create();
+                            const xform = Transform2D.new();
                             xform.tx = Math.floor(offset.x);
                             xform.ty = Math.floor(offset.y);
 
@@ -818,7 +812,7 @@ export class TileMap extends Node2D {
      * @param {number} y
      */
     _create_quadrant(x: number, y: number) {
-        const xform = Transform2D.create();
+        const xform = Transform2D.new();
         const q = new Quadrant;
         const q_size = this.cell_quadrant_size;
         const pos = this.map_to_world(x * q_size, y * q_size);
@@ -993,14 +987,11 @@ export class TileMap extends Node2D {
     }
 
     /**
-     * Returns new Vector2.
-     * @param {number} x
-     * @param {number} y
-     * @param {boolean} [ignore_ofs]
+     * Returns new "Vector2"
      */
     map_to_world(x: number, y: number, ignore_ofs: boolean = false) {
         const cell_mat = this.get_cell_transform();
-        const ret = Vector2.create(x, y);
+        const ret = Vector2.new(x, y);
         cell_mat.xform(ret, ret);
         if (!ignore_ofs) {
             switch (this.cell_half_offset) {
@@ -1027,13 +1018,11 @@ export class TileMap extends Node2D {
         return ret;
     }
     /**
-     * Returns new Vector2.
-     * @param {number} x
-     * @param {number} y
+     * Returns new "Vector2"
      */
     world_to_map(x: number, y: number) {
         const xform = this.get_cell_transform().affine_inverse();
-        const ret = Vector2.create(x, y);
+        const ret = Vector2.new(x, y);
         xform.xform(ret, ret);
 
         switch (this.cell_half_offset) {
@@ -1076,8 +1065,8 @@ export class TileMap extends Node2D {
 
         let global_transform = this.get_global_transform();
 
-        let xform = Transform2D.create();
-        let xform2 = Transform2D.create();
+        let xform = Transform2D.new();
+        let xform2 = Transform2D.new();
 
         const ps = Physics2DServer.get_singleton();
 

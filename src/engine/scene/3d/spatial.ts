@@ -316,7 +316,7 @@ export class Spatial extends Node {
      * @param {Transform} p_transform
      */
     set_global_transform(p_transform: Transform) {
-        let xform = Transform.create();
+        let xform = Transform.new();
         if (this.d_data.parent && !this.d_data.toplevel_active) {
             let p = this.d_data.parent;
             xform.copy(p.get_global_transform()).affine_invert().append(p_transform);
@@ -332,7 +332,7 @@ export class Spatial extends Node {
      * @param {Vector3Like} origin
      */
     set_global_transform_v(basis: Basis, origin: Vector3Like) {
-        let xform = Transform.create();
+        let xform = Transform.new();
         xform.set(
             basis.elements[0].x,
             basis.elements[0].y,
@@ -366,7 +366,7 @@ export class Spatial extends Node {
      * @param {number} z
      */
     set_global_transform_n(xx: number, xy: number, xz: number, yx: number, yy: number, yz: number, zx: number, zy: number, zz: number, x: number, y: number, z: number) {
-        let xform = Transform.create();
+        let xform = Transform.new();
         xform.set(
             xx, xy, xz,
             yx, yy, yz,
@@ -413,7 +413,7 @@ export class Spatial extends Node {
     }
 
     set_identity() {
-        let t = Transform.create();
+        let t = Transform.new();
         this.set_transform(t);
         Transform.free(t);
     }

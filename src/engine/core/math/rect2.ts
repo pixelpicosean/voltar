@@ -1,44 +1,10 @@
 import { Vector2, Vector2Like } from './vector2';
 
 /**
- * @type {Rect2[]}
- */
-const pool: Rect2[] = [];
-
-/**
  * Rectangle object is an area defined by its position, as indicated by its top-left corner
  * point (x, y) and by its width and its height.
  */
 export class Rect2 {
-    /**
-     * @param {number} p_x
-     * @param {number} p_y
-     * @param {number} p_width
-     * @param {number} p_height
-     */
-    static create(p_x: number = 0, p_y: number = 0, p_width: number = 0, p_height: number = 0) {
-        const r = pool.pop();
-        if (!r) {
-            return new Rect2(p_x, p_y, p_width, p_height);
-        } else {
-            return r.set(p_x, p_y, p_width, p_height);
-        }
-    }
-    /**
-     * @param {Rect2} p_rect
-     */
-    static free(p_rect: Rect2) {
-        if (p_rect && pool.length < 2019) {
-            pool.push(p_rect);
-        }
-        return Rect2;
-    }
-
-    /**
-     * A constant empty rectangle.
-     */
-    static EMPTY = Object.freeze(new Rect2(0, 0, 0, 0));
-
     x: number;
     y: number;
     width: number;
@@ -111,7 +77,7 @@ export class Rect2 {
      * Returns new Rect2 with same value.
      */
     clone() {
-        return Rect2.create(this.x, this.y, this.width, this.height);
+        return Rect2.new(this.x, this.y, this.width, this.height);
     }
 
     /**
@@ -188,7 +154,7 @@ export class Rect2 {
     }
 
     /**
-     * Returns new Rect2 with absolute values.
+     * Returns new "Rect2" with absolute values
      */
     abs() {
         return this.clone().abs_to();
@@ -202,7 +168,7 @@ export class Rect2 {
     }
 
     /**
-     * Returns new Rect2.
+     * Returns new "Rect2"
      * @param {Rect2} p_rect
      */
     clip(p_rect: Rect2) {
@@ -246,7 +212,7 @@ export class Rect2 {
 
     /**
      * Pads the rectangle making it grow in all directions.
-     * Returns new Rect2.
+     * Returns new "Rect2"
      *
      * @param {number} p_by - The horizontal padding amount.
      */
@@ -268,7 +234,7 @@ export class Rect2 {
     }
 
     /**
-     * Returns new Rect2.
+     * Returns new "Rect2"
      * @param {number} p_left
      * @param {number} p_top
      * @param {number} p_right
@@ -284,7 +250,7 @@ export class Rect2 {
     }
 
     /**
-     * Returns new Rect2.
+     * Returns new "Rect2"
      * @param {Vector2} p_vector
      */
     expand(p_vector: Vector2) {
@@ -295,8 +261,8 @@ export class Rect2 {
      * @param {Vector2} p_vector
      */
     expand_to(p_vector: Vector2) {
-        const begin = Vector2.create(this.x, this.y);
-        const end = Vector2.create(this.x + this.width, this.y + this.height);
+        const begin = _i_expand_to_vec2_1.set(this.x, this.y);
+        const end = _i_expand_to_vec2_2.set(this.x + this.width, this.y + this.height);
 
         if (p_vector.x < begin.x) {
             begin.x = p_vector.x;
@@ -316,9 +282,6 @@ export class Rect2 {
         this.y = begin.y;
         this.width = end.x - begin.x;
         this.height = end.y - begin.y;
-
-        Vector2.free(begin);
-        Vector2.free(end);
 
         return this;
     }
@@ -363,7 +326,7 @@ export class Rect2 {
 
     /**
      * Merge the given rectangle and return a new one.
-     * Returns new Rect2.
+     * Returns new "Rect2"
      *
      * @param {Rect2} p_rect - The rectangle to merge.
      */
@@ -491,7 +454,7 @@ export class Rect2 {
                 return false;
         }
 
-        const rel = p_to.clone().subtract(p_from);
+        const rel = _i_intersects_segment_vec2.copy(p_to).subtract(p_from);
 
         if (r_normal) {
             r_normal.set(0, 0);
@@ -506,8 +469,30 @@ export class Rect2 {
             r_pos.copy(p_from).add(rel.scale(min));
         }
 
-        Vector2.free(rel);
-
         return true;
     }
+
+    static EMPTY = Object.freeze(new Rect2(0, 0, 0, 0));
+
+    static new(p_x: number = 0, p_y: number = 0, p_width: number = 0, p_height: number = 0) {
+        const r = pool.pop();
+        if (!r) {
+            return new Rect2(p_x, p_y, p_width, p_height);
+        } else {
+            return r.set(p_x, p_y, p_width, p_height);
+        }
+    }
+
+    static free(p_rect: Rect2) {
+        if (p_rect && pool.length < 2019) {
+            pool.push(p_rect);
+        }
+        return Rect2;
+    }
 }
+const pool: Rect2[] = [];
+
+const _i_expand_to_vec2_1 = new Vector2;
+const _i_expand_to_vec2_2 = new Vector2;
+
+const _i_intersects_segment_vec2 = new Vector2;

@@ -20,8 +20,6 @@ const action_status = {
     strength: 0,
 };
 
-const has = Object.prototype.hasOwnProperty;
-
 export class InputMap {
     static get_singleton() { return singleton }
 

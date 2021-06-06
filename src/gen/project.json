@@ -7,7 +7,6 @@
         "webgl2": false,
         "stretch_mode": "2d",
         "stretch_aspect": "keep_width",
-        "fxaa": true,
         "directional_shadow_size": 2048
     },
     "input": {

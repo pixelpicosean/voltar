@@ -114,7 +114,7 @@ export class TextureButton extends BaseButton {
                 }
 
                 if (texdraw) {
-                    const ofs = Vector2.create(0, 0);
+                    const ofs = Vector2.new(0, 0);
                     const size = texdraw.get_size().clone();
                     this.texture_region.set(0, 0, size.x, size.y);
                     this.tile = false;
@@ -155,7 +155,7 @@ export class TextureButton extends BaseButton {
                             case STRETCH_KEEP_ASPECT_COVERED: {
                                 size.copy(this.rect_size);
                                 const tex_size = texdraw.get_size().clone();
-                                const scale_size = Vector2.create(size.x / tex_size.x, size.y / tex_size.y);
+                                const scale_size = Vector2.new(size.x / tex_size.x, size.y / tex_size.y);
                                 const scale = scale_size.x > scale_size.y ? scale_size.x : scale_size.y;
                                 scale_size.scale(scale);
                                 this.texture_region.set(

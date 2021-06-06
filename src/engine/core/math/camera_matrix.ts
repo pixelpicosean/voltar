@@ -5,9 +5,6 @@ import { rad2deg, deg2rad } from "./math_funcs";
 import { Vector3 } from "./vector3";
 import { Rect2 } from "./rect2";
 
-/** @type {CameraMatrix[]} */
-const pool: CameraMatrix[] = [];
-
 const PLANE_NEAR = 0;
 const PLANE_FAR = 1;
 const PLANE_LEFT = 2;
@@ -27,21 +24,6 @@ const intersections = [
 ]
 
 export class CameraMatrix {
-    static create() {
-        let obj = pool.pop();
-        if (!obj) obj = new CameraMatrix;
-        return obj.set_identity();
-    }
-
-    /**
-     * @param {CameraMatrix} obj
-     */
-    static free(obj: CameraMatrix) {
-        if (obj && pool.length < 2020) {
-            pool.push(obj);
-        }
-    }
-
     matrix = [
         [1, 0, 0, 0],
         [0, 1, 0, 0],
@@ -88,7 +70,7 @@ export class CameraMatrix {
     }
 
     clone() {
-        return CameraMatrix.create().copy(this);
+        return CameraMatrix.new().copy(this);
     }
 
     is_orthogonal() {
@@ -99,7 +81,7 @@ export class CameraMatrix {
      * @param {CameraMatrix} p_matrix
      */
     append(p_matrix: CameraMatrix) {
-        let new_m = CameraMatrix.create();
+        let new_m = _i_append_camera_matrix.identity();
 
         for (let j = 0; j < 4; j++) {
             for (let i = 0; i < 4; i++) {
@@ -111,7 +93,6 @@ export class CameraMatrix {
         }
 
         this.copy(new_m);
-        CameraMatrix.free(new_m);
 
         return this;
     }
@@ -205,13 +186,13 @@ export class CameraMatrix {
     }
 
     /**
-     * @returns new CameraMatrix
+     * Returns new "CameraMatrix"
      */
     inverse() {
-        return CameraMatrix.create().copy(this).invert();
+        return CameraMatrix.new().copy(this).invert();
     }
 
-    set_identity() {
+    identity() {
         for (let i = 0; i < 4; i++) {
             for (let j = 0; j < 4; j++) {
                 this.matrix[i][j] = (i === j) ? 1 : 0;
@@ -275,7 +256,7 @@ export class CameraMatrix {
         }
         cot = Math.cos(radians) / sin;
 
-        this.set_identity();
+        this.identity();
 
         this.matrix[0][0] = cot / aspect;
         this.matrix[1][1] = cot;
@@ -294,7 +275,7 @@ export class CameraMatrix {
      * @param {boolean} [flip_fov]
      */
     set_orthogonal(size: number, aspect: number, z_near: number, z_far: number, flip_fov: boolean = false) {
-        this.set_identity();
+        this.identity();
 
         if (!flip_fov) {
             size *= aspect;
@@ -312,7 +293,7 @@ export class CameraMatrix {
      * @param {number} z_far
      */
     set_orthogonal_d(left: number, right: number, bottom: number, top: number, z_near: number, z_far: number) {
-        this.set_identity();
+        this.identity();
 
         this.matrix[0][0] = 2.0 / (right - left);
         this.matrix[1][1] = 2.0 / (top - bottom);
@@ -333,7 +314,7 @@ export class CameraMatrix {
      * @param {boolean} [flip_fov]
      */
     set_frustum(size: number, aspect: number, offset: Vector2Like, z_near: number, z_far: number, flip_fov: boolean = false) {
-        this.set_identity();
+        this.identity();
 
         if (!flip_fov) {
             size *= aspect;
@@ -432,7 +413,7 @@ export class CameraMatrix {
     }
 
     get_fov() {
-        let right_plane = Plane.create().set(
+        let right_plane = _i_get_fov_plane_1.set(
             this.matrix[0][3] - this.matrix[0][0],
             this.matrix[1][3] - this.matrix[1][0],
             this.matrix[2][3] - this.matrix[2][0],
@@ -441,11 +422,9 @@ export class CameraMatrix {
         right_plane.normalize();
 
         if (this.matrix[2][0] === 0 && this.matrix[2][1] === 0) {
-            let res = rad2deg(Math.acos(Math.abs(right_plane.normal.x))) * 2;
-            Plane.free(right_plane);
-            return res;
+            return rad2deg(Math.acos(Math.abs(right_plane.normal.x))) * 2;
         } else {
-            let left_plane = Plane.create().set(
+            let left_plane = _i_get_fov_plane_2.set(
                 this.matrix[0][3] + this.matrix[0][0],
                 this.matrix[1][3] + this.matrix[1][0],
                 this.matrix[2][3] + this.matrix[2][0],
@@ -453,17 +432,12 @@ export class CameraMatrix {
             );
             left_plane.normalize();
 
-            let res = rad2deg(Math.acos(Math.abs(left_plane.normal.x))) + rad2deg(Math.acos(Math.abs(right_plane.normal.x)));
-
-            Plane.free(right_plane);
-            Plane.free(left_plane);
-
-            return res;
+            return rad2deg(Math.acos(Math.abs(left_plane.normal.x))) + rad2deg(Math.acos(Math.abs(right_plane.normal.x)));
         }
     }
 
     get_z_far() {
-        let new_plane = Plane.create().set(
+        let new_plane = _i_get_z_far_plane.set(
             this.matrix[0][3] - this.matrix[0][2],
             this.matrix[1][3] - this.matrix[1][2],
             this.matrix[2][3] - this.matrix[2][2],
@@ -471,22 +445,18 @@ export class CameraMatrix {
         );
         new_plane.normal.negate();
         new_plane.normalize();
-        let d = new_plane.d;
-        Plane.free(new_plane);
-        return d;
+        return new_plane.d;
     }
 
     get_z_near() {
-        let new_plane = Plane.create().set(
+        let new_plane = _i_get_z_near_plane.set(
             this.matrix[0][3] + this.matrix[0][2],
             this.matrix[1][3] + this.matrix[1][2],
             this.matrix[2][3] + this.matrix[2][2],
             -this.matrix[3][3] - this.matrix[3][2]
         );
         new_plane.normalize();
-        let d = new_plane.d;
-        Plane.free(new_plane);
-        return d;
+        return new_plane.d;
     }
 
     get_aspect() {
@@ -496,8 +466,8 @@ export class CameraMatrix {
         return res;
     }
 
-    get_viewport_half_extents() {
-        let near_plane = Plane.create().set(
+    get_viewport_half_extents(r_out?: Vector3) {
+        let near_plane = _i_get_viewport_half_extents_plane_1.set(
             this.matrix[0][3] + this.matrix[0][2],
             this.matrix[1][3] + this.matrix[1][2],
             this.matrix[2][3] + this.matrix[2][2],
@@ -505,7 +475,7 @@ export class CameraMatrix {
         );
         near_plane.normalize();
 
-        let right_plane = Plane.create().set(
+        let right_plane = _i_get_viewport_half_extents_plane_2.set(
             this.matrix[0][3] - this.matrix[0][0],
             this.matrix[1][3] - this.matrix[1][0],
             this.matrix[2][3] - this.matrix[2][0],
@@ -513,7 +483,7 @@ export class CameraMatrix {
         );
         right_plane.normalize();
 
-        let top_plane = Plane.create().set(
+        let top_plane = _i_get_viewport_half_extents_plane_3.set(
             this.matrix[0][3] - this.matrix[0][1],
             this.matrix[1][3] - this.matrix[1][1],
             this.matrix[2][3] - this.matrix[2][1],
@@ -521,12 +491,8 @@ export class CameraMatrix {
         );
         top_plane.normalize();
 
-        let res = Vector3.create();
+        let res = r_out || Vector3.new();
         near_plane.intersect_3(right_plane, top_plane, res);
-
-        Plane.free(near_plane);
-        Plane.free(right_plane);
-        Plane.free(top_plane);
 
         return res;
     }
@@ -538,7 +504,7 @@ export class CameraMatrix {
     get_endpoints(p_transform: Transform, p_points: Vector3[]) {
         let planes = this.get_projection_planes(Transform.IDENTITY);
 
-        let point = Vector3.create();
+        let point = _i_get_endpoints_vec3.set(0, 0, 0);
         for (let i = 0; i < 8; i++) {
             planes[intersections[i][0]].intersect_3(
                 planes[intersections[i][1]],
@@ -547,7 +513,6 @@ export class CameraMatrix {
             );
             p_transform.xform(point, p_points[i]);
         }
-        Vector3.free(point);
 
         return true;
     }
@@ -560,7 +525,7 @@ export class CameraMatrix {
         let planes: Plane[] = [];
 
         let m = this.matrix;
-        let new_plane = Plane.create();
+        let new_plane = Plane.new();
 
         // near plane
         new_plane.set(
@@ -642,4 +607,32 @@ export class CameraMatrix {
 
         return planes;
     }
+
+    static new() {
+        let obj = pool.pop();
+        if (!obj) obj = new CameraMatrix;
+        return obj.identity();
+    }
+
+    static free(obj: CameraMatrix) {
+        if (obj && pool.length < 2020) {
+            pool.push(obj);
+        }
+    }
 }
+const pool: CameraMatrix[] = [];
+
+const _i_append_camera_matrix = new CameraMatrix;
+
+const _i_get_fov_plane_1 = new Plane;
+const _i_get_fov_plane_2 = new Plane;
+
+const _i_get_z_far_plane = new Plane;
+
+const _i_get_z_near_plane = new Plane;
+
+const _i_get_viewport_half_extents_plane_1 = new Plane;
+const _i_get_viewport_half_extents_plane_2 = new Plane;
+const _i_get_viewport_half_extents_plane_3 = new Plane;
+
+const _i_get_endpoints_vec3 = new Vector3;

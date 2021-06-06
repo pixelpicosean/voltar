@@ -10,21 +10,6 @@ export interface Vector2Like {
  * the horizontal axis and y represents the vertical axis.
  */
 export class Vector2 {
-    static create(p_x: number = 0, p_y: number = 0) {
-        const vec = pool.pop();
-        if (!vec) {
-            return new Vector2(p_x, p_y);
-        } else {
-            return vec.set(p_x, p_y);
-        }
-    }
-    static free(vec: Vector2) {
-        if (vec && pool.length < 2019) {
-            pool.push(vec);
-        }
-        return Vector2;
-    }
-
     x = 0;
     y = 0;
     _array: [number, number] = [0, 0];
@@ -334,14 +319,9 @@ export class Vector2 {
         return this;
     }
 
-    /**
-     * Returns new Vector2.
-     */
-    plane_project(p_d: number, p_vec: Vector2) {
-        const self = this.clone();
-        const vec = p_vec.clone().subtract(self.scale(this.dot(p_vec) - p_d));
-        Vector2.free(self);
-        return vec;
+    plane_project(p_d: number, p_vec: Vector2, r_out?: Vector2) {
+        const self = _i_plane_project_vec2.copy(this);
+        return r_out.copy(p_vec).subtract(self.scale(this.dot(p_vec) - p_d));
     }
 
     /**
@@ -388,7 +368,7 @@ export class Vector2 {
      * Slide returns the component of the vector along the given plane, specified by its normal vector.
      */
     slide(normal: Vector2Like): Vector2 {
-        return this.subtract(tmp_point.copy(normal).scale(this.dot(normal)))
+        return this.subtract(_i_slide_vec2.copy(normal).scale(this.dot(normal)))
     }
 
     /**
@@ -450,7 +430,8 @@ export class Vector2 {
     /**
      * Returns a perpendicular vector.
      */
-    tangent(r_out = Vector2.create()): Vector2 {
+    tangent(r_out?: Vector2): Vector2 {
+        if (!r_out) r_out = Vector2.new();
         return r_out.set(this.y, -this.x);
     }
 
@@ -462,11 +443,8 @@ export class Vector2 {
         return this.x === 0 && this.y === 0;
     }
 
-    /**
-     * Returns new Vector2.
-     */
-    linear_interpolate(p_b: Vector2Like, p_t: number): Vector2 {
-        const res = this.clone();
+    linear_interpolate(p_b: Vector2Like, p_t: number, r_out?: Vector2): Vector2 {
+        const res = (r_out || Vector2.new()).copy(this);
 
         res.x += (p_t * (p_b.x - this.x));
         res.y += (p_t * (p_b.y - this.y));
@@ -474,13 +452,10 @@ export class Vector2 {
         return res;
     }
 
-    /**
-     * Returns new Vector2.
-     */
-    cubic_interpolate(p_b: Vector2, p_pre_a: Vector2, p_post_b: Vector2, p_t: number): Vector2 {
+    cubic_interpolate(p_b: Vector2, p_pre_a: Vector2, p_post_b: Vector2, p_t: number, r_out?: Vector2): Vector2 {
         const t2 = p_t * p_t;
         const t3 = t2 * p_t;
-        return Vector2.create(
+        return (r_out || Vector2.new()).set(
             0.5 * ((this.x * 2) + (-p_pre_a.x + p_b.x) * p_t + (2 * p_pre_a.x - 5 * this.x + 4 * p_b.x - p_post_b.x) * t2 + (-p_pre_a.x + 3 * this.x - 3 * p_b.x + p_post_b.x) * t3),
             0.5 * ((this.y * 2) + (-p_pre_a.y + p_b.y) * p_t + (2 * p_pre_a.y - 5 * this.y + 4 * p_b.y - p_post_b.y) * t2 + (-p_pre_a.y + 3 * this.y - 3 * p_b.y + p_post_b.y) * t3)
         );
@@ -493,8 +468,26 @@ export class Vector2 {
     static RIGHT = Object.freeze(new Vector2(1, 0));
     static UP = Object.freeze(new Vector2(0, -1));
     static DOWN = Object.freeze(new Vector2(0, 1));
+
+    static new(p_x: number = 0, p_y: number = 0) {
+        const vec = pool.pop();
+        if (!vec) {
+            return new Vector2(p_x, p_y);
+        } else {
+            return vec.set(p_x, p_y);
+        }
+    }
+
+    static free(vec: Vector2) {
+        if (vec && pool.length < 2019) {
+            pool.push(vec);
+        }
+        return Vector2;
+    }
 }
 
 const pool: Vector2[] = [];
 
-const tmp_point = new Vector2();
+const _i_slide_vec2 = new Vector2;
+
+const _i_plane_project_vec2 = new Vector2;

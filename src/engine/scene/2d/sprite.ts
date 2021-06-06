@@ -15,7 +15,7 @@ export class Sprite extends Node2D {
     get class() { return 'Sprite' }
 
     get frame_coords() {
-        return Vector2.create(this.frame % this.hframes, this.frame / this.hframes).floor();
+        return Vector2.new(this.frame % this.hframes, this.frame / this.hframes).floor();
     }
 
     centered = true;
@@ -69,14 +69,11 @@ export class Sprite extends Node2D {
                     break;
                 }
 
-                const src_rect = Rect2.create();
-                const dst_rect = Rect2.create();
+                const src_rect = _i_notification_Rect2_1.set(0, 0, 0, 0);
+                const dst_rect = _i_notification_Rect2_2.set(0, 0, 0, 0);
 
                 this._get_rects(src_rect, dst_rect);
                 this.texture.draw_rect_region(this.canvas_item, dst_rect, src_rect, WHITE, false);
-
-                Rect2.free(src_rect);
-                Rect2.free(dst_rect);
             } break;
         }
     }
@@ -162,12 +159,14 @@ export class Sprite extends Node2D {
         this.item_rect_changed();
     }
 
-    get_rect() {
+    get_rect(r_out?: Rect2) {
+        if (!r_out) r_out = Rect2.new();
+
         if (!this.texture || !this.texture.get_rid()) {
-            return Rect2.create(0, 0, 1, 1);
+            return r_out.set(0, 0, 1, 1);
         }
 
-        const s = Vector2.create(0, 0);
+        const s = _i_get_rect_Vector2_1.set(0, 0);
 
         if (this.region_enabled) {
             s.set(this.region_rect.width, this.region_rect.height);
@@ -178,7 +177,7 @@ export class Sprite extends Node2D {
         s.x /= this.hframes;
         s.y /= this.vframes;
 
-        const ofs = Vector2.create(0, 0);
+        const ofs = _i_get_rect_Vector2_2.set(0, 0);
         if (this.centered) {
             ofs.x -= s.x / 2;
             ofs.y -= s.y / 2;
@@ -187,11 +186,7 @@ export class Sprite extends Node2D {
             s.set(1, 1);
         }
 
-        const rect = Rect2.create(ofs.x, ofs.y, s.x, s.y);
-        Vector2.free(s);
-        Vector2.free(ofs);
-
-        return rect;
+        return r_out.set(ofs.x, ofs.y, s.x, s.y);
     }
 
     /**
@@ -249,12 +244,8 @@ export class Sprite extends Node2D {
 
     /* private */
 
-    /**
-     * @param {Rect2} r_src_rect
-     * @param {Rect2} r_dst_rect
-     */
     _get_rects(r_src_rect: Rect2, r_dst_rect: Rect2) {
-        const base_rect = Rect2.create();
+        const base_rect = _i_get_rects_Rect2_1.set(0, 0, 0, 0);
 
         let r_filter_clip = false;
 
@@ -267,8 +258,8 @@ export class Sprite extends Node2D {
             base_rect.height = this.texture.get_height();
         }
 
-        const frame_size = Vector2.create(base_rect.width / this.hframes, base_rect.height / this.vframes);
-        const frame_offset = Vector2.create(this.frame % this.hframes, Math.floor(this.frame / this.hframes));
+        const frame_size = _i_get_rects_Vector2_1.set(base_rect.width / this.hframes, base_rect.height / this.vframes);
+        const frame_offset = _i_get_rects_Vector2_2.set(this.frame % this.hframes, Math.floor(this.frame / this.hframes));
         frame_offset.multiply(frame_size);
 
         r_src_rect.width = frame_size.x;
@@ -276,7 +267,7 @@ export class Sprite extends Node2D {
         r_src_rect.x = base_rect.x + frame_offset.x;
         r_src_rect.y = base_rect.y + frame_offset.y;
 
-        const dest_offset = this.offset.clone();
+        const dest_offset = _i_get_rects_Vector2_3.copy(this.offset);
         if (this.centered) {
             dest_offset.x -= frame_size.x / 2;
             dest_offset.y -= frame_size.y / 2;
@@ -294,13 +285,19 @@ export class Sprite extends Node2D {
             r_dst_rect.height = - r_dst_rect.height;
         }
 
-        Vector2.free(frame_size);
-        Vector2.free(frame_offset);
-        Vector2.free(dest_offset);
-        Rect2.free(base_rect);
-
         return r_filter_clip;
     }
 }
 
 node_class_map['Sprite'] = GDCLASS(Sprite, Node2D)
+
+const _i_notification_Rect2_1 = new Rect2;
+const _i_notification_Rect2_2 = new Rect2;
+
+const _i_get_rect_Vector2_1 = new Vector2;
+const _i_get_rect_Vector2_2 = new Vector2;
+
+const _i_get_rects_Vector2_1 = new Vector2;
+const _i_get_rects_Vector2_2 = new Vector2;
+const _i_get_rects_Vector2_3 = new Vector2;
+const _i_get_rects_Rect2_1 = new Rect2;

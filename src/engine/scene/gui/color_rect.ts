@@ -24,7 +24,7 @@ export class ColorRect extends Control {
 
     _notification(p_what: number) {
         if (p_what === NOTIFICATION_DRAW) {
-            const rect = Rect2.create(0, 0, this.rect_size.x, this.rect_size.y)
+            const rect = Rect2.new(0, 0, this.rect_size.x, this.rect_size.y)
             this.draw_rect(rect, this.color);
             Rect2.free(rect);
         }

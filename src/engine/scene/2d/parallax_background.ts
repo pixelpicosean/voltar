@@ -202,8 +202,8 @@ export class ParallaxBackground extends CanvasLayer {
     _camera_moved(p_transform: Transform2D, p_screen_offset: Vector2) {
         this.screen_offset.copy(p_screen_offset);
 
-        const vec = Vector2.create(0.5, 0.5);
-        const scale = Vector2.create();
+        const vec = Vector2.new(0.5, 0.5);
+        const scale = Vector2.new();
         p_transform.get_scale(scale);
         this.scroll_scale = scale.dot(vec);
         Vector2.free(scale);

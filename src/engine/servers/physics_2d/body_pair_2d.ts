@@ -146,8 +146,8 @@ export class BodyPair2DSW extends Constraint2DSW {
         if (B.continuous_cd_mode === CCDMode.CAST_SHAPE) {
             motion_B = B.get_motion();
         }
-        if (!motion_A) motion_A = Vector2.create();
-        if (!motion_B) motion_B = Vector2.create();
+        if (!motion_A) motion_A = Vector2.new();
+        if (!motion_B) motion_B = Vector2.new();
 
         let prev_collided = this.collided;
 
@@ -287,9 +287,9 @@ export class BodyPair2DSW extends Constraint2DSW {
 
         let do_process = false;
 
-        let global_A = Vector2.create();
-        let global_B = Vector2.create();
-        let a_minus_b = Vector2.create();
+        let global_A = Vector2.new();
+        let global_B = Vector2.new();
+        let a_minus_b = Vector2.new();
         for (let i = 0; i < this.contact_count; i++) {
             let c = this.contacts[i];
 
@@ -317,14 +317,14 @@ export class BodyPair2DSW extends Constraint2DSW {
                 global_B.add(offset_A);
 
                 if (gather_A) {
-                    let crB = Vector2.create(-B.angular_velocity * c.rB.y, B.angular_velocity * c.rB.x);
+                    let crB = Vector2.new(-B.angular_velocity * c.rB.y, B.angular_velocity * c.rB.x);
                     let nn = c.normal.clone().negate();
                     A.add_contact(global_A, nn, depth, this.shape_A, global_B, this.shape_B, B.instance, B.self, crB.add(B.linear_velocity));
                     Vector2.free(nn);
                     Vector2.free(crB);
                 }
                 if (gather_B) {
-                    let crA = Vector2.create(-A.angular_velocity * c.rA.y, A.angular_velocity * c.rA.x);
+                    let crA = Vector2.new(-A.angular_velocity * c.rA.y, A.angular_velocity * c.rA.x);
                     A.add_contact(global_B, c.normal, depth, this.shape_B, global_A, this.shape_A, A.instance, A.self, crA.add(A.linear_velocity));
                     Vector2.free(crA);
                 }
@@ -367,8 +367,8 @@ export class BodyPair2DSW extends Constraint2DSW {
 
             c.bounce = combine_bounce(A, B);
             if (c.bounce) {
-                let crA = Vector2.create(-A.angular_velocity * c.rA.y, A.angular_velocity * c.rA.x);
-                let crB = Vector2.create(-B.angular_velocity * c.rB.y, B.angular_velocity * c.rB.x);
+                let crA = Vector2.new(-A.angular_velocity * c.rA.y, A.angular_velocity * c.rA.x);
+                let crB = Vector2.new(-B.angular_velocity * c.rB.y, B.angular_velocity * c.rB.x);
                 let dv = B.linear_velocity.clone().add(crB).subtract(A.linear_velocity).subtract(crA);
                 c.bounce = c.bounce * dv.dot(c.normal);
                 Vector2.free(dv);
@@ -413,12 +413,12 @@ export class BodyPair2DSW extends Constraint2DSW {
 
             // relative velocity at contact
 
-            let crA = Vector2.create(-A.angular_velocity * c.rA.y, A.angular_velocity * c.rA.x);
-            let crB = Vector2.create(-B.angular_velocity * c.rB.y, B.angular_velocity * c.rB.x);
+            let crA = Vector2.new(-A.angular_velocity * c.rA.y, A.angular_velocity * c.rA.x);
+            let crB = Vector2.new(-B.angular_velocity * c.rB.y, B.angular_velocity * c.rB.x);
             let dv = B.linear_velocity.clone().add(crB).subtract(A.linear_velocity).subtract(crA);
 
-            let crbA = Vector2.create(-A.biased_angular_velocity * c.rA.y, A.biased_angular_velocity * c.rA.x);
-            let crbB = Vector2.create(-B.biased_angular_velocity * c.rB.y, B.biased_angular_velocity * c.rB.x);
+            let crbA = Vector2.new(-A.biased_angular_velocity * c.rA.y, A.biased_angular_velocity * c.rA.x);
+            let crbB = Vector2.new(-B.biased_angular_velocity * c.rB.y, B.biased_angular_velocity * c.rB.x);
             let dbv = B.biased_linear_velocity.clone().add(crbB).subtract(A.biased_linear_velocity).subtract(crbA);
 
             let vn = dv.dot(c.normal);
@@ -487,7 +487,7 @@ export class BodyPair2DSW extends Constraint2DSW {
         // by motion length support is the worst case collision point, so real collision
         // happened before
         let s = get_vec_arr_2();
-        let xformed_mnormal = Vector2.create();
+        let xformed_mnormal = Vector2.new();
         p_A.get_shape(p_shape_A).get_supports(p_xform_A.basis_xform(mnormal, xformed_mnormal).normalize(), s, 0);
         let from = p_xform_A.xform(s[0], s[0]);
         let to = from.clone().add(motion);
@@ -499,8 +499,8 @@ export class BodyPair2DSW extends Constraint2DSW {
         from_inv.xform(local_from, local_from);
         let local_to = from_inv.xform(to);
 
-        let rpos = Vector2.create();
-        let rnorm = Vector2.create();
+        let rpos = Vector2.new();
+        let rnorm = Vector2.new();
         if (!p_B.get_shape(p_shape_B).intersect_segment(local_from, local_to, rpos, rnorm)) {
             Vector2.free(rnorm);
             Vector2.free(rpos);
@@ -551,10 +551,10 @@ export class BodyPair2DSW extends Constraint2DSW {
         let max_separation = this.space.contact_max_separation;
         let max_separation2 = max_separation * max_separation;
 
-        let global_A = Vector2.create();
-        let global_B = Vector2.create();
-        let axis = Vector2.create();
-        let diff = Vector2.create();
+        let global_A = Vector2.new();
+        let global_B = Vector2.new();
+        let axis = Vector2.new();
+        let diff = Vector2.new();
         for (let i = 0; i < this.contact_count; i++) {
             let c = this.contacts[i];
 
@@ -644,9 +644,9 @@ export class BodyPair2DSW extends Constraint2DSW {
             let least_deep = -1;
             let min_depth = 1e10;
 
-            let global_A = Vector2.create();
-            let global_B = Vector2.create();
-            let axis = Vector2.create();
+            let global_A = Vector2.new();
+            let global_B = Vector2.new();
+            let axis = Vector2.new();
             for (let i = 0; i <= this.contact_count; i++) {
                 let c = (i === this.contact_count) ? contact : this.contacts[i];
                 A.transform.basis_xform(c.local_A, global_A);

@@ -452,7 +452,7 @@ export class VisualServerScene {
      * @param {ShadowAtlas_t} shadow_atlas
      */
     render_camera(camera: Camera_t, scenario: Scenario_t, viewport_size: Vector2Like, shadow_atlas: ShadowAtlas_t) {
-        let camera_matrix = CameraMatrix.create();
+        const camera_matrix = _i_render_camera_CameraMatrix.identity();
         let ortho = false;
 
         switch (camera.type) {
@@ -491,8 +491,6 @@ export class VisualServerScene {
 
         this._prepare_scene(camera.transform, camera_matrix, ortho, camera.env, camera.visible_layers, scenario, shadow_atlas);
         this._render_scene(camera.transform, camera_matrix, ortho, camera.env, scenario, shadow_atlas);
-
-        CameraMatrix.free(camera_matrix);
     }
 
     /**
@@ -869,11 +867,10 @@ export class VisualServerScene {
      * @param {Instance_t} p_instance
      */
     _update_instance_aabb(p_instance: Instance_t) {
-        /** @type {AABB} */
-        let new_aabb: AABB = null;
+        const new_aabb = _i_update_instance_aabb_AABB.set(0, 0, 0, 0, 0, 0);
         switch (p_instance.base_type) {
             case INSTANCE_TYPE_MESH: {
-                new_aabb = VSG.storage.mesh_get_aabb(p_instance.base as Mesh_t);
+                VSG.storage.mesh_get_aabb(p_instance.base as Mesh_t, new_aabb);
             } break;
             case INSTANCE_TYPE_MULTIMESH: {
             } break;
@@ -882,20 +879,18 @@ export class VisualServerScene {
             case INSTANCE_TYPE_PARTICLES: {
             } break;
             case INSTANCE_TYPE_LIGHT: {
-                new_aabb = VSG.storage.light_get_aabb(p_instance.base as Light_t);
+                VSG.storage.light_get_aabb(p_instance.base as Light_t, new_aabb);
             } break;
             case INSTANCE_TYPE_LIGHTMAP_CAPTURE: {
-                new_aabb = VSG.storage.lightmap_capture_get_bounds(p_instance.base as LightmapCapture_t);
+                VSG.storage.lightmap_capture_get_bounds(p_instance.base as LightmapCapture_t, new_aabb);
             } break;
         }
-        if (!new_aabb) new_aabb = AABB.create();
 
         if (p_instance.extra_margin) {
             new_aabb.grow_by(p_instance.extra_margin);
         }
 
         p_instance.aabb.copy(new_aabb);
-        AABB.free(new_aabb);
     }
 
     /**
@@ -926,11 +921,10 @@ export class VisualServerScene {
 
         p_instance.mirror = p_instance.transform.basis.determinant() < 0;
 
-        let new_aabb = p_instance.transform.xform_aabb(p_instance.aabb);
+        const new_aabb = p_instance.transform.xform_aabb(p_instance.aabb, _i_update_instance_AABB);
         p_instance.transformed_aabb.copy(new_aabb);
 
         if (!p_instance.scenario) {
-            AABB.free(new_aabb);
             return;
         }
 
@@ -948,8 +942,6 @@ export class VisualServerScene {
         } else {
             p_instance.scenario.octree.move(p_instance.octree_id, new_aabb);
         }
-
-        AABB.free(new_aabb);
     }
 
     /**
@@ -977,9 +969,9 @@ export class VisualServerScene {
 
         let planes = p_cam_projection.get_projection_planes(p_cam_transform);
 
-        let near_plane = Plane.create().set_point_and_normal(
+        let near_plane = _i_prepare_scene_Plane_1.set_point_and_normal(
             p_cam_transform.origin,
-            p_cam_transform.basis.get_axis(2).normalize().negate()
+            p_cam_transform.basis.get_axis(2, _i_prepare_scene_Vector3_1).normalize().negate()
         );
         let z_far = p_cam_projection.get_z_far();
 
@@ -1091,14 +1083,14 @@ export class VisualServerScene {
                 let coverage = 0.0;
 
                 {
-                    let cam_xf = p_cam_transform.clone();
+                    let cam_xf = _i_prepare_scene_Transform.copy(p_cam_transform);
                     let zn = p_cam_projection.get_z_near();
-                    let p = Plane.create().set_point_and_normal(
-                        cam_xf.basis.get_axis(2).scale(-zn).add(cam_xf.origin),
-                        cam_xf.basis.get_axis(2).negate()
+                    let p = _i_prepare_scene_Plane_2.set_point_and_normal(
+                        cam_xf.basis.get_axis(2, _i_prepare_scene_Vector3_2).scale(-zn).add(cam_xf.origin),
+                        cam_xf.basis.get_axis(2, _i_prepare_scene_Vector3_3).negate()
                     );
 
-                    let vp_half_extents = p_cam_projection.get_viewport_half_extents();
+                    let vp_half_extents = p_cam_projection.get_viewport_half_extents(_i_prepare_scene_Vector3_4);
 
                     switch (light_base.type) {
                         case LIGHT_OMNI: {
@@ -1106,7 +1098,7 @@ export class VisualServerScene {
 
                             let points = [
                                 inst.transform.origin.clone(),
-                                cam_xf.basis.get_axis(0).scale(radius).add(inst.transform.origin),
+                                cam_xf.basis.get_axis(0, _i_prepare_scene_Vector3_5).scale(radius).add(inst.transform.origin),
                             ];
 
                             if (!p_cam_ortho) {
@@ -1129,12 +1121,12 @@ export class VisualServerScene {
                             let w = radius * Math.sin(deg2rad(angle));
                             let d = radius * Math.cos(deg2rad(angle));
 
-                            let base = inst.transform.basis.get_axis(2).normalize().scale(-d)
+                            let base = inst.transform.basis.get_axis(2, _i_prepare_scene_Vector3_6).normalize().scale(-d)
                                 .add(inst.transform.origin)
 
                             let points = [
                                 base,
-                                cam_xf.basis.get_axis(0).scale(w).add(base),
+                                cam_xf.basis.get_axis(0, _i_prepare_scene_Vector3_7).scale(w).add(base),
                             ];
 
                             if (!p_cam_ortho) {
@@ -1151,9 +1143,6 @@ export class VisualServerScene {
                             coverage = screen_diameter / (vp_half_extents.x + vp_half_extents.y);
                         } break;
                     }
-
-                    Plane.free(p);
-                    Transform.free(cam_xf);
                 }
 
                 if (light.shadow_dirty) {
@@ -1181,7 +1170,7 @@ export class VisualServerScene {
     _light_instance_update_shadow(p_instance: Instance_t, p_cam_transform: Transform, p_cam_projection: CameraMatrix, p_cam_ortho: boolean, p_shadow_atlas: ShadowAtlas_t, p_scenario: Scenario_t) {
         let light: InstanceLightData = p_instance.base_data as InstanceLightData;
 
-        let light_transform = p_instance.transform.clone();
+        let light_transform = _i_light_instance_update_shadow_Transform_1.copy(p_instance.transform);
         light_transform.orthonormalize();
 
         let animated_material_found = false;
@@ -1206,9 +1195,8 @@ export class VisualServerScene {
                 if (depth_range_mode === LIGHT_DIRECTIONAL_SHADOW_DEPTH_RANGE_OPTIMIZED) {
                     let planes = p_cam_projection.get_projection_planes(p_cam_transform);
                     let cull_count = p_scenario.octree.cull_convex(planes, this.instance_shadow_cull_result, MAX_INSTANCE_CULL, INSTANCE_GEOMETRY_MASK);
-                    let axis2_ne = p_cam_transform.basis.get_axis(2).negate();
-                    let base = Plane.create().set_point_and_normal(p_cam_transform.origin, axis2_ne);
-                    Vector3.free(axis2_ne);
+                    let axis2_ne = p_cam_transform.basis.get_axis(2, _i_light_instance_update_shadow_Vector3_1).negate();
+                    let base = _i_light_instance_update_shadow_Plane_1.set_point_and_normal(p_cam_transform.origin, axis2_ne);
 
                     let found_items = false;
                     let z_max = -1e20;
@@ -1272,12 +1260,12 @@ export class VisualServerScene {
 
                 let first_radius = 0;
                 for (let i = 0; i < splits; i++) {
-                    let camera_matrix = CameraMatrix.create();
+                    let camera_matrix = _i_light_instance_update_shadow_CameraMatrix_1.identity();
 
                     let aspect = p_cam_projection.get_aspect();
 
                     if (p_cam_ortho) {
-                        let vp_he = p_cam_projection.get_viewport_half_extents();
+                        let vp_he = p_cam_projection.get_viewport_half_extents(_i_light_instance_update_shadow_Vector3_2);
 
                         camera_matrix.set_orthogonal(vp_he.y * 2, aspect, distances[(i === 0 || !overlap) ? i : i - 1], distances[i + 1], false);
                     } else {
@@ -1289,11 +1277,11 @@ export class VisualServerScene {
                     camera_matrix.get_endpoints(p_cam_transform, endpoints);
 
                     // obtain light frustum ranges
-                    let transform = light_transform.clone();
+                    let transform = _i_light_instance_update_shadow_Transform_2.copy(light_transform);
 
-                    let x_vec = transform.basis.get_axis(0).normalize();
-                    let y_vec = transform.basis.get_axis(1).normalize();
-                    let z_vec = transform.basis.get_axis(2).normalize();
+                    let x_vec = transform.basis.get_axis(0, _i_light_instance_update_shadow_Vector3_3).normalize();
+                    let y_vec = transform.basis.get_axis(1, _i_light_instance_update_shadow_Vector3_4).normalize();
+                    let z_vec = transform.basis.get_axis(2, _i_light_instance_update_shadow_Vector3_5).normalize();
 
                     let x_min = 0, x_max = 0;
                     let y_min = 0, y_max = 0;
@@ -1336,7 +1324,7 @@ export class VisualServerScene {
                     {
                         // camera viewport stuff
 
-                        let center = Vector3.create();
+                        const center = _i_light_instance_update_shadow_Vector3_6.set(0, 0, 0);
 
                         for (let j = 0; j < 8; j++) {
                             center.add(endpoints[j]);
@@ -1375,8 +1363,6 @@ export class VisualServerScene {
                             y_max_cam = stepify(y_max_cam, unit);
                             y_min_cam = stepify(y_min_cam, unit);
                         }
-
-                        Vector3.free(center);
                     }
 
                     // - right/left
@@ -1391,9 +1377,9 @@ export class VisualServerScene {
 
                     let cull_count = p_scenario.octree.cull_convex(light_frustum_planes, this.instance_shadow_cull_result, MAX_INSTANCE_CULL, INSTANCE_GEOMETRY_MASK);
 
-                    let near_plane = Plane.create().set_point_and_normal(light_transform.origin, light_transform.basis.get_axis(2).negate());
+                    let near_plane = _i_light_instance_update_shadow_Plane_2.set_point_and_normal(light_transform.origin, light_transform.basis.get_axis(2, _i_light_instance_update_shadow_Vector3_6).negate());
 
-                    let tmp_plane = Plane.create();
+                    let tmp_plane = _i_light_instance_update_shadow_Plane_3;
                     for (let j = 0; j < cull_count; j++) {
                         let instance = this.instance_shadow_cull_result[j];
                         let base_data: InstanceGeometryData = instance.base_data as InstanceGeometryData;
@@ -1412,17 +1398,16 @@ export class VisualServerScene {
                             z_max = res.max;
                         }
                     }
-                    Plane.free(tmp_plane);
 
                     {
-                        let ortho_camera = CameraMatrix.create();
+                        let ortho_camera = _i_light_instance_update_shadow_CameraMatrix_2.identity();
 
                         let half_x = (x_max_cam - x_min_cam) * 0.5;
                         let half_y = (y_max_cam - y_min_cam) * 0.5;
 
                         ortho_camera.set_orthogonal_d(-half_x, half_x, -half_y, half_y, 0, z_max - z_min_cam);
 
-                        let ortho_transform = Transform.create();
+                        let ortho_transform = _i_light_instance_update_shadow_Transform_3.identity();
                         ortho_transform.basis.copy(transform.basis);
                         ortho_transform.origin
                             .copy(x_vec.scale(x_min_cam + half_x))
@@ -1434,19 +1419,9 @@ export class VisualServerScene {
                             ortho_camera, ortho_transform,
                             0, distances[i + 1], i, bias_scale
                         );
-
-                        Transform.free(ortho_transform);
-                        CameraMatrix.free(ortho_camera);
                     }
 
                     VSG.scene_render.render_shadow(light.instance, p_shadow_atlas, i, this.instance_shadow_cull_result, cull_count);
-
-                    Vector3.free(x_vec);
-                    Vector3.free(y_vec);
-                    Vector3.free(z_vec);
-
-                    Transform.free(transform);
-                    CameraMatrix.free(camera_matrix);
                 }
             } break;
             case LIGHT_OMNI: {
@@ -1457,23 +1432,21 @@ export class VisualServerScene {
                         let radius = light_base.param[LIGHT_PARAM_RANGE];
 
                         let z = i === 0 ? -1 : 1;
-                        /** @type {Plane[]} */
                         let planes: Plane[] = Array(5);
-                        let vec = Vector3.create();
-                        planes[0] = light_transform.xform_plane(Plane.create().set(0, 0, z, radius));
+                        let vec = _i_light_instance_update_shadow_Vector3_7;
+                        planes[0] = light_transform.xform_plane(_i_light_instance_update_shadow_Plane_4.set(0, 0, z, radius), _i_light_instance_update_shadow_Plane_5);
                         vec.set(1, 0, z).normalize();
-                        planes[1] = light_transform.xform_plane(Plane.create().set(vec.x, vec.y, vec.z, radius));
+                        planes[1] = light_transform.xform_plane(_i_light_instance_update_shadow_Plane_6.set(vec.x, vec.y, vec.z, radius), _i_light_instance_update_shadow_Plane_7);
                         vec.set(-1, 0, z).normalize();
-                        planes[2] = light_transform.xform_plane(Plane.create().set(vec.x, vec.y, vec.z, radius));
+                        planes[2] = light_transform.xform_plane(_i_light_instance_update_shadow_Plane_8.set(vec.x, vec.y, vec.z, radius), _i_light_instance_update_shadow_Plane_9);
                         vec.set(0, 1, z).normalize();
-                        planes[3] = light_transform.xform_plane(Plane.create().set(vec.x, vec.y, vec.z, radius));
+                        planes[3] = light_transform.xform_plane(_i_light_instance_update_shadow_Plane_10.set(vec.x, vec.y, vec.z, radius), _i_light_instance_update_shadow_Plane_11);
                         vec.set(0, -1, z).normalize();
-                        planes[4] = light_transform.xform_plane(Plane.create().set(vec.x, vec.y, vec.z, radius));
-                        Vector3.free(vec);
+                        planes[4] = light_transform.xform_plane(_i_light_instance_update_shadow_Plane_12.set(vec.x, vec.y, vec.z, radius), _i_light_instance_update_shadow_Plane_13);
 
                         let cull_count = p_scenario.octree.cull_convex(planes, this.instance_shadow_cull_result, MAX_INSTANCE_CULL, INSTANCE_GEOMETRY_MASK);
 
-                        let near_plane = Plane.create().set_point_and_normal(light_transform.origin, light_transform.basis.get_axis(2).scale(z));
+                        let near_plane = _i_light_instance_update_shadow_Plane_14.set_point_and_normal(light_transform.origin, light_transform.basis.get_axis(2, _i_light_instance_update_shadow_Vector3_8).scale(z));
 
                         for (let j = 0; j < cull_count; j++) {
                             let instance = this.instance_shadow_cull_result[j];
@@ -1490,13 +1463,12 @@ export class VisualServerScene {
                             }
                         }
 
-                        let cm = CameraMatrix.create();
+                        const cm = _i_light_instance_update_shadow_CameraMatrix_3.identity();
                         VSG.scene_render.light_instance_set_shadow_transform(
                             light.instance,
                             cm, light_transform,
                             radius, 0, i
                         )
-                        CameraMatrix.free(cm);
                         VSG.scene_render.render_shadow(light.instance, p_shadow_atlas, i, this.instance_shadow_cull_result, cull_count);
                     }
                 }
@@ -1505,13 +1477,13 @@ export class VisualServerScene {
                 let radius = light_base.param[LIGHT_PARAM_RANGE];
                 let angle = light_base.param[LIGHT_PARAM_SPOT_ANGLE];
 
-                let cm = CameraMatrix.create();
+                const cm = _i_light_instance_update_shadow_CameraMatrix_4.identity();
                 cm.set_perspective(angle * 2, 1, 0.01, radius);
 
                 let planes = cm.get_projection_planes(light_transform);
                 let cull_count = p_scenario.octree.cull_convex(planes, this.instance_shadow_cull_result, MAX_INSTANCE_CULL, INSTANCE_GEOMETRY_MASK);
 
-                let near_plane = Plane.create().set_point_and_normal(light_transform.origin, light_transform.basis.get_axis(2).negate());
+                let near_plane = _i_light_instance_update_shadow_Plane_15.set_point_and_normal(light_transform.origin, light_transform.basis.get_axis(2, _i_light_instance_update_shadow_Vector3_9).negate());
                 for (let j = 0; j < cull_count; j++) {
                     let instance = this.instance_shadow_cull_result[j];
                     let base_data: InstanceGeometryData = instance.base_data as InstanceGeometryData;
@@ -1532,12 +1504,8 @@ export class VisualServerScene {
                     radius, 0, 0
                 );
                 VSG.scene_render.render_shadow(light.instance, p_shadow_atlas, 0, this.instance_shadow_cull_result, cull_count);
-
-                CameraMatrix.free(cm);
             } break;
         }
-
-        Transform.free(light_transform);
 
         return animated_material_found;
     }
@@ -1555,3 +1523,52 @@ export class VisualServerScene {
         VSG.scene_render.render_scene(p_cam_transform, p_cam_projection, p_cam_ortho, this.instance_cull_result, this.instance_cull_count, this.light_instance_cull_result, this.light_cull_count + this.directional_light_count, environment, p_shadow_atlas);
     }
 }
+
+const _i_render_camera_CameraMatrix = new CameraMatrix;
+
+const _i_update_instance_aabb_AABB = new AABB;
+
+const _i_update_instance_AABB = new AABB;
+
+const _i_prepare_scene_Plane_1 = new Plane;
+const _i_prepare_scene_Plane_2 = new Plane;
+const _i_prepare_scene_Transform = new Transform;
+const _i_prepare_scene_Vector3_1 = new Vector3;
+const _i_prepare_scene_Vector3_2 = new Vector3;
+const _i_prepare_scene_Vector3_3 = new Vector3;
+const _i_prepare_scene_Vector3_4 = new Vector3;
+const _i_prepare_scene_Vector3_5 = new Vector3;
+const _i_prepare_scene_Vector3_6 = new Vector3;
+const _i_prepare_scene_Vector3_7 = new Vector3;
+
+const _i_light_instance_update_shadow_Vector3_1 = new Vector3;
+const _i_light_instance_update_shadow_Vector3_2 = new Vector3;
+const _i_light_instance_update_shadow_Vector3_3 = new Vector3;
+const _i_light_instance_update_shadow_Vector3_4 = new Vector3;
+const _i_light_instance_update_shadow_Vector3_5 = new Vector3;
+const _i_light_instance_update_shadow_Vector3_6 = new Vector3;
+const _i_light_instance_update_shadow_Vector3_7 = new Vector3;
+const _i_light_instance_update_shadow_Vector3_8 = new Vector3;
+const _i_light_instance_update_shadow_Vector3_9 = new Vector3;
+const _i_light_instance_update_shadow_CameraMatrix_1 = new CameraMatrix;
+const _i_light_instance_update_shadow_CameraMatrix_2 = new CameraMatrix;
+const _i_light_instance_update_shadow_CameraMatrix_3 = new CameraMatrix;
+const _i_light_instance_update_shadow_CameraMatrix_4 = new CameraMatrix;
+const _i_light_instance_update_shadow_Transform_1 = new Transform;
+const _i_light_instance_update_shadow_Transform_2 = new Transform;
+const _i_light_instance_update_shadow_Transform_3 = new Transform;
+const _i_light_instance_update_shadow_Plane_1 = new Plane;
+const _i_light_instance_update_shadow_Plane_2 = new Plane;
+const _i_light_instance_update_shadow_Plane_3 = new Plane;
+const _i_light_instance_update_shadow_Plane_4 = new Plane;
+const _i_light_instance_update_shadow_Plane_5 = new Plane;
+const _i_light_instance_update_shadow_Plane_6 = new Plane;
+const _i_light_instance_update_shadow_Plane_7 = new Plane;
+const _i_light_instance_update_shadow_Plane_8 = new Plane;
+const _i_light_instance_update_shadow_Plane_9 = new Plane;
+const _i_light_instance_update_shadow_Plane_10 = new Plane;
+const _i_light_instance_update_shadow_Plane_11 = new Plane;
+const _i_light_instance_update_shadow_Plane_12 = new Plane;
+const _i_light_instance_update_shadow_Plane_13 = new Plane;
+const _i_light_instance_update_shadow_Plane_14 = new Plane;
+const _i_light_instance_update_shadow_Plane_15 = new Plane;

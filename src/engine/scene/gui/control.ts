@@ -204,9 +204,8 @@ export class Control extends CanvasItem {
      * @param {number} y
      */
     set_rect_min_size_n(x: number, y: number) {
-        const size = Vector2.create(x, y);
+        const size = _i_set_rect_min_size_n_Vector2_1.set(x, y);
         this.set_rect_min_size(size);
-        Vector2.free(size);
     }
 
     get rect_position() { return this.c_data.pos_cache }
@@ -223,14 +222,13 @@ export class Control extends CanvasItem {
      * @param {boolean} [p_keep_margins=false]
      */
     set_rect_position_n(x: number, y: number, p_keep_margins: boolean = false) {
-        const rect = Rect2.create(x, y, this.c_data.size_cache.x, this.c_data.size_cache.y);
+        const rect = _i_set_rect_position_n_Rect2_1.set(x, y, this.c_data.size_cache.x, this.c_data.size_cache.y);
         if (p_keep_margins) {
             this._compute_anchors(rect, this.c_data.margin, this.c_data.anchor);
         } else {
             this._compute_margins(rect, this.c_data.anchor, this.c_data.margin);
         }
         this._size_changed();
-        Rect2.free(rect);
     }
     /**
      * @param {Vector2Like} value
@@ -253,14 +251,12 @@ export class Control extends CanvasItem {
      * @param {boolean} [p_keep_margins=false]
      */
     set_rect_global_position_n(x: number, y: number, p_keep_margins: boolean = false) {
-        const inv = Transform2D.create();
+        const inv = _i_set_rect_global_position_n_Transform2D_1.identity();
         if (this.c_data.parent_canvas_item) {
             inv.copy(this.c_data.parent_canvas_item.get_global_transform()).affine_inverse();
         }
-        const point = Vector2.create(x, y)
+        const point = _i_set_rect_global_position_n_Vector2_1.set(x, y);
         this.set_rect_position(inv.xform(point, point), p_keep_margins);
-        Vector2.free(point);
-        Transform2D.free(inv);
     }
     /**
      * @param {Vector2Like} value
@@ -289,8 +285,8 @@ export class Control extends CanvasItem {
      * @param {number} y
      */
     set_rect_size_n(x: number, y: number, p_keep_margins = false) {
-        const new_size = Vector2.create(x, y);
-        const min = this.get_combined_minimum_size();
+        const new_size = _i_set_rect_size_n_Vector2_1.set(x, y);
+        const min = this.get_combined_minimum_size(_i_set_rect_size_n_Vector2_2);
         if (new_size.x < min.x) {
             new_size.x = min.x;
         }
@@ -298,7 +294,7 @@ export class Control extends CanvasItem {
             new_size.y = min.y;
         }
 
-        const rect = Rect2.create(
+        const rect = _i_set_rect_size_n_Rect2_1.set(
             this.c_data.pos_cache.x,
             this.c_data.pos_cache.y,
             new_size.x,
@@ -310,9 +306,6 @@ export class Control extends CanvasItem {
             this._compute_margins(rect, this.c_data.anchor, this.c_data.margin);
         }
         this._size_changed();
-        Rect2.free(rect);
-        Vector2.free(new_size);
-        Vector2.free(min);
     }
 
     get rect_rotation() { return rad2deg(this.c_data.rotation) }
@@ -688,7 +681,7 @@ export class Control extends CanvasItem {
             } break;
             case NOTIFICATION_DRAW: {
                 this._update_canvas_item_transform();
-                const rect = Rect2.create(0, 0, this.rect_size.x, this.rect_size.y);
+                const rect = Rect2.new(0, 0, this.rect_size.x, this.rect_size.y);
                 VSG.canvas.canvas_item_set_custom_rect(this.canvas_item, !this.c_data.disable_visibility_clip, rect);
                 VSG.canvas.canvas_item_set_clip(this.canvas_item, this.c_data.clip_contents);
             } break;
@@ -752,10 +745,6 @@ export class Control extends CanvasItem {
         return false;
     }
 
-    _get_minimum_size(): Vector2 {
-        return null;
-    }
-
     /**
      * @param {InputEvent} p_event
      */
@@ -798,18 +787,16 @@ export class Control extends CanvasItem {
         this.update();
     }
 
-    get_minimum_size() {
-        const s = this._get_minimum_size();
-        return s || Vector2.create(0, 0);
+    get_minimum_size(r_out?: Vector2) {
+        return (r_out || Vector2.new()).set(0, 0);
     }
-    /**
-     * returns new Vector2
-     */
-    get_combined_minimum_size() {
+    get_combined_minimum_size(r_out?: Vector2) {
+        if (!r_out) r_out = Vector2.new();
+
         if (!this.c_data.minimum_size_valid) {
             this._update_minimum_size_cache();
         }
-        return this.c_data.minimum_size_cache.clone();
+        return r_out.copy(this.c_data.minimum_size_cache);
     }
 
     /**
@@ -1056,7 +1043,7 @@ export class Control extends CanvasItem {
     set_margins_preset(p_preset: number, p_resize_mode: number, p_margin: number) {
         // Calculate the size if the node is not resized
         const min_size = this.get_minimum_size();
-        const new_size = this.rect_size.clone();
+        const new_size = _i_set_margins_preset_Vector2_1.copy(this.rect_size);
         if (p_resize_mode == PRESET_MODE_MINSIZE || p_resize_mode == PRESET_MODE_KEEP_HEIGHT) {
             new_size.x = min_size.x;
         }
@@ -1064,7 +1051,7 @@ export class Control extends CanvasItem {
             new_size.y = min_size.y;
         }
 
-        const parent_rect = this.get_parent_anchorable_rect();
+        const parent_rect = this.get_parent_anchorable_rect(_i_set_margins_preset_Rect2_1);
 
         //Left
         switch (p_preset) {
@@ -1179,10 +1166,6 @@ export class Control extends CanvasItem {
         }
 
         this._size_changed();
-
-        Rect2.free(parent_rect);
-        Vector2.free(min_size);
-        Vector2.free(new_size);
     }
 
     /**
@@ -1211,7 +1194,7 @@ export class Control extends CanvasItem {
         this._size_changed();
     }
     get_begin() {
-        return Vector2.create(this.c_data.margin[0], this.c_data.margin[1]);
+        return Vector2.new(this.c_data.margin[0], this.c_data.margin[1]);
     }
 
     /**
@@ -1230,11 +1213,11 @@ export class Control extends CanvasItem {
         this._size_changed();
     }
     get_end() {
-        return Vector2.create(this.c_data.margin[2], this.c_data.margin[3]);
+        return Vector2.new(this.c_data.margin[2], this.c_data.margin[3]);
     }
 
     get_rect() {
-        return Rect2.create(
+        return Rect2.new(
             this.c_data.pos_cache.x,
             this.c_data.pos_cache.y,
             this.c_data.size_cache.x,
@@ -1243,7 +1226,7 @@ export class Control extends CanvasItem {
     }
     get_global_rect() {
         const pos = this.rect_global_position;
-        const rect = Rect2.create(
+        const rect = Rect2.new(
             pos.x,
             pos.y,
             this.c_data.size_cache.x,
@@ -1258,8 +1241,8 @@ export class Control extends CanvasItem {
         gr.y += rect.y;
         return gr;
     }
-    get_anchorable_rect() {
-        return Rect2.create(0, 0, this.c_data.size_cache.x, this.c_data.size_cache.y);
+    get_anchorable_rect(r_out?: Rect2) {
+        return (r_out || Rect2.new()).set(0, 0, this.c_data.size_cache.x, this.c_data.size_cache.y);
     }
 
     /**
@@ -1401,38 +1384,35 @@ export class Control extends CanvasItem {
             return ret;
         }
 
-        const rect = Rect2.create(0, 0, this.rect_size.x, this.rect_size.y);
+        const rect = Rect2.new(0, 0, this.rect_size.x, this.rect_size.y);
         ret = rect.has_point(p_point);
         return ret;
     }
 
-    /**
-     * returns new Rect2
-     */
-    get_parent_anchorable_rect() {
+    get_parent_anchorable_rect(r_out?: Rect2) {
+        if (!r_out) r_out = Rect2.new();
+        else r_out.set(0, 0, 0, 0);
+
         if (!this.is_inside_tree()) {
-            return Rect2.create();
+            return r_out;
         }
 
         if (this.c_data.parent_canvas_item) {
             return this.c_data.parent_canvas_item.get_anchorable_rect();
         } else {
-            return this.get_viewport().get_visible_rect();
+            return this.get_viewport().get_visible_rect(r_out);
         }
     }
 
-    /**
-     * returns new Vector2
-     */
-    get_parent_area_size() {
-        const rect = this.get_parent_anchorable_rect();
-        const size = Vector2.create(rect.width, rect.height);
-        Rect2.free(rect);
-        return size;
+    get_parent_area_size(r_out?: Vector2) {
+        if (!r_out) r_out = Vector2.new();
+
+        const rect = this.get_parent_anchorable_rect(_i_get_parent_area_size_Rect2_1);
+        return r_out.set(rect.width, rect.height);
     }
 
-    get_transform() {
-        const xform = this._get_internal_transform();
+    get_transform(r_out?: Transform2D) {
+        const xform = this._get_internal_transform(r_out);
         xform.tx += this.c_data.pos_cache.x;
         xform.ty += this.c_data.pos_cache.y;
         return xform;
@@ -1450,7 +1430,7 @@ export class Control extends CanvasItem {
 
         type = this.class;
 
-        // TODO: Loop through theme owners and find the value
+        // @Incomplete: Loop through theme owners and find the value
 
         return Theme.get_default().get_constant(name, type);
     }
@@ -1547,7 +1527,7 @@ export class Control extends CanvasItem {
     }
 
     _size_changed() {
-        const parent_rect = this.get_parent_anchorable_rect();
+        const parent_rect = this.get_parent_anchorable_rect(_i_size_changed_Rect2_1);
         margin_pos[0] = 0;
         margin_pos[1] = 0;
         margin_pos[2] = 0;
@@ -1557,10 +1537,10 @@ export class Control extends CanvasItem {
             margin_pos[i] = this.c_data.margin[i] + (this.c_data.anchor[i] * ((i % 2 === 0) ? parent_rect.width : parent_rect.height));
         }
 
-        const new_pos_cache = Vector2.create(margin_pos[0], margin_pos[1]);
-        const new_size_cache = Vector2.create(margin_pos[2], margin_pos[3]).subtract(new_pos_cache);
+        const new_pos_cache = _i_size_changed_Vector2_1.set(margin_pos[0], margin_pos[1]);
+        const new_size_cache = _i_size_changed_Vector2_2.set(margin_pos[2], margin_pos[3]).subtract(new_pos_cache);
 
-        const minimum_size = this.get_combined_minimum_size();
+        const minimum_size = this.get_combined_minimum_size(_i_size_changed_Vector2_3);
 
         if (minimum_size.x > new_size_cache.x) {
             if (this.c_data.h_grow === GROW_DIRECTION_BEGIN) {
@@ -1601,15 +1581,10 @@ export class Control extends CanvasItem {
                 this._update_canvas_item_transform();
             }
         }
-
-        Vector2.free(minimum_size);
-        Vector2.free(new_pos_cache);
-        Vector2.free(new_size_cache);
-        Rect2.free(parent_rect);
     }
 
     _update_canvas_item_transform() {
-        const xform = this._get_internal_transform();
+        const xform = this._get_internal_transform(_i_update_canvas_item_transform_Transform2D_1);
         const position = this.rect_position;
         xform.tx += position.x;
         xform.ty += position.y;
@@ -1620,20 +1595,18 @@ export class Control extends CanvasItem {
         }
 
         VSG.canvas.canvas_item_set_transform(this.canvas_item, xform);
-        Transform2D.free(xform);
     }
 
-    /**
-     * returns new Transform2D
-     */
-    _get_internal_transform() {
-        const rot_scale = Transform2D.create();
+    _get_internal_transform(r_out?: Transform2D) {
+        if (!r_out) r_out = Transform2D.new();
+        else r_out.identity();
+
+        const rot_scale = _i_get_internal_transform_Transform2D_1.identity();
         rot_scale.set_rotation_and_scale(this.c_data.rotation, this.c_data.scale);
-        const offset = Transform2D.create();
+        const offset = r_out;
         offset.set_origin_n(-this.c_data.pivot_offset.x, -this.c_data.pivot_offset.y);
         rot_scale.append(offset);
         offset.affine_inverse().append(rot_scale);
-        Transform2D.free(rot_scale);
         return offset;
     }
 
@@ -1642,7 +1615,7 @@ export class Control extends CanvasItem {
             return;
         }
 
-        const minsize = this.get_combined_minimum_size();
+        const minsize = this.get_combined_minimum_size(_i_update_minimum_size_Vector2_1);
         if (
             minsize.x > this.c_data.size_cache.x
             ||
@@ -1657,10 +1630,9 @@ export class Control extends CanvasItem {
             this.c_data.last_minimum_size.copy(minsize);
             this.emit_signal('minimum_size_changed');
         }
-        Vector2.free(minsize);
     }
     _update_minimum_size_cache() {
-        const minsize = this.get_minimum_size();
+        const minsize = this.get_minimum_size(_i_update_minimum_size_cache_Vector2_1);
         minsize.x = Math.max(minsize.x, this.c_data.custom_minimum_size.x);
         minsize.y = Math.max(minsize.y, this.c_data.custom_minimum_size.y);
 
@@ -1675,7 +1647,6 @@ export class Control extends CanvasItem {
         if (size_changed) {
             this.minimum_size_changed();
         }
-        Vector2.free(minsize);
     }
 
     _modal_stack_remove() {
@@ -1702,3 +1673,32 @@ export function CComparator(p_a: Element<Control>, p_b: Element<Control>) {
     }
     return p_a.value.get_canvas_layer() - p_b.value.get_canvas_layer();
 }
+
+const _i_set_rect_min_size_n_Vector2_1 = new Vector2;
+
+const _i_set_rect_position_n_Rect2_1 = new Rect2;
+
+const _i_set_rect_global_position_n_Vector2_1 = new Vector2;
+const _i_set_rect_global_position_n_Transform2D_1 = new Transform2D;
+
+const _i_set_rect_size_n_Vector2_1 = new Vector2;
+const _i_set_rect_size_n_Vector2_2 = new Vector2;
+const _i_set_rect_size_n_Rect2_1 = new Rect2;
+
+const _i_set_margins_preset_Vector2_1 = new Vector2;
+const _i_set_margins_preset_Rect2_1 = new Rect2;
+
+const _i_get_parent_area_size_Rect2_1 = new Rect2;
+
+const _i_size_changed_Vector2_1 = new Vector2;
+const _i_size_changed_Vector2_2 = new Vector2;
+const _i_size_changed_Vector2_3 = new Vector2;
+const _i_size_changed_Rect2_1 = new Rect2;
+
+const _i_update_canvas_item_transform_Transform2D_1 = new Transform2D;
+
+const _i_get_internal_transform_Transform2D_1 = new Transform2D;
+
+const _i_update_minimum_size_Vector2_1 = new Vector2;
+
+const _i_update_minimum_size_cache_Vector2_1 = new Vector2;

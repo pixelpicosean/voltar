@@ -8,7 +8,6 @@ import { segment_intersects_segment_2d } from "engine/core/math/geometry";
 
 const _SEGMENT_IS_VALID_SUPPORT_THRESHOLD = 0.99998;
 
-const tmp_vec = new Vector2;
 const support_vec2 = [new Vector2, new Vector2];
 function get_support_vec2() {
     support_vec2[0].set(0, 0);
@@ -292,7 +291,7 @@ export class SegmentShape2DSW extends Shape2DSW {
         const n = sub.tangent();
         this.normal.copy(n);
 
-        const aabb = Rect2.create(this.a.x, this.a.y);
+        const aabb = Rect2.new(this.a.x, this.a.y);
         aabb.expand_to(this.b);
         if (aabb.width === 0) {
             aabb.width = 0.001;
@@ -352,7 +351,7 @@ export class RayShape2DSW extends Shape2DSW {
      */
     project_rangev(p_normal: Vector2, p_transform: Transform2D, r_result: { min: number; max: number; }): { min: number; max: number; } {
         // real large
-        const vec = Vector2.create(0, this.length);
+        const vec = Vector2.new(0, this.length);
 
         const origin = p_transform.get_origin();
         r_result.max = p_normal.dot(origin);
@@ -414,7 +413,7 @@ export class RayShape2DSW extends Shape2DSW {
      */
     project_range(p_normal: Vector2, p_transform: Transform2D, r_result: { min: number; max: number; }): { min: number; max: number; } {
         // real large
-        const vec = Vector2.create(0, this.length);
+        const vec = Vector2.new(0, this.length);
         const origin = p_transform.get_origin();
         r_result.max = p_normal.dot(origin);
         r_result.min = p_normal.dot(p_transform.xform(vec, vec));
@@ -539,7 +538,7 @@ export class RectangleShape2DSW extends Shape2DSW {
         return this.project_range(p_normal, p_transform, r_result);
     }
     get_supports(p_normal: Vector2, r_supports: Vector2[], r_amount: number): number {
-        let ag = Vector2.create();
+        let ag = Vector2.new();
 
         for (let i = 0; i < 2; i++) {
             if (i === 0) {
@@ -640,7 +639,7 @@ export class RectangleShape2DSW extends Shape2DSW {
         r_result.max = -1e20;
         r_result.min = 1e20;
 
-        const local_normal = Vector2.create();
+        const local_normal = Vector2.new();
         for (let i = 0; i < 4; i++) {
             local_normal.set(
                 ((i & 1) * 2 - 1) * this.half_extents.x,
@@ -666,7 +665,7 @@ export class RectangleShape2DSW extends Shape2DSW {
      */
     get_circle_axis(p_xform: Transform2D, p_xform_inv: Transform2D, p_circle: Vector2) {
         const local_v = p_xform_inv.xform(p_circle);
-        const he = Vector2.create(
+        const he = Vector2.new(
             (local_v.x < 0) ? -this.half_extents.x : this.half_extents.x,
             (local_v.y < 0) ? -this.half_extents.y : this.half_extents.y
         );
@@ -677,16 +676,16 @@ export class RectangleShape2DSW extends Shape2DSW {
      * Returns new Vector2
      */
     get_box_axis(p_xform: Transform2D, p_xform_inv: Transform2D, p_B: RectangleShape2DSW, p_B_xform: Transform2D, p_B_xform_inv: Transform2D) {
-        const a = Vector2.create();
-        const b = Vector2.create();
+        const a = Vector2.new();
+        const b = Vector2.new();
 
         {
-            const local_v = Vector2.create();
+            const local_v = Vector2.new();
             const B_origin = p_B_xform.get_origin();
             p_xform_inv.xform(B_origin, local_v);
             Vector2.free(B_origin);
 
-            const he = Vector2.create(
+            const he = Vector2.new(
                 (local_v.x < 0) ? -this.half_extents.x : this.half_extents.x,
                 (local_v.y < 0) ? -this.half_extents.y : this.half_extents.y
             )
@@ -697,12 +696,12 @@ export class RectangleShape2DSW extends Shape2DSW {
             Vector2.free(he);
         }
         {
-            const local_v = Vector2.create();
+            const local_v = Vector2.new();
             const origin = p_xform.get_origin();
             p_B_xform_inv.xform(origin, local_v);
             Vector2.free(origin);
 
-            const he = Vector2.create(
+            const he = Vector2.new(
                 (local_v.x < 0) ? -p_B.half_extents.x : p_B.half_extents.x,
                 (local_v.y < 0) ? -p_B.half_extents.y : p_B.half_extents.y
             )
@@ -783,11 +782,11 @@ export class CapsuleShape2DSW extends Shape2DSW {
         let n = p_end.clone().subtract(p_begin).normalize();
         let collided = false;
 
-        let begin = Vector2.create();
-        let end = Vector2.create();
-        let line_vec = Vector2.create();
-        let point = Vector2.create();
-        let pointf = Vector2.create();
+        let begin = Vector2.new();
+        let end = Vector2.new();
+        let line_vec = Vector2.new();
+        let point = Vector2.new();
+        let pointf = Vector2.new();
         for (let i = 0; i < 2; i++) {
             begin.copy(p_begin);
             end.copy(p_end);
@@ -830,9 +829,9 @@ export class CapsuleShape2DSW extends Shape2DSW {
         Vector2.free(end);
         Vector2.free(begin);
 
-        let rpos = Vector2.create();
-        let rnorm = Vector2.create();
-        let rect = Rect2.create(-this.radius, -this.height * 0.5, this.radius * 2, this.height);
+        let rpos = Vector2.new();
+        let rnorm = Vector2.new();
+        let rect = Rect2.new(-this.radius, -this.height * 0.5, this.radius * 2, this.height);
         if (rect.intersects_segment(p_begin, p_end, rpos, rnorm)) {
             let pd = n.dot(rpos);
             if (pd < d) {
@@ -851,7 +850,7 @@ export class CapsuleShape2DSW extends Shape2DSW {
         return collided;
     }
     get_moment_of_inertia(p_mass: number, p_scale: Vector2): number {
-        let he2 = Vector2.create(this.radius * 2, this.height + this.radius * 2).multiply(p_scale);
+        let he2 = Vector2.new(this.radius * 2, this.height + this.radius * 2).multiply(p_scale);
         let res = p_mass * he2.dot(he2) / 12.0;
         Vector2.free(he2);
         return res;
@@ -875,7 +874,7 @@ export class CapsuleShape2DSW extends Shape2DSW {
         n.scale(this.radius);
         n.y += h * 0.5;
 
-        let nn = Vector2.create();
+        let nn = Vector2.new();
         r_result.max = p_normal.dot(p_transform.xform(n, nn));
         r_result.min = p_normal.dot(p_transform.xform(n.negate(), nn));
         Vector2.free(nn);
@@ -1010,7 +1009,7 @@ export class ConvexPolygonShape2DSW extends Shape2DSW {
         let d = 1e10, nd = 0;
         let inters = false;
 
-        const res = [Vector2.create()];
+        const res = [Vector2.new()];
         for (let i = 0, len = this._points.length; i < len; i++) {
             if (!segment_intersects_segment_2d(p_begin, p_end, this._points[i].pos, this._points[(i + 1) % len].pos, res)) {
                 continue;
@@ -1040,9 +1039,9 @@ export class ConvexPolygonShape2DSW extends Shape2DSW {
      * @returns {number}
      */
     get_moment_of_inertia(p_mass: number, p_scale: Vector2): number {
-        const aabb = Rect2.create();
-        const pos = Vector2.create();
-        const size = Vector2.create();
+        const aabb = Rect2.new();
+        const pos = Vector2.new();
+        const size = Vector2.new();
 
         aabb.x = this._points[0].pos.x * p_scale.x;
         aabb.y = this._points[0].pos.y * p_scale.y;
@@ -1063,7 +1062,7 @@ export class ConvexPolygonShape2DSW extends Shape2DSW {
         for (let i = 0; i < point_count; i++) {
             this._points[i] = new Point(p_data[i].x, p_data[i].y);
         }
-        const n = Vector2.create(), t = Vector2.create();
+        const n = Vector2.new(), t = Vector2.new();
         for (let i = 0; i < point_count; i++) {
             n.copy(this._points[(i + 1) % point_count].pos).subtract(this._points[i].pos);
             this._points[i].normal.copy(n.tangent(t).normalize());
@@ -1071,7 +1070,7 @@ export class ConvexPolygonShape2DSW extends Shape2DSW {
         Vector2.free(t);
         Vector2.free(n);
 
-        let aabb = Rect2.create();
+        let aabb = Rect2.new();
         aabb.x = this._points[0].pos.x;
         aabb.y = this._points[0].pos.y;
         for (let i = 1; i < point_count; i++) {
@@ -1092,7 +1091,7 @@ export class ConvexPolygonShape2DSW extends Shape2DSW {
     project_range(p_normal: Vector2, p_transform: Transform2D, r_result: { min: number; max: number; }): { min: number; max: number; } {
         // no matter the angle, the box is mirrored anyway
 
-        const pos = Vector2.create();
+        const pos = Vector2.new();
         r_result.min = r_result.max = p_normal.dot(p_transform.xform(this._points[0].pos, pos));
 
         let i = 0, d = 0, len = this._points.length;
