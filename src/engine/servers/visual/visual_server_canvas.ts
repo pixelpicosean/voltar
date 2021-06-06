@@ -13,6 +13,8 @@ import { Vector2, Vector2Like } from 'engine/core/math/vector2';
 import { Rect2 } from 'engine/core/math/rect2';
 import { Transform2D } from 'engine/core/math/transform_2d';
 import { Color, ColorLike } from 'engine/core/color';
+import { ProjectSettings } from 'engine/core/project_settings';
+import { NoShrinkArray } from 'engine/core/v_array';
 import { Texture } from 'engine/scene/resources/texture';
 import { Material } from 'engine/scene/resources/material';
 
@@ -152,13 +154,13 @@ export class Item {
             return this.rect;
         }
 
-        let xf = Transform2D.create();
+        const xf = _i_get_rect_Transform2D_1.identity();
         let found_xform = false;
         let first = true;
 
         let cmd = this.commands;
 
-        let r = Rect2.create();
+        const r = _i_get_rect_Rect2_1.set(0, 0, 0, 0);
         for (let i = 0; i < s; i++) {
             let c = cmd[i];
             r.set(0, 0, 0, 0);
@@ -172,7 +174,7 @@ export class Item {
                 } break;
                 case TYPE_POLYLINE: {
                     let pline = c as CommandPolyLine;
-                    let vec = Vector2.create();
+                    const vec = _i_get_rect_Vector2_1.set(0, 0);
                     let tri = pline.triangles;
                     for (let j = 0, len = Math.floor(tri.length / 2); j < len; j++) {
                         if (j === 0) {
@@ -182,7 +184,6 @@ export class Item {
                             r.expand_to(vec.set(tri[j * 2], tri[j * 2 + 1]));
                         }
                     }
-                    Vector2.free(vec);
                 } break;
                 case TYPE_CIRCLE: {
                     let circle = c as CommandCircle;
@@ -224,8 +225,6 @@ export class Item {
                 this.rect.merge_with(r);
             }
         }
-        Rect2.free(r);
-        Transform2D.free(xf);
 
         this.rect_dirty = false;
         return this.rect;
@@ -260,24 +259,34 @@ function Item_free(item: Item) {
 }
 
 const z_range = CANVAS_ITEM_Z_MAX - CANVAS_ITEM_Z_MIN + 1;
-const z_list = new Array(z_range);
-const z_last_list = new Array(z_range);
+let z_list: Item[] = null;
+let z_last_list: Item[] = null;
 function get_z_list(reset = false) {
+    if (!z_list) {
+        z_list = Array(z_range);
+        reset = false;
+    }
     if (reset) {
-        for (let i = 0; i < z_list.length; i++) {
+        for (let i = 0; i < z_range; i++) {
             z_list[i] = null;
         }
     }
     return z_list;
 }
 function get_z_last_list(reset = false) {
+    if (!z_last_list) {
+        z_last_list = Array(z_range);
+        reset = false;
+    }
     if (reset) {
-        for (let i = 0; i < z_last_list.length; i++) {
+        for (let i = 0; i < z_range; i++) {
             z_last_list[i] = null;
         }
     }
     return z_last_list;
 }
+
+const item_list: NoShrinkArray<Item> = new NoShrinkArray;
 
 const WHITE = Object.freeze(new Color(1, 1, 1, 1));
 
@@ -547,8 +556,8 @@ export class VisualServerCanvas {
             }
         }
 
-        let t = Vector2.create();
-        let tangent = Vector2.create();
+        const t = _i_canvas_item_add_polyline_Vector2_1.set(0, 0);
+        const tangent = _i_canvas_item_add_polyline_Vector2_2.set(0, 0);
         for (let i = 0, len = Math.floor(p_points.length / 2); i < len; i++) {
             let index = i * 2;
 
@@ -560,9 +569,8 @@ export class VisualServerCanvas {
                     p_points[(i + 1) * 2 + 0] - p_points[index + 0],
                     p_points[(i + 1) * 2 + 1] - p_points[index + 1]
                 )
-                .normalize().tangent();
+                .normalize().tangent(_i_canvas_item_add_polyline_Vector2_3);
                 t.copy(_t);
-                Vector2.free(_t);
 
                 if (i === 0) {
                     prev_x = t.x;
@@ -592,8 +600,6 @@ export class VisualServerCanvas {
             prev_x = t.x;
             prev_y = t.y;
         }
-        Vector2.free(tangent);
-        Vector2.free(t);
 
         p_item.rect_dirty = true;
         p_item.commands.push(pline);
@@ -922,40 +928,68 @@ export class VisualServerCanvas {
             }
         }
 
-        if (!has_mirror) {
-            get_z_list(true);
-            get_z_last_list(true);
+        if (!ProjectSettings.get_singleton().display.fast2d) {
+            if (!has_mirror) {
+                get_z_list(true);
+                get_z_last_list(true);
 
-            for (let i = 0; i < l; i++) {
-                this._render_canvas_item(ci[i].item, p_transform, p_clip_rect, WHITE, 0, z_list, z_last_list, null, null);
-            }
-
-            for (let i = 0; i < z_range; i++) {
-                if (!z_list[i]) {
-                    continue;
+                for (let i = 0; i < l; i++) {
+                    this._render_canvas_item(ci[i].item, p_transform, p_clip_rect, WHITE, 0, z_list, z_last_list, null, null);
                 }
 
-                VSG.canvas_render.canvas_render_items(z_list[i], CANVAS_ITEM_Z_MIN + i, p_canvas.modulate, p_transform);
+                for (let i = 0; i < z_range; i++) {
+                    if (!z_list[i]) {
+                        continue;
+                    }
+
+                    VSG.canvas_render.canvas_render_items(z_list[i], CANVAS_ITEM_Z_MIN + i, p_canvas.modulate, p_transform);
+                }
+            } else {
+                for (let i = 0; i < l; i++) {
+                    let ci2 = p_canvas.child_items[i];
+                    this._render_canvas_item_tree(ci2.item, p_transform, p_clip_rect, p_canvas.modulate);
+
+                    const xform2 = _i_render_canvas_Transform2D_1.identity();
+                    if (ci2.mirror.x !== 0) {
+                        xform2.copy(p_transform).translate(ci2.mirror.x, 0);
+                        this._render_canvas_item_tree(ci2.item, xform2, p_clip_rect, p_canvas.modulate);
+                    }
+                    if (ci2.mirror.y !== 0) {
+                        xform2.copy(p_transform).translate(0, ci2.mirror.y);
+                        this._render_canvas_item_tree(ci2.item, xform2, p_clip_rect, p_canvas.modulate);
+                    }
+                    if (ci2.mirror.x !== 0 && ci2.mirror.y !== 0) {
+                        xform2.copy(p_transform).translate(ci2.mirror.x, ci2.mirror.y);
+                        this._render_canvas_item_tree(ci2.item, xform2, p_clip_rect, p_canvas.modulate);
+                    }
+                }
             }
         } else {
-            for (let i = 0; i < l; i++) {
-                let ci2 = p_canvas.child_items[i];
-                this._render_canvas_item_tree(ci2.item, p_transform, p_clip_rect, p_canvas.modulate);
+            if (!has_mirror) {
+                item_list.clear();
+                for (let i = 0; i < l; i++) {
+                    this._render_canvas_item_fast(ci[i].item, p_transform, p_clip_rect, WHITE, item_list, null, null);
+                }
+                VSG.canvas_render.canvas_render_items_array(item_list, p_canvas.modulate, p_transform);
+            } else {
+                for (let i = 0; i < l; i++) {
+                    const ci2 = ci[i];
+                    this._render_canvas_item_tree_fast(ci[i].item, p_transform, p_clip_rect, WHITE);
 
-                let xform2 = Transform2D.create();
-                if (ci2.mirror.x !== 0) {
-                    xform2.copy(p_transform).translate(ci2.mirror.x, 0);
-                    this._render_canvas_item_tree(ci2.item, xform2, p_clip_rect, p_canvas.modulate);
+                    const xform2 = _i_render_canvas_Transform2D_1.identity();
+                    if (ci2.mirror.x !== 0) {
+                        xform2.copy(p_transform).translate(ci2.mirror.x, 0);
+                        this._render_canvas_item_tree_fast(ci2.item, xform2, p_clip_rect, p_canvas.modulate);
+                    }
+                    if (ci2.mirror.y !== 0) {
+                        xform2.copy(p_transform).translate(0, ci2.mirror.y);
+                        this._render_canvas_item_tree_fast(ci2.item, xform2, p_clip_rect, p_canvas.modulate);
+                    }
+                    if (ci2.mirror.x !== 0 && ci2.mirror.y !== 0) {
+                        xform2.copy(p_transform).translate(ci2.mirror.x, ci2.mirror.y);
+                        this._render_canvas_item_tree_fast(ci2.item, xform2, p_clip_rect, p_canvas.modulate);
+                    }
                 }
-                if (ci2.mirror.y !== 0) {
-                    xform2.copy(p_transform).translate(0, ci2.mirror.y);
-                    this._render_canvas_item_tree(ci2.item, xform2, p_clip_rect, p_canvas.modulate);
-                }
-                if (ci2.mirror.x !== 0 && ci2.mirror.y !== 0) {
-                    xform2.copy(p_transform).translate(ci2.mirror.x, ci2.mirror.y);
-                    this._render_canvas_item_tree(ci2.item, xform2, p_clip_rect, p_canvas.modulate);
-                }
-                Transform2D.free(xform2);
             }
         }
 
@@ -964,15 +998,24 @@ export class VisualServerCanvas {
 
     /* private */
 
-    _render_canvas_item_tree(p_canvas_item: Item, p_transform: Transform2D, p_clip_rect: Rect2, p_module: Color) {
-        this._render_canvas_item(p_canvas_item, p_transform, p_clip_rect, WHITE, 0, get_z_list(true), get_z_last_list(true), null, null);
+    _render_canvas_item_tree(p_canvas_item: Item, p_transform: Transform2D, p_clip_rect: Rect2, p_modulate: Color) {
+        get_z_list(true);
+        get_z_last_list(true);
+
+        this._render_canvas_item(p_canvas_item, p_transform, p_clip_rect, WHITE, 0, z_list, z_last_list, null, null);
 
         for (let i = 0; i < z_range; i++) {
             if (!z_list[i]) {
                 continue;
             }
-            VSG.canvas_render.canvas_render_items(z_list[i], CANVAS_ITEM_Z_MIN + i, p_module, p_transform);
+            VSG.canvas_render.canvas_render_items(z_list[i], CANVAS_ITEM_Z_MIN + i, p_modulate, p_transform);
         }
+    }
+
+    _render_canvas_item_tree_fast(p_canvas_item: Item, p_transform: Transform2D, p_clip_rect: Rect2, p_modulate: Color) {
+        item_list.clear();
+        this._render_canvas_item_fast(p_canvas_item, p_transform, p_clip_rect, WHITE, item_list, null, null);
+        VSG.canvas_render.canvas_render_items_array(item_list, p_modulate, p_transform);
     }
 
     /**
@@ -998,15 +1041,14 @@ export class VisualServerCanvas {
             ci.children_order_dirty = false;
         }
 
-        let rect = ci.get_rect().clone();
-        let xform = ci.xform.clone();
+        const rect = _i_render_canvas_item_Rect2_1.copy(ci.get_rect());
+        const xform = Transform2D.new().copy(ci.xform);
         if (this.snap_2d_transforms) {
             xform.tx = Math.floor(xform.tx);
             xform.ty = Math.floor(xform.ty);
         }
-        let xx = xform.clone();
+        const xx = _i_render_canvas_item_Transform2D_2.copy(xform);
         xform.copy(p_transform).append(xx);
-        Transform2D.free(xx);
 
         let global_rect = xform.xform_rect(rect, rect);
         global_rect.x += p_clip_rect.x;
@@ -1019,12 +1061,11 @@ export class VisualServerCanvas {
             ci.material_owner = null;
         }
 
-        let modulate = ci.modulate.clone().multiply(p_modulate);
+        const modulate = ci.modulate.clone().multiply(p_modulate);
 
         if (modulate.a < 0.007) {
             Color.free(modulate);
             Transform2D.free(xform);
-            Rect2.free(rect);
             return;
         }
 
@@ -1045,9 +1086,8 @@ export class VisualServerCanvas {
         if (ci.sort_y) {
             if (ci.ysort_children_count === -1) {
                 ci.ysort_children_count = 0;
-                let xform = Transform2D.create();
+                const xform = _i_render_canvas_item_Transform2D_3.identity();
                 ci.ysort_children_count = this._collect_ysort_children(ci, xform, p_material_owner, WHITE, null, 0);
-                Transform2D.free(xform);
             }
 
             child_item_count = ci.ysort_children_count;
@@ -1061,9 +1101,8 @@ export class VisualServerCanvas {
                 }
             }
 
-            let xform = Transform2D.create();
+            const xform = _i_render_canvas_item_Transform2D_4.identity();
             this._collect_ysort_children(ci, xform, p_material_owner, WHITE, child_items, 0);
-            Transform2D.free(xform);
 
             child_items.sort(item_sort);
         }
@@ -1081,8 +1120,8 @@ export class VisualServerCanvas {
                 continue;
             }
             if (ci.sort_y) {
-                let xf = xform.clone().append(item.ysort_xform);
-                let mo = modulate.clone().multiply(item.ysort_modulate);
+                const xf = xform.clone().append(item.ysort_xform);
+                const mo = modulate.clone().multiply(item.ysort_modulate);
                 this._render_canvas_item(item, xf, p_clip_rect, mo, p_z, z_list, z_last_list, ci.final_clip_owner, item.material_owner);
                 Color.free(mo);
                 Transform2D.free(xf);
@@ -1127,8 +1166,8 @@ export class VisualServerCanvas {
                 continue;
             }
             if (ci.sort_y) {
-                let xx = xform.clone().append(item.ysort_xform);
-                let mm = modulate.clone().multiply(item.ysort_modulate);
+                const xx = xform.clone().append(item.ysort_xform);
+                const mm = modulate.clone().multiply(item.ysort_modulate);
                 this._render_canvas_item(item, xx, p_clip_rect, mm, p_z, z_list, z_last_list, ci.final_clip_owner, item.material_owner);
                 Color.free(mm);
                 Transform2D.free(xx);
@@ -1137,9 +1176,80 @@ export class VisualServerCanvas {
             }
         }
 
-        Rect2.free(rect);
         Transform2D.free(xform);
         Color.free(modulate);
+    }
+
+    _render_canvas_item_fast(p_canvas_item: Item, p_transform: Transform2D, p_clip_rect: Rect2, p_modulate: Color, item_list: NoShrinkArray<Item>, p_canvas_clip: Item, p_material_owner: Item) {
+        let ci = p_canvas_item;
+
+        if (!ci.visible) {
+            return;
+        }
+
+        if (ci.children_order_dirty) {
+            ci.child_items.sort(item_index_sort);
+            ci.children_order_dirty = false;
+        }
+
+        const rect = _i_render_canvas_item_Rect2_1.copy(ci.get_rect());
+        const xform = Transform2D.new().copy(ci.xform);
+        if (this.snap_2d_transforms) {
+            xform.tx = Math.floor(xform.tx);
+            xform.ty = Math.floor(xform.ty);
+        }
+        const xx = _i_render_canvas_item_Transform2D_2.copy(xform);
+        xform.copy(p_transform).append(xx);
+
+        let global_rect = xform.xform_rect(rect, rect);
+        global_rect.x += p_clip_rect.x;
+        global_rect.y += p_clip_rect.y;
+
+        if (ci.use_parent_material && p_material_owner) {
+            ci.material_owner = p_material_owner;
+        } else {
+            p_material_owner = ci;
+            ci.material_owner = null;
+        }
+
+        const modulate = ci.modulate.clone().multiply(p_modulate);
+
+        if (modulate.a < 0.007) {
+            Color.free(modulate);
+            Transform2D.free(xform);
+            return;
+        }
+
+        if (ci.clip) {
+            if (p_canvas_clip) {
+                ci.final_clip_rect.copy(p_canvas_clip.final_clip_rect).clip_by(global_rect);
+            } else {
+                ci.final_clip_rect.copy(global_rect);
+            }
+            ci.final_clip_owner = ci;
+        } else {
+            ci.final_clip_owner = p_canvas_clip;
+        }
+
+        if (ci.copy_back_buffer) {
+            xform.xform_rect(ci.copy_back_buffer.screen_rect, ci.copy_back_buffer.screen_rect).clip_by(p_clip_rect);
+        }
+
+        if ((ci.commands.length > 0 && p_clip_rect.intersects(global_rect)) || ci.vp_render || ci.copy_back_buffer) {
+            // something to draw?
+            ci.final_transform.copy(xform);
+            ci.final_modulate.copy(modulate).multiply(ci.self_modulate);
+            ci.global_rect_cache.copy(global_rect);
+            ci.global_rect_cache.x -= p_clip_rect.x;
+            ci.global_rect_cache.y -= p_clip_rect.y;
+
+            item_list.push(ci);
+        }
+
+        // try to render all its child items
+        for (let item of ci.child_items) {
+            this._render_canvas_item_fast(item, xform, p_clip_rect, modulate, item_list, ci.final_clip_owner, p_material_owner);
+        }
     }
 
     /**
@@ -1172,9 +1282,8 @@ export class VisualServerCanvas {
                     r_items[r_index] = item;
                     item.ysort_modulate.copy(p_modulate);
                     item.ysort_xform.copy(p_transform);
-                    let origin = item.xform.get_origin();
+                    const origin = item.xform.get_origin(_i_collect_ysort_children_Vector2_1);
                     p_transform.xform(origin, item.ysort_pos);
-                    Vector2.free(origin);
                     item.material_owner = item.use_parent_material ? p_material_owner : null;
                     item.ysort_index = r_index;
                 }
@@ -1182,14 +1291,37 @@ export class VisualServerCanvas {
                 r_index++;
 
                 if (item.sort_y) {
-                    let xform = p_transform.clone().append(item.xform);
-                    let mm = p_modulate.clone().multiply(item.modulate);
+                    const xform = _i_collect_ysort_children_Transform2D_1.copy(p_transform).append(item.xform);
+                    const mm = _i_collect_ysort_children_Color_1.copy(p_modulate).multiply(item.modulate);
                     r_index = this._collect_ysort_children(item, xform, item.use_parent_material ? p_material_owner : item, mm, r_items, r_index);
-                    Color.free(mm);
-                    Transform2D.free(xform);
                 }
             }
         }
         return r_index;
     }
 }
+
+const _i_get_rect_Vector2_1 = new Vector2;
+const _i_get_rect_Rect2_1 = new Rect2;
+const _i_get_rect_Transform2D_1 = new Transform2D;
+
+const _i_canvas_item_add_polyline_Vector2_1 = new Vector2;
+const _i_canvas_item_add_polyline_Vector2_2 = new Vector2;
+const _i_canvas_item_add_polyline_Vector2_3 = new Vector2;
+
+const _i_render_canvas_Transform2D_1 = new Transform2D;
+
+const _i_render_canvas_item_Rect2_1 = new Rect2;
+const _i_render_canvas_item_Transform2D_1 = new Transform2D;
+const _i_render_canvas_item_Transform2D_2 = new Transform2D;
+const _i_render_canvas_item_Transform2D_3 = new Transform2D;
+const _i_render_canvas_item_Transform2D_4 = new Transform2D;
+const _i_render_canvas_item_Transform2D_5 = new Transform2D;
+const _i_render_canvas_item_Transform2D_6 = new Transform2D;
+const _i_render_canvas_item_Color_1 = new Color;
+const _i_render_canvas_item_Color_2 = new Color;
+const _i_render_canvas_item_Color_3 = new Color;
+
+const _i_collect_ysort_children_Vector2_1 = new Vector2;
+const _i_collect_ysort_children_Transform2D_1 = new Transform2D;
+const _i_collect_ysort_children_Color_1 = new Color;
