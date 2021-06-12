@@ -14,6 +14,7 @@ import {
 import { InputEvent } from 'engine/core/os/input_event';
 import { Engine } from 'engine/core/engine';
 import { Element as List$Element, List } from 'engine/core/list';
+import { memdelete } from 'engine/core/os/memory';
 
 
 export const PAUSE_MODE_INHERIT = 0;
@@ -47,52 +48,54 @@ class GroupData {
 }
 
 class Data {
-    filename = '';
+    filename: string;
 
-    instance_state: any = null;
-    inherited_state: any = null;
-
-    parent: Node = null;
-    owner: Node = null;
+    parent: Node;
+    owner: Node;
     children: Node[] = [];
-    pos = -1;
-    depth = -1;
-    name = '';
-    tree: import('./scene_tree').SceneTree = null;
-    inside_tree = false;
-    ready_notified = false;
-    ready_first = true;
+    pos: number;
+    depth: number;
+    name: string;
+    tree: import('./scene_tree').SceneTree;
+    inside_tree: boolean;
+    ready_notified: boolean;
+    ready_first: boolean;
 
-    viewport: import('./viewport').Viewport = null;
+    viewport: import('./viewport').Viewport;
 
-    grouped: { [name: string]: GroupData; } = Object.create(null);
-    OW: List$Element<Node> = null;
+    grouped: { [name: string]: GroupData } = Object.create(null);
+    OW: List$Element<Node>;
     owned: List<Node> = new List;
 
-    pause_mode = PAUSE_MODE_INHERIT;
-    pause_owner: Node = null;
+    pause_mode: number;
+    pause_owner: Node;
 
-    physics_process = false;
-    idle_process = false;
-    process_priority = 0;
+    physics_process: boolean;
+    idle_process: boolean;
 
-    physics_process_internal = false;
-    idle_process_internal = false;
+    physics_process_internal: boolean;
+    idle_process_internal: boolean;
 
-    input = false;
-    unhandled_input = false;
-    unhandled_key_input = false;
+    input: boolean;
+    unhandled_input: boolean;
+    unhandled_key_input: boolean;
 
-    parent_owned = false;
-    in_constructor = false;
-    use_placeholder = false;
+    parent_owned: boolean;
+    in_constructor: boolean;
+    use_placeholder: boolean;
 
-    path_cache: string = null;
+    path_cache: string;
 }
 
 
 export class Node extends VObject {
-    static instance() { return new Node() }
+    static instance() { return new Node }
+
+    static new() {
+        const inst = new this;
+        inst._init();
+        return inst;
+    }
 
     get class() { return 'Node' }
 
@@ -123,7 +126,7 @@ export class Node extends VObject {
      */
     set_owner(p_owner: Node) {
         if (this.data.owner) {
-            this.owner.data.owned.erase(this.data.OW);
+            this.data.owner.data.owned.erase(this.data.OW);
             this.data.OW = null;
             this.data.owner = null;
         }
@@ -162,7 +165,6 @@ export class Node extends VObject {
             return;
         }
 
-        /** @type {Node} */
         let owner: Node = null;
 
         if (this.data.pause_mode === PAUSE_MODE_INHERIT) {
@@ -186,9 +188,49 @@ export class Node extends VObject {
     is_skeleton = false;
     is_collision_object = false;
 
+    _script_ = false;
+
     data = new Data;
 
     /* virtuals */
+
+    _init() {
+        this.data.pos = -1;
+        this.data.depth = -1;
+        this.data.parent = null;
+        this.data.tree = null;
+        this.data.physics_process = false;
+        this.data.idle_process = false;
+        this.data.physics_process_internal = false;
+        this.data.idle_process_internal = false;
+        this.data.inside_tree = false;
+        this.data.ready_notified = false;
+
+        this.data.owner = null;
+        this.data.OW = null;
+        this.data.input = false;
+        this.data.unhandled_input = false;
+        this.data.unhandled_key_input = false;
+        this.data.pause_mode = PAUSE_MODE_INHERIT;
+        this.data.pause_owner = null;
+        this.data.path_cache = null;
+        this.data.parent_owned = false;
+        this.data.in_constructor = true;
+        this.data.viewport = null;
+        this.data.use_placeholder = false;
+        this.data.ready_first = true;
+
+        orphan_node_count++;
+    }
+    _free() {
+        this.data.grouped = Object.create(null);
+        this.data.owned.clear();
+        this.data.children.length = 0;
+
+        orphan_node_count--;
+
+        super._free();
+    }
 
     /**
      * @param {any} data
@@ -215,37 +257,12 @@ export class Node extends VObject {
 
     _enter_tree() { }
     _ready() { }
-    /**
-     * @param {InputEvent} event
-     */
     _input(event: InputEvent) { }
-    /**
-     * @param {InputEvent} event
-     */
     _unhandled_input(event: InputEvent) { }
-    /**
-     * @param {InputEvent} event
-     */
     _unhandled_key_input(event: InputEvent) { }
-    /**
-     * @param {number} delta
-     */
     _process(delta: number) { }
-    /**
-     * @param {number} delta
-     */
     _physics_process(delta: number) { }
     _exit_tree() { }
-
-    _free() {
-        this.data.grouped = Object.create(null);
-        this.data.owned.clear();
-        this.data.children.length = 0;
-
-        orphan_node_count--;
-
-        super._free();
-    }
 
     /* public */
 
@@ -580,7 +597,7 @@ export class Node extends VObject {
                 while (children.length > 0) {
                     let child = children[children.length - 1];
                     this.remove_child(child);
-                    // @Memory: recycle child nodes
+                    memdelete(child);
                 }
             } break;
         }
@@ -1133,33 +1150,6 @@ export class Node extends VObject {
     }
     is_processing_internal() {
         return this.data.idle_process_internal;
-    }
-
-    /**
-     * @param {number} value
-     */
-    set_process_priority(value: number) {
-        this.data.process_priority = value;
-
-        if (!this.data.tree) {
-            return;
-        }
-
-        if (this.data.idle_process) {
-            this.data.tree.make_group_changed('idle_process')
-        }
-        if (this.data.idle_process_internal) {
-            this.data.tree.make_group_changed('idle_process_internal')
-        }
-        if (this.data.physics_process) {
-            this.data.tree.make_group_changed('physics_process')
-        }
-        if (this.data.physics_process_internal) {
-            this.data.tree.make_group_changed('physics_process_internal')
-        }
-    }
-    get_process_priority() {
-        return this.data.process_priority;
     }
 
     /**

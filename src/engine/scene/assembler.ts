@@ -25,7 +25,9 @@ export function register_scene_class<T extends Node>(key: string, ctor: { new():
 export function attach_script<T extends Node>(url: string, scene: { new(): T, instance(): T, filename?: string }) {
     register_scene_class(url, scene);
     scene["instance"] = () => {
-        return (get_resource_map()[url] as PackedScene).instance() as T;
+        const inst = (get_resource_map()[url] as PackedScene).instance() as T;
+        inst._script_ = true; // script classes cannot be recycled automatically
+        return inst;
     };
     scene["filename"] = url;
 }

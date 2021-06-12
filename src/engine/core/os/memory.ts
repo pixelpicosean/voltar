@@ -2,6 +2,7 @@ import { node_class_map } from "engine/registry";
 
 interface VtObjectInterface {
     class: string;
+    _script_?: boolean;
 
     _init(): void;
 
@@ -13,10 +14,11 @@ interface VtObjectInterface {
 const RECYCLE_OBJECTS = false;
 
 // @Incomplete: object recycling
-export function memnew(m_class: string) {
+export function memnew(m_class: string): any {
     if (!RECYCLE_OBJECTS) {
-        let ctor = node_class_map[m_class];
-        return new ctor;
+        const inst: VtObjectInterface = new (node_class_map[m_class]);
+        inst._init();
+        return inst;
     }
 
     let pool = Pool[m_class];
@@ -24,14 +26,12 @@ export function memnew(m_class: string) {
         pool = Pool[m_class] = [];
     }
 
-    let inst: VtObjectInterface = pool.pop();
-
+    let inst = pool.pop();
     if (!inst) {
-        let ctor = node_class_map[m_class];
-        inst = new ctor;
-    } else {
-        inst._init();
+        inst = new (node_class_map[m_class]);
     }
+
+    inst._init();
 
     return inst;
 }
@@ -43,7 +43,7 @@ export function memdelete(obj: VtObjectInterface) {
 
     obj._free();
 
-    if (!RECYCLE_OBJECTS) return;
+    if (!RECYCLE_OBJECTS || obj._script_) return;
 
     let pool = Pool[obj.class];
     if (!pool) {

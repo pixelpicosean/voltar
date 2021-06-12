@@ -616,9 +616,6 @@ export class AnimationPlayer extends Node {
     }
 
     accum_pass = 1;
-    /**
-     * The default time in which to blend animations.
-     */
     playback_default_blend_time = 0;
 
     autoplay = '';
@@ -648,6 +645,32 @@ export class AnimationPlayer extends Node {
     playing_caches: Set<NodeCache> = new Set<NodeCache>();
 
     /* virtual */
+
+    _init() {
+        super._init();
+
+        this.accum_pass = 1;
+        // this.cache_update_size = 0;
+        // this.cache_update_prop_size = 0;
+        // this.cache_update_bezier_size = 0;
+        this.playback_speed = 1;
+        this.end_reached = false;
+        this.end_notify = false;
+        this.playback_process_mode = ANIMATION_PROCESS_IDLE;
+        this.method_call_mode = ANIMATION_METHOD_CALL_DEFERRED;
+        this.processing = false;
+        this.playback_default_blend_time = 0;
+        this.playing = false;
+        // this.active = true;
+        this.playback.seeked = false;
+        this.playback.started = false;
+
+        this.queued.length = 0;
+        this.anims = Object.create(null);
+        this.animation_set = Object.create(null);
+        this.blend_times = Object.create(null);
+        this.playing_caches.clear();
+    }
 
     _load_data(data: any) {
         super._load_data(data);

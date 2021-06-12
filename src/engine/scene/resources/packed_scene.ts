@@ -1,3 +1,4 @@
+import { memnew } from "engine/core/os/memory";
 import {
     node_class_map,
     res_class_map,
@@ -41,9 +42,11 @@ export class PackedScene {
         if (this.script) {
             /* script attached, type known */
             root = new this.script;
+            root._init();
         } else if (root_data.type) {
             /* no script, no inheritance. Simple node! \o/ */
-            root = new (node_class_map[root_data.type]);
+            // root = new (node_class_map[root_data.type]);
+            root = memnew(root_data.type);
         }
         node_path_table["."] = root;
 
@@ -108,7 +111,7 @@ function setup_scene(scene_data: PackedScene, node_path_table: NodePathTable) {
 
         // child node not existed, create one and add to parent
         if (!child) {
-            // TODO: support script attached to normal node
+            // @Incomplete: support script attached to normal node
             // if (node_data.script) {
             //     child = new node_data.script;
             // }
@@ -119,7 +122,8 @@ function setup_scene(scene_data: PackedScene, node_path_table: NodePathTable) {
                 child = child_packed_scene.instance();
             } else {
                 /* a normal node */
-                child = new (node_class_map[node_data.type]);
+                // child = new (node_class_map[node_data.type]);
+                child = memnew(node_data.type);
             }
 
             node_path_table[self_path] = child;
