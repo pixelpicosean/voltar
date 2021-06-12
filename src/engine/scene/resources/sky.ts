@@ -18,7 +18,7 @@ import {
     PIXEL_FORMAT_RGBA8,
 } from "./texture";
 import { VSG } from "engine/servers/visual/visual_server_globals";
-import { TEXTURE_TYPE_2D } from "engine/servers/visual_server";
+import { TEXTURE_TYPE_2D } from "engine/servers/visual/visual_server";
 
 const HALF_PI = Math.PI / 2;
 

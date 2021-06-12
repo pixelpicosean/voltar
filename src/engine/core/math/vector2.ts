@@ -10,9 +10,20 @@ export interface Vector2Like {
  * the horizontal axis and y represents the vertical axis.
  */
 export class Vector2 {
-    x = 0;
-    y = 0;
-    _array: [number, number] = [0, 0];
+    static new(p_x: number = 0, p_y: number = 0) {
+        const vec = pool.pop();
+        if (!vec) {
+            return new Vector2(p_x, p_y);
+        } else {
+            return vec.set(p_x, p_y);
+        }
+    }
+    static free(vec: Vector2) {
+        if (vec && pool.length < 2019) {
+            pool.push(vec);
+        }
+        return Vector2;
+    }
 
     get width() { return this.x }
     set width(value: number) {
@@ -30,34 +41,37 @@ export class Vector2 {
         this.y = value;
     }
 
+    x: number;
     set_x(value: number) {
         this.x = value;
     }
-
+    y: number;
     set_y(value: number) {
         this.y = value;
     }
+
+    _array: [number, number] = null;
 
     constructor(x: number = 0, y: number = 0) {
         this.x = x;
         this.y = y;
     }
 
-    as_array(r_out?: [number, number]) {
-        r_out = r_out || this._array;
-        r_out[0] = this.x;
-        r_out[1] = this.y;
-        return r_out;
+    as_array() {
+        let out = this._array || (this._array = [0, 0]);
+        out[0] = this.x;
+        out[1] = this.y;
+        return out;
     }
 
     /**
      * Sets the point to a new x and y position.
      * If y is omitted, both x and y will be set to x.
      *
-     * @param [x] - position of the point on the x axis
-     * @param [y] - position of the point on the y axis
+     * @param {number} [x=0] - position of the point on the x axis
+     * @param {number} [y=0] - position of the point on the y axis
      */
-    set(x: number, y: number): Vector2 {
+    set(x: number, y: number) {
         if (x === undefined) {
             x = 0;
         }
@@ -70,6 +84,9 @@ export class Vector2 {
     }
     /**
      * Copy value from other vector
+     *
+     * @param {Vector2Like} p_b
+     * @returns {Vector2} self for chaining
      */
     copy(p_b: Vector2Like): Vector2 {
         this.x = p_b.x;
@@ -80,19 +97,19 @@ export class Vector2 {
     /**
      * Returns new Vector2 with same value.
      */
-    clone(): Vector2 {
+    clone() {
         return new Vector2(this.x, this.y);
     }
     /**
      * Returns new Vector2 but normalized.
      */
-    normalized(): Vector2 {
+    normalized() {
         return this.clone().normalize();
     }
     /**
      * Returns new Vector2 but clamped.
      */
-    clamped(p_length: number): Vector2 {
+    clamped(p_length: number) {
         const len = this.length();
         const v = this.clone();
         if (len > 0 && p_length < len) {
@@ -102,15 +119,17 @@ export class Vector2 {
     }
     /**
      * Returns new Vector2 but rotated.
+     *
+     * @param {number} p_rotation
      */
-    rotated(p_rotation: number): Vector2 {
+    rotated(p_rotation: number) {
         return this.clone().rotate(p_rotation);
     }
 
     /**
      * Whether this equals to another point
      */
-    equals(p_b: Vector2Like): boolean {
+    equals(p_b: Vector2Like) {
         const a0 = this.x, a1 = this.y;
         const b0 = p_b.x, b1 = p_b.y;
         return (Math.abs(a0 - b0) <= CMP_EPSILON * Math.max(1.0, Math.abs(a0), Math.abs(b0)) &&
@@ -119,12 +138,13 @@ export class Vector2 {
     /**
      * Whether this equals to another point(precisely)
      */
-    exact_equals(p_b: Vector2Like): boolean {
+    exact_equals(p_b: Vector2Like) {
         return (this.x === p_b.x) && (this.y === p_b.y);
     }
 
     /**
      * Add the vector by another vector or number.
+     * @returns {Vector2} self for chaining
      */
     add(x: Vector2Like | number, y?: number): Vector2 {
         if (y === undefined) {
@@ -143,6 +163,7 @@ export class Vector2 {
 
     /**
      * Subtract the vector by another vector or number.
+     * @returns {Vector2} self for chaining
      */
     subtract(x: Vector2Like | number, y?: number): Vector2 {
         if (y === undefined) {
@@ -161,6 +182,7 @@ export class Vector2 {
 
     /**
      * Multiply the vector by another vector or number.
+     * @returns {Vector2} self for chaining
      */
     multiply(x: Vector2Like | number, y?: number): Vector2 {
         if (y === undefined) {
@@ -179,6 +201,7 @@ export class Vector2 {
 
     /**
      * Divide x and y by another vector or number.
+     * @returns {Vector2} self for chaining
      */
     divide(x: Vector2Like | number, y?: number): Vector2 {
         if (y === undefined) {
@@ -320,15 +343,17 @@ export class Vector2 {
     }
 
     plane_project(p_d: number, p_vec: Vector2, r_out?: Vector2) {
-        const self = _i_plane_project_vec2.copy(this);
-        return r_out.copy(p_vec).subtract(self.scale(this.dot(p_vec) - p_d));
+        if (!r_out) r_out = Vector2.new();
+
+        const self = this.clone();
+        const vec = r_out.copy(p_vec).subtract(self.scale(this.dot(p_vec) - p_d));
+        Vector2.free(self);
+
+        return vec;
     }
 
     /**
      * Project to a vector.
-     *
-     * @param {Vector2} p_b
-     * @returns {Vector2}
      */
     project(p_b: Vector2): Vector2 {
         const amt = this.dot(p_b) / p_b.length_squared();
@@ -368,7 +393,7 @@ export class Vector2 {
      * Slide returns the component of the vector along the given plane, specified by its normal vector.
      */
     slide(normal: Vector2Like): Vector2 {
-        return this.subtract(_i_slide_vec2.copy(normal).scale(this.dot(normal)))
+        return this.subtract(tmp_point.copy(normal).scale(this.dot(normal)))
     }
 
     /**
@@ -430,64 +455,48 @@ export class Vector2 {
     /**
      * Returns a perpendicular vector.
      */
-    tangent(r_out?: Vector2): Vector2 {
-        if (!r_out) r_out = Vector2.new();
+    tangent(r_out = Vector2.new()): Vector2 {
         return r_out.set(this.y, -this.x);
     }
 
-    aspect(): number {
+    aspect() {
         return this.x / this.y;
     }
 
-    is_zero(): boolean {
+    is_zero() {
         return this.x === 0 && this.y === 0;
     }
 
-    linear_interpolate(p_b: Vector2Like, p_t: number, r_out?: Vector2): Vector2 {
-        const res = (r_out || Vector2.new()).copy(this);
-
+    /**
+     * Returns new Vector2.
+     */
+    linear_interpolate(p_b: Vector2Like, p_t: number) {
+        const res = this.clone();
         res.x += (p_t * (p_b.x - this.x));
         res.y += (p_t * (p_b.y - this.y));
-
         return res;
     }
 
-    cubic_interpolate(p_b: Vector2, p_pre_a: Vector2, p_post_b: Vector2, p_t: number, r_out?: Vector2): Vector2 {
+    /**
+     * Returns new Vector2.
+     */
+    cubic_interpolate(p_b: Vector2, p_pre_a: Vector2, p_post_b: Vector2, p_t: number) {
         const t2 = p_t * p_t;
         const t3 = t2 * p_t;
-        return (r_out || Vector2.new()).set(
+        return Vector2.new(
             0.5 * ((this.x * 2) + (-p_pre_a.x + p_b.x) * p_t + (2 * p_pre_a.x - 5 * this.x + 4 * p_b.x - p_post_b.x) * t2 + (-p_pre_a.x + 3 * this.x - 3 * p_b.x + p_post_b.x) * t3),
             0.5 * ((this.y * 2) + (-p_pre_a.y + p_b.y) * p_t + (2 * p_pre_a.y - 5 * this.y + 4 * p_b.y - p_post_b.y) * t2 + (-p_pre_a.y + 3 * this.y - 3 * p_b.y + p_post_b.y) * t3)
         );
     }
 
-    static ZERO = Object.freeze(new Vector2());
+    static ZERO = Object.freeze(new Vector2(0, 0));
     static ONE = Object.freeze(new Vector2(1, 1));
     static INF = Object.freeze(new Vector2(Infinity, Infinity));
     static LEFT = Object.freeze(new Vector2(-1, 0));
     static RIGHT = Object.freeze(new Vector2(1, 0));
     static UP = Object.freeze(new Vector2(0, -1));
     static DOWN = Object.freeze(new Vector2(0, 1));
-
-    static new(p_x: number = 0, p_y: number = 0) {
-        const vec = pool.pop();
-        if (!vec) {
-            return new Vector2(p_x, p_y);
-        } else {
-            return vec.set(p_x, p_y);
-        }
-    }
-
-    static free(vec: Vector2) {
-        if (vec && pool.length < 2019) {
-            pool.push(vec);
-        }
-        return Vector2;
-    }
 }
 
 const pool: Vector2[] = [];
-
-const _i_slide_vec2 = new Vector2;
-
-const _i_plane_project_vec2 = new Vector2;
+const tmp_point = new Vector2();

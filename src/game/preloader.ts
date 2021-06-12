@@ -1,5 +1,4 @@
 import * as v from 'engine/index';
-import { CMP_EPSILON } from 'engine/index';
 
 import { get_loading_progress } from 'engine/core/io/loader';
 
@@ -73,7 +72,7 @@ class PreloaderScene extends v.Node {
     }
 
     on_resource_loaded() {
-        console.log('resource loaded');
+        // resource loading finished
     }
 }
 

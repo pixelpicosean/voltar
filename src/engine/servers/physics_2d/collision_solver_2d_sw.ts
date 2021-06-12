@@ -3,7 +3,8 @@ import { Transform2D } from "engine/core/math/transform_2d";
 import { ShapeType } from "engine/scene/2d/const";
 
 import { Shape2DSW } from "./shape_2d_sw";
-import { sat_2d_calculate_penetration as collision_solver } from './collision_solver_2d_sat';
+
+import { collision_solver_2d } from './collision_solver_2d_sat';
 
 
 export type CallbackResult = (p_point_A: Vector2, p_point_B: Vector2, p_userdata: any) => void;
@@ -44,7 +45,7 @@ export class CollisionSolver2DSW {
                 return CollisionSolver2DSW.solve_raycast(p_shape_A, p_motion_A, p_transform_A, p_shape_B, p_transform_B, p_result_callback, p_userdata, false, sep_axis);
             }
         } else {
-            return collision_solver(p_shape_A, p_transform_A, p_motion_A, p_shape_B, p_transform_B, p_motion_B, p_result_callback, p_userdata, false, sep_axis, margin_A, margin_B);
+            return collision_solver_2d(p_shape_A, p_transform_A, p_motion_A, p_shape_B, p_transform_B, p_motion_B, p_result_callback, p_userdata, false, sep_axis, margin_A, margin_B);
         }
 
         return false;

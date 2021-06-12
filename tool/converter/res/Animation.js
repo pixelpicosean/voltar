@@ -18,8 +18,8 @@ module.exports = (data) => {
         tracks: [],
     };
 
-    // Support up to 128 tracks per animation
-    for (let i = 0; i < 128; i++) {
+    // Support up to 512 tracks per animation
+    for (let i = 0; i < 512; i++) {
         let track_pre = `tracks/${i}`;
         let track_type = data.prop[`${track_pre}/type`];
 

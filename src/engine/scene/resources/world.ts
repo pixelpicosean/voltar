@@ -1,7 +1,7 @@
-import { VObject } from 'engine/core/v_object';
-import { VSG } from 'engine/servers/visual/visual_server_globals';
+import { VObject } from "engine/core/v_object";
+import { VSG } from "engine/servers/visual/visual_server_globals";
 
-type Environment_t = import('engine/drivers/webgl/rasterizer_scene').Environment_t;
+type Environment_t = import("engine/drivers/webgl/rasterizer_scene").Environment_t;
 
 export class World extends VObject {
     get class() { return "World" }

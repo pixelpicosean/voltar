@@ -6,7 +6,7 @@ import {
     convex_hull_2d,
 } from "engine/core/math/geometry";
 
-import { Physics2DServer } from "engine/servers/physics_2d/physics_2d_server";
+import { Physics2DServer } from "engine/servers/physics_2d";
 
 import { Shape2D } from "./shape_2d";
 

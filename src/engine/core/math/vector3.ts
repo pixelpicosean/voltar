@@ -11,46 +11,50 @@ export interface Vector3Like {
  * the horizontal axis and y represents the vertical axis.
  */
 export class Vector3 {
-    x: number;
-    y: number;
-    z: number;
-    _array: [number, number, number];
-
-    constructor(x: number = 0, y: number = 0, z: number = 0) {
-        this.x = x;
-        this.y = y;
-        this.z = z;
-
-        this._array = [x, y, z];
+    static new(p_x = 0, p_y = 0, p_z = 0) {
+        const vec = pool.pop();
+        if (!vec) {
+            return new Vector3(p_x, p_y, p_z);
+        } else {
+            return vec.set(p_x, p_y, p_z);
+        }
+    }
+    static free(vec: Vector3) {
+        if (vec && pool.length < 2020) {
+            pool.push(vec);
+        }
+        return Vector3;
     }
 
-    /**
-     * @param {number} value
-     */
+    x: number;
     set_x(value: number) {
         this.x = value;
     }
 
-    /**
-     * @param {number} value
-     */
+    y: number;
     set_y(value: number) {
         this.y = value;
     }
 
-    /**
-     * @param {number} value
-     */
+    z: number;
     set_z(value: number) {
         this.z = value;
     }
 
-    as_array(r_out?: [number, number, number]) {
-        r_out = r_out || this._array;
-        r_out[0] = this.x;
-        r_out[1] = this.y;
-        r_out[2] = this.z;
-        return r_out;
+    _array: [number, number, number] = null;
+
+    constructor(x = 0, y = 0, z = 0) {
+        this.x = x;
+        this.y = y;
+        this.z = z;
+    }
+
+    as_array() {
+        let out = this._array || (this._array = [0, 0, 0]);
+        out[0] = this.x;
+        out[1] = this.y;
+        out[2] = this.z;
+        return out;
     }
 
     /**
@@ -61,10 +65,7 @@ export class Vector3 {
      * @param {number} [y=0] - position of the point on the y axis
      * @param {number} [z=0] - position of the point on the z axis
      */
-    set(x: number, y: number, z: number) {
-        if (x === undefined) {
-            x = 0;
-        }
+    set(x: number = 0, y?: number, z?: number) {
         if (y === undefined) {
             y = x;
             z = x;
@@ -76,11 +77,8 @@ export class Vector3 {
     }
     /**
      * Copy value from other vector
-     *
-     * @param {Vector3Like} p_b
-     * @returns {Vector3} self for chaining
      */
-    copy(p_b: Vector3Like): Vector3 {
+    copy(p_b: Vector3Like) {
         this.x = p_b.x;
         this.y = p_b.y;
         this.z = p_b.z;
@@ -102,21 +100,37 @@ export class Vector3 {
 
     linear_interpolate(p_b: Vector3Like, p_t: number, r_out?: Vector3) {
         if (!r_out) r_out = Vector3.new();
-
         return r_out.set(
             this.x + (p_t * (p_b.x - this.x)),
             this.y + (p_t * (p_b.y - this.y)),
             this.z + (p_t * (p_b.z - this.z))
         );
     }
+    cubic_interpolate(p2: Vector3Like, p0: Vector3Like, p3: Vector3Like, t: number, r_out?: Vector3) {
+        if (!r_out) r_out = Vector3.new();
+        const p1 = this;
+
+        const t2 = t * t;
+        const t3 = t2 * t;
+
+        return r_out.set(
+            0.5 * ((p1.x * 2) +
+                (-p0.x + p2.x) * t +
+                (2 * p0.x - 5 * p1.x + 4 * p2.x - p3.x) * t2 +
+                (-p0.x + 3 * p1.x - 3 * p2.x + p3.x) * t3
+            ),
+            0.5 * ((p1.y * 2) +
+                (-p0.y + p2.y) * t +
+                (2 * p0.y - 5 * p1.y + 4 * p2.y - p3.y) * t2 +
+                (-p0.y + 3 * p1.y - 3 * p2.y + p3.y) * t3
+            )
+        );
+    }
 
     /**
      * Whether this equals to another point
-     *
-     * @param {Vector3Like} p_b
-     * @param {number} [eps]
      */
-    is_equal_approx(p_b: Vector3Like, eps: number = CMP_EPSILON) {
+    is_equal_approx(p_b: Vector3Like, eps = CMP_EPSILON) {
         const a0 = this.x, a1 = this.y, a2 = this.z;
         const b0 = p_b.x, b1 = p_b.y, b2 = p_b.z;
         return (
@@ -129,26 +143,22 @@ export class Vector3 {
     }
     /**
      * Whether this equals to another point(precisely)
-     *
-     * @param {Vector3Like} p_b
      */
     exact_equals(p_b: Vector3Like) {
         return (this.x === p_b.x) && (this.y === p_b.y) && (this.z === p_b.z);
     }
 
+    length_squared() {
+        return this.x * this.x + this.y * this.y + this.z * this.z;
+    }
     length() {
         return Math.hypot(this.x, this.y, this.z);
     }
 
     /**
      * Add the vector by another vector or number.
-     *
-     * @param {Vector3Like|number} x
-     * @param {number} [y]
-     * @param {number} [z]
-     * @returns {Vector3} self for chaining
      */
-    add(x: Vector3Like | number, y?: number, z?: number): Vector3 {
+    add(x: number | Vector3Like, y?: number, z?: number) {
         if (y === undefined) {
             // @ts-ignore
             this.x += x.x;
@@ -169,13 +179,8 @@ export class Vector3 {
 
     /**
      * Subtract the vector by another vector or number.
-     *
-     * @param {Vector3Like|number} x
-     * @param {number} [y]
-     * @param {number} [z]
-     * @returns {Vector3} self for chaining
      */
-    subtract(x: Vector3Like | number, y?: number, z?: number): Vector3 {
+    subtract(x: number | Vector3Like, y?: number, z?: number) {
         if (y === undefined) {
             // @ts-ignore
             this.x -= x.x;
@@ -196,13 +201,8 @@ export class Vector3 {
 
     /**
      * Multiply the vector by another vector.
-     *
-     * @param {Vector3Like|number} x
-     * @param {number} [y]
-     * @param {number} [z]
-     * @returns {Vector3} self for chaining
      */
-    multiply(x: Vector3Like | number, y?: number, z?: number): Vector3 {
+    multiply(x: number | Vector3Like, y?: number, z?: number) {
         if (y === undefined) {
             // @ts-ignore
             this.x *= x.x;
@@ -221,9 +221,6 @@ export class Vector3 {
         return this;
     }
 
-    /**
-     * @param {number} s
-     */
     scale(s: number) {
         this.x *= s;
         this.y *= s;
@@ -233,13 +230,8 @@ export class Vector3 {
 
     /**
      * Divide x and y by another vector or number.
-     *
-     * @param {Vector3Like|number} x
-     * @param {number} [y]
-     * @param {number} [z]
-     * @returns {Vector3} self for chaining
      */
-    divide(x: Vector3Like | number, y: number, z: number): Vector3 {
+    divide(x: number | Vector3Like, y?: number, z?: number) {
         if (y === undefined) {
             // @ts-ignore
             this.x /= x.x;
@@ -260,40 +252,33 @@ export class Vector3 {
 
     /**
      * Dot multiply another vector.
-     *
-     * @param {Vector3Like} p_b
-     * @returns {number}
      */
-    dot(p_b: Vector3Like): number {
+    dot(p_b: Vector3Like) {
         return this.x * p_b.x + this.y * p_b.y + this.z * p_b.z;
     }
 
     /**
      * Cross multiply another vector.
      */
-    cross(p_b: Vector3Like, r_out?: Vector3) {
-        if (!r_out) r_out = Vector3.new();
-
-        return r_out.set(
+    cross(p_b: Vector3Like) {
+        return Vector3.new(
             (this.y * p_b.z) - (this.z * p_b.y),
             (this.z * p_b.x) - (this.x * p_b.z),
             (this.x * p_b.y) - (this.y * p_b.x)
-        );
+        )
     }
 
-    /**
-     * @param {Vector3Like} p_b
-     */
+    distance_squared_to(p_b: Vector3Like) {
+        return (p_b.x - this.x) * (p_b.x - this.x) + (p_b.y - this.y) * (p_b.y - this.y) + (p_b.z - this.z) * (p_b.z - this.z);
+    }
     distance_to(p_b: Vector3Like) {
         return Math.hypot(p_b.x - this.x, p_b.y - this.y, p_b.z - this.z);
     }
 
     /**
      * Change x and y components to their absolute values.
-     *
-     * @returns {Vector3}
      */
-    abs(): Vector3 {
+    abs() {
         this.x = Math.abs(this.x);
         this.y = Math.abs(this.y);
         this.z = Math.abs(this.z);
@@ -302,10 +287,8 @@ export class Vector3 {
 
     /**
      * Ceil x and y components.
-     *
-     * @returns {Vector3}
      */
-    ceil(): Vector3 {
+    ceil() {
         this.x = Math.ceil(this.x);
         this.y = Math.ceil(this.y);
         this.z = Math.ceil(this.z);
@@ -314,10 +297,8 @@ export class Vector3 {
 
     /**
      * Floor x and y components.
-     *
-     * @returns {Vector3}
      */
-    floor(): Vector3 {
+    floor() {
         this.x = Math.floor(this.x);
         this.y = Math.floor(this.y);
         this.z = Math.floor(this.z);
@@ -326,10 +307,8 @@ export class Vector3 {
 
     /**
      * Round to int vector.
-     *
-     * @returns {Vector3}
      */
-    round(): Vector3 {
+    round() {
         this.x = Math.round(this.x);
         this.y = Math.round(this.y);
         this.z = Math.round(this.z);
@@ -338,10 +317,8 @@ export class Vector3 {
 
     /**
      * Negate x and y components.
-     *
-     * @returns {Vector3}
      */
-    negate(): Vector3 {
+    negate() {
         this.x = -this.x;
         this.y = -this.y;
         this.z = -this.z;
@@ -350,10 +327,8 @@ export class Vector3 {
 
     /**
      * Inverse the x and y components.
-     *
-     * @returns {Vector3}
      */
-    inverse(): Vector3 {
+    inverse() {
         this.x = 1.0 / this.x;
         this.y = 1.0 / this.y;
         this.z = 1.0 / this.z;
@@ -362,10 +337,8 @@ export class Vector3 {
 
     /**
      * Normalize this vector to unit length.
-     *
-     * @returns {Vector3}
      */
-    normalize(): Vector3 {
+    normalize() {
         const x = this.x, y = this.y, z = this.z;
         let len = x * x + y * y + z * z;
         if (len === 0) {
@@ -379,36 +352,15 @@ export class Vector3 {
         return this;
     }
 
-    static ZERO = Object.freeze(new Vector3(0, 0, 0));
-    static ONE = Object.freeze(new Vector3(1, 1, 1));
-    static INF = Object.freeze(new Vector3(Infinity, Infinity, Infinity));
-    static LEFT = Object.freeze(new Vector3(-1, 0, 0));
-    static RIGHT = Object.freeze(new Vector3(1, 0, 0));
-    static UP = Object.freeze(new Vector3(0, 1, 0));
-    static DOWN = Object.freeze(new Vector3(0, -1, 0));
-    static FORWARD = Object.freeze(new Vector3(0, 0, -1));
-    static BACK = Object.freeze(new Vector3(0, 0, 1));
-
-    static new(p_x: number = 0, p_y: number = 0, p_z: number = 0) {
-        const vec = pool.pop();
-        if (!vec) {
-            return new Vector3(p_x, p_y, p_z);
-        } else {
-            return vec.set(p_x, p_y, p_z);
-        }
-    }
-    /**
-     * @param {Vector3} vec
-     */
-    static free(vec: Vector3) {
-        if (vec && pool.length < 2020) {
-            pool.push(vec);
-        }
-        return Vector3;
-    }
+    static ZERO = new Vector3(0, 0, 0);
+    static ONE = new Vector3(1, 1, 1);
+    static INF = new Vector3(Infinity, Infinity, Infinity);
+    static LEFT = new Vector3(-1, 0, 0);
+    static RIGHT = new Vector3(1, 0, 0);
+    static UP = new Vector3(0, 1, 0);
+    static DOWN = new Vector3(0, -1, 0);
+    static FORWARD = new Vector3(0, 0, -1);
+    static BACK = new Vector3(0, 0, 1);
 }
 
-/**
- * @type {Vector3[]}
- */
 const pool: Vector3[] = [];

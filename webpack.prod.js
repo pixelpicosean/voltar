@@ -22,17 +22,19 @@ module.exports = merge(common, {
             new TerserPlugin({
                 terserOptions: {
                     ecma: undefined,
-                    warnings: false,
                     parse: {},
                     compress: {},
-                    mangle: true,
+                    warnings: false,
                     module: false,
                     output: null,
                     toplevel: false,
                     nameCache: null,
-                    ie8: false,
-                    keep_classnames: undefined,
+
+                    mangle: true,
+                    keep_classnames: false,
                     keep_fnames: false,
+
+                    ie8: false,
                     safari10: false,
                 },
             }),

@@ -7,9 +7,9 @@ import { Rect2 } from "engine/core/math/rect2";
 import { Transform2D } from "engine/core/math/transform_2d";
 
 import { Item } from "engine/servers/visual/visual_server_canvas";
-import { Space2DSW } from "engine/servers/physics_2d/space_2d_sw";
-import { Body2DSW } from "engine/servers/physics_2d/body_2d_sw";
-import { Physics2DServer } from "engine/servers/physics_2d/physics_2d_server";
+import { Space2DSW } from "engine/servers/physics_2d";
+import { Body2DSW } from "engine/servers/physics_2d";
+import { Physics2DServer } from "engine/servers/physics_2d";
 
 import { VSG } from "engine/servers/visual/visual_server_globals";
 

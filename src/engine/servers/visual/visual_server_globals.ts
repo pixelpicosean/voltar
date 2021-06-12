@@ -21,13 +21,13 @@ export const VSG = {
         vao: false,
     },
 
-    storage: null as import('engine/drivers/webgl/rasterizer_storage').RasterizerStorage,
+    storage: null as import("engine/drivers/webgl/rasterizer_storage").RasterizerStorage,
 
-    rasterizer: null as import('engine/drivers/webgl/rasterizer').Rasterizer,
-    canvas_render: null as import('engine/drivers/webgl/rasterizer_canvas').RasterizerCanvas,
-    scene_render: null as import('engine/drivers/webgl/rasterizer_scene').RasterizerScene,
+    rasterizer: null as import("engine/drivers/webgl/rasterizer").Rasterizer,
+    canvas_render: null as import("engine/drivers/webgl/rasterizer_canvas").RasterizerCanvas,
+    scene_render: null as import("engine/drivers/webgl/rasterizer_scene").RasterizerScene,
 
-    viewport: null as import('engine/servers/visual/visual_server_viewport').VisualServerViewport,
-    canvas: null as import('engine/servers/visual/visual_server_canvas').VisualServerCanvas,
-    scene: null as import('engine/servers/visual/visual_server_scene').VisualServerScene,
+    viewport: null as import("engine/servers/visual/visual_server_viewport").VisualServerViewport,
+    canvas: null as import("engine/servers/visual/visual_server_canvas").VisualServerCanvas,
+    scene: null as import("engine/servers/visual/visual_server_scene").VisualServerScene,
 }

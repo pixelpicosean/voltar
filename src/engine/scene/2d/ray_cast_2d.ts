@@ -2,9 +2,9 @@ import { node_class_map } from "engine/registry";
 import { GDCLASS } from "engine/core/v_object";
 import { Vector2 } from "engine/core/math/vector2";
 
-import { Physics2DServer } from "engine/servers/physics_2d/physics_2d_server";
-import { CollisionObject2DSW } from "engine/servers/physics_2d/collision_object_2d_sw";
-import { RayResult } from "engine/servers/physics_2d/space_2d_sw";
+import { Physics2DServer } from "engine/servers/physics_2d";
+import { CollisionObject2DSW } from "engine/servers/physics_2d";
+import { RayResult } from "engine/servers/physics_2d";
 
 import {
     NOTIFICATION_ENTER_TREE,

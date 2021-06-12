@@ -64,7 +64,7 @@ class _CollectorCallback2D {
 
 const tmp_callback = new _CollectorCallback2D;
 
-export function sat_2d_calculate_penetration(p_shape_A: Shape2DSW, p_transform_A: Transform2D, p_motion_A: Vector2, p_shape_B: Shape2DSW, p_transform_B: Transform2D, p_motion_B: Vector2, p_result_callback: import("./collision_solver_2d_sw").CallbackResult, p_userdata: any, p_swap: boolean = false, sep_axis: Vector2[] = null, p_margin_A: number = 0, p_margin_B: number = 0): boolean {
+export function collision_solver_2d(p_shape_A: Shape2DSW, p_transform_A: Transform2D, p_motion_A: Vector2, p_shape_B: Shape2DSW, p_transform_B: Transform2D, p_motion_B: Vector2, p_result_callback: import("./collision_solver_2d_sw").CallbackResult, p_userdata: any, p_swap: boolean = false, sep_axis: Vector2[] = null, p_margin_A: number = 0, p_margin_B: number = 0): boolean {
     let type_A = p_shape_A.type;
     let type_B = p_shape_B.type;
 

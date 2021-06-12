@@ -90,3 +90,10 @@ Custom shader supported in a level (may not work with complex shaders right now)
 - [x] `OmniLight` with shadow support (not perfect but fast)
 - [ ] `RichTextLabel` (WIP)
 - [ ] `RigidBody2D` (WIP)
+
+### Optimize build size
+
+1. comment unused exports in `engine/index` to disable modules not used
+2. uncomment export of PhysicsServer2D in `engine/servers/physics_2d` to enable physics support
+3. uncomment code to replace usage of `earcut` in `engine/servers/visual/visual_server_canvas` for 2D polygon rendering
+4. uncomment export of AudioServer in `engine/audio/index` to enable audio support

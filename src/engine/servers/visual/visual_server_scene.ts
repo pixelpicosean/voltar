@@ -1,17 +1,16 @@
-import { List as SelfList$List, SelfList } from 'engine/core/self_list';
-import { memdelete } from 'engine/core/os/memory';
-import { List, Element as List$Element } from 'engine/core/list';
-import { clamp, stepify, deg2rad } from 'engine/core/math/math_funcs';
-import { Vector2, Vector2Like } from 'engine/core/math/vector2';
-import { Vector3Like, Vector3 } from 'engine/core/math/vector3';
-import { AABB } from 'engine/core/math/aabb';
-import { Plane } from 'engine/core/math/plane';
-import { Transform } from 'engine/core/math/transform';
-import { CameraMatrix } from 'engine/core/math/camera_matrix';
-import { Octree } from 'engine/core/math/octree';
-import { ProjectSettings } from 'engine/core/project_settings';
+import { List as SelfList$List, SelfList } from "engine/core/self_list";
+import { List, Element as List$Element } from "engine/core/list";
+import { clamp, stepify, deg2rad } from "engine/core/math/math_funcs";
+import { Vector2, Vector2Like } from "engine/core/math/vector2";
+import { Vector3Like, Vector3 } from "engine/core/math/vector3";
+import { AABB } from "engine/core/math/aabb";
+import { Plane } from "engine/core/math/plane";
+import { Transform } from "engine/core/math/transform";
+import { CameraMatrix } from "engine/core/math/camera_matrix";
+import { Octree } from "engine/core/math/octree";
+import { ProjectSettings } from "engine/core/project_settings";
 
-import { LightmapCapture_t, Skeleton_t } from 'engine/drivers/webgl/rasterizer_storage';
+import { LightmapCapture_t, Skeleton_t } from "engine/drivers/webgl/rasterizer_storage";
 
 import {
     INSTANCE_TYPE_NONE,
@@ -44,18 +43,18 @@ import {
     VisualServer,
     SHADOW_CASTING_SETTING_OFF,
     SHADOW_CASTING_SETTING_ON,
-} from '../visual_server';
-import { VSG } from './visual_server_globals';
+} from "./visual_server";
+import { VSG } from "./visual_server_globals";
 
-type Material_t = import('engine/drivers/webgl/rasterizer_storage').Material_t;
-type Instantiable_t = import('engine/drivers/webgl/rasterizer_storage').Instantiable_t;
-type Mesh_t = import('engine/drivers/webgl/rasterizer_storage').Mesh_t;
-type Light_t = import('engine/drivers/webgl/rasterizer_storage').Light_t;
+type Material_t = import("engine/drivers/webgl/rasterizer_storage").Material_t;
+type Instantiable_t = import("engine/drivers/webgl/rasterizer_storage").Instantiable_t;
+type Mesh_t = import("engine/drivers/webgl/rasterizer_storage").Mesh_t;
+type Light_t = import("engine/drivers/webgl/rasterizer_storage").Light_t;
 
-type LightInstance_t = import('engine/drivers/webgl/rasterizer_scene').LightInstance_t;
+type LightInstance_t = import("engine/drivers/webgl/rasterizer_scene").LightInstance_t;
 
-type Environment_t = import('engine/drivers/webgl/rasterizer_scene').Environment_t;
-type ShadowAtlas_t = import('engine/drivers/webgl/rasterizer_scene').ShadowAtlas_t;
+type Environment_t = import("engine/drivers/webgl/rasterizer_scene").Environment_t;
+type ShadowAtlas_t = import("engine/drivers/webgl/rasterizer_scene").ShadowAtlas_t;
 
 const MAX_INSTANCE_CULL = 65536;
 const MAX_LIGHTS_CULLED = 4096;

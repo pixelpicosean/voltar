@@ -2,7 +2,7 @@ import { res_class_map } from "engine/registry";
 import { Vector2, Vector2Like } from "engine/core/math/vector2";
 import { Rect2 } from "engine/core/math/rect2";
 
-import { Physics2DServer } from "engine/servers/physics_2d/physics_2d_server";
+import { Physics2DServer } from "engine/servers/physics_2d";
 
 import { Shape2D } from "./shape_2d";
 

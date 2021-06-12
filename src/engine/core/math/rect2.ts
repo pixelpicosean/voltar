@@ -5,6 +5,28 @@ import { Vector2, Vector2Like } from './vector2';
  * point (x, y) and by its width and its height.
  */
 export class Rect2 {
+    static new(p_x: number = 0, p_y: number = 0, p_width: number = 0, p_height: number = 0) {
+        const r = pool.pop();
+        if (!r) {
+            return new Rect2(p_x, p_y, p_width, p_height);
+        } else {
+            return r.set(p_x, p_y, p_width, p_height);
+        }
+    }
+    static free(p_rect: Rect2) {
+        if (p_rect && pool.length < 2019) {
+            pool.push(p_rect);
+        }
+        return Rect2;
+    }
+
+    /**
+     * A constant empty rectangle.
+     */
+    static get EMPTY() {
+        return Object.freeze(new Rect2(0, 0, 0, 0));
+    }
+
     x: number;
     y: number;
     width: number;
@@ -23,12 +45,6 @@ export class Rect2 {
         this.height = height;
     }
 
-    /**
-     * @param {number} p_x
-     * @param {number} p_y
-     * @param {number} p_width
-     * @param {number} p_height
-     */
     set(p_x: number, p_y: number, p_width: number, p_height: number) {
         this.x = p_x;
         this.y = p_y;
@@ -37,52 +53,28 @@ export class Rect2 {
         return this;
     }
 
-    /**
-     * returns the left edge of the rectangle
-     *
-     * @type {number}
-     */
     get left() {
         return this.x;
     }
 
-    /**
-     * returns the right edge of the rectangle
-     *
-     * @type {number}
-     */
     get right() {
         return this.x + this.width;
     }
 
-    /**
-     * returns the top edge of the rectangle
-     *
-     * @type {number}
-     */
     get top() {
         return this.y;
     }
 
-    /**
-     * returns the bottom edge of the rectangle
-     *
-     * @type {number}
-     */
     get bottom() {
         return this.y + this.height;
     }
 
-    /**
-     * Returns new Rect2 with same value.
-     */
     clone() {
         return Rect2.new(this.x, this.y, this.width, this.height);
     }
 
     /**
      * Copies another rectangle to this one.
-     *
      * @param {Rect2} rectangle - The rectangle to copy.
      */
     copy(rectangle: Rect2) {
@@ -98,9 +90,6 @@ export class Rect2 {
         return this.x === 0 && this.y === 0 && this.width === 0 && this.height === 0;
     }
 
-    /**
-     * @param {Rect2} rect
-     */
     equals(rect: Rect2) {
         return this.x === rect.x && this.y === rect.y && this.width === rect.width && this.height === rect.height;
     }
@@ -128,9 +117,6 @@ export class Rect2 {
     has_no_area() {
         return this.width <= 0 || this.height <= 0;
     }
-    /**
-     * @param {Vector2Like} p_point
-     */
     has_point(p_point: Vector2Like) {
         if (p_point.x < this.x) {
             return false;
@@ -154,7 +140,7 @@ export class Rect2 {
     }
 
     /**
-     * Returns new "Rect2" with absolute values
+     * Returns new Rect2 with absolute values.
      */
     abs() {
         return this.clone().abs_to();
@@ -168,16 +154,12 @@ export class Rect2 {
     }
 
     /**
-     * Returns new "Rect2"
-     * @param {Rect2} p_rect
+     * Returns new Rect2.
      */
     clip(p_rect: Rect2) {
         return this.clone().clip_by(p_rect);
     }
 
-    /**
-     * @param {Rect2} p_rect
-     */
     clip_by(p_rect: Rect2) {
         if (!this.intersects(p_rect)) {
             return this.set(0, 0, 0, 0);
@@ -199,9 +181,6 @@ export class Rect2 {
         return this;
     }
 
-    /**
-     * @param {Rect2} p_rect
-     */
     encloses(p_rect: Rect2) {
         return (p_rect.x >= this.x) && (p_rect.y >= this.y)
             &&
@@ -212,7 +191,7 @@ export class Rect2 {
 
     /**
      * Pads the rectangle making it grow in all directions.
-     * Returns new "Rect2"
+     * Returns new Rect2.
      *
      * @param {number} p_by - The horizontal padding amount.
      */
@@ -233,13 +212,6 @@ export class Rect2 {
         return this;
     }
 
-    /**
-     * Returns new "Rect2"
-     * @param {number} p_left
-     * @param {number} p_top
-     * @param {number} p_right
-     * @param {number} p_bottom
-     */
     grow_individual(p_left: number, p_top: number, p_right: number, p_bottom: number) {
         const g = this.clone();
         g.x -= p_left;
@@ -250,19 +222,15 @@ export class Rect2 {
     }
 
     /**
-     * Returns new "Rect2"
-     * @param {Vector2} p_vector
+     * Returns new Rect2.
      */
     expand(p_vector: Vector2) {
         return this.clone().expand_to(p_vector);
     }
 
-    /**
-     * @param {Vector2} p_vector
-     */
     expand_to(p_vector: Vector2) {
-        const begin = _i_expand_to_vec2_1.set(this.x, this.y);
-        const end = _i_expand_to_vec2_2.set(this.x + this.width, this.y + this.height);
+        const begin = Vector2.new(this.x, this.y);
+        const end = Vector2.new(this.x + this.width, this.y + this.height);
 
         if (p_vector.x < begin.x) {
             begin.x = p_vector.x;
@@ -282,6 +250,9 @@ export class Rect2 {
         this.y = begin.y;
         this.width = end.x - begin.x;
         this.height = end.y - begin.y;
+
+        Vector2.free(begin);
+        Vector2.free(end);
 
         return this;
     }
@@ -326,7 +297,7 @@ export class Rect2 {
 
     /**
      * Merge the given rectangle and return a new one.
-     * Returns new "Rect2"
+     * Returns new Rect2.
      *
      * @param {Rect2} p_rect - The rectangle to merge.
      */
@@ -353,9 +324,6 @@ export class Rect2 {
         return this;
     }
 
-    /**
-     * @param {Rect2} p_rect
-     */
     intersects(p_rect: Rect2) {
         if (this.x >= p_rect.x + p_rect.width) {
             return false;
@@ -372,12 +340,6 @@ export class Rect2 {
         return true;
     }
 
-    /**
-     * @param {Vector2} p_from
-     * @param {Vector2} p_to
-     * @param {Vector2} [r_pos]
-     * @param {Vector2} [r_normal]
-     */
     intersects_segment(p_from: Vector2, p_to: Vector2, r_pos: Vector2 = undefined, r_normal: Vector2 = undefined) {
         let min = 0, max = 1;
         let axis = 0;
@@ -454,7 +416,7 @@ export class Rect2 {
                 return false;
         }
 
-        const rel = _i_intersects_segment_vec2.copy(p_to).subtract(p_from);
+        const rel = p_to.clone().subtract(p_from);
 
         if (r_normal) {
             r_normal.set(0, 0);
@@ -469,30 +431,10 @@ export class Rect2 {
             r_pos.copy(p_from).add(rel.scale(min));
         }
 
+        Vector2.free(rel);
+
         return true;
     }
-
-    static EMPTY = Object.freeze(new Rect2(0, 0, 0, 0));
-
-    static new(p_x: number = 0, p_y: number = 0, p_width: number = 0, p_height: number = 0) {
-        const r = pool.pop();
-        if (!r) {
-            return new Rect2(p_x, p_y, p_width, p_height);
-        } else {
-            return r.set(p_x, p_y, p_width, p_height);
-        }
-    }
-
-    static free(p_rect: Rect2) {
-        if (p_rect && pool.length < 2019) {
-            pool.push(p_rect);
-        }
-        return Rect2;
-    }
 }
+
 const pool: Rect2[] = [];
-
-const _i_expand_to_vec2_1 = new Vector2;
-const _i_expand_to_vec2_2 = new Vector2;
-
-const _i_intersects_segment_vec2 = new Vector2;

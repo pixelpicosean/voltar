@@ -1,6 +1,5 @@
 import { remove_item } from 'engine/dep/index';
 import { Element } from 'engine/core/list';
-import { earcut } from 'engine/dep/earcut';
 import {
     CMP_EPSILON,
     MARGIN_LEFT,
@@ -18,7 +17,7 @@ import { NoShrinkArray } from 'engine/core/v_array';
 import { Texture } from 'engine/scene/resources/texture';
 import { Material } from 'engine/scene/resources/material';
 
-import { VisualServer } from '../visual_server';
+import { VisualServer } from './visual_server';
 import { VSG } from './visual_server_globals';
 import {
     TYPE_LINE,
@@ -44,6 +43,13 @@ import {
     CommandMultiMesh,
     CommandTransform,
 } from './commands';
+
+
+// uncomment this line, and remove the placeholder function to enable proper polygon rendering
+// import { earcut } from 'engine/dep/earcut';
+function earcut(params: any) {
+    return [0, 1, 2];
+}
 
 
 let uid = 0;

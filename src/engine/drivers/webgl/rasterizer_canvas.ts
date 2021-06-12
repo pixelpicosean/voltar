@@ -67,7 +67,7 @@ import {
     MULTIMESH_CUSTOM_DATA_NONE,
     MULTIMESH_CUSTOM_DATA_8BIT,
     MULTIMESH_CUSTOM_DATA_FLOAT,
-} from 'engine/servers/visual_server';
+} from 'engine/servers/visual/visual_server';
 import { Rect2 } from 'engine/core/math/rect2';
 import { ARRAY_MAX } from 'engine/scene/const';
 import { parse_attributes_from_code, parse_uniforms_from_code } from './shader_parser';
@@ -222,9 +222,9 @@ function get_uvs_of_sub_rect(r_vts: Float32Array, vt_start: number, tex_uvs: num
 }
 
 export class RasterizerCanvas extends VObject {
-    scene_render: import('./rasterizer_scene').RasterizerScene = null;
+    scene_render: import("./rasterizer_scene").RasterizerScene = null;
 
-    storage: import('./rasterizer_storage').RasterizerStorage = null;
+    storage: import("./rasterizer_storage").RasterizerStorage = null;
 
     states = {
         material: null as Material_t,

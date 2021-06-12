@@ -37,7 +37,7 @@ import {
     LIGHT_PARAM_SPOT_ATTENUATION,
 
     VisualServer,
-} from "engine/servers/visual_server";
+} from "engine/servers/visual/visual_server";
 import {
     Instance_t,
 } from "engine/servers/visual/visual_server_scene";

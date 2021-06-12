@@ -3,8 +3,8 @@ const Spatial = require("./Spatial");
 module.exports = (data) => {
     let bones = [];
 
-    // Support up to 128 bones per skeleton
-    for (let i = 0; i < 128; i++) {
+    // Support up to 512 bones per skeleton
+    for (let i = 0; i < 512; i++) {
         let bone_pre = `bones/${i}`;
         let bone_name = data.prop[`${bone_pre}/name`];
 

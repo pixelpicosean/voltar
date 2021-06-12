@@ -16,9 +16,9 @@ import {
     BUTTON_RIGHT,
     InputEventKey,
 } from "./input_event";
-import { VisualServer } from "engine/servers/visual_server";
+import { VisualServer } from "engine/servers/visual/visual_server";
 import { VSG } from "engine/servers/visual/visual_server_globals";
-import { AudioServer } from "engine/audio/audio.js";
+import { AudioServer } from "engine/audio/index";
 
 type ProjectSettings = import('../project_settings').ProjectSettings;
 

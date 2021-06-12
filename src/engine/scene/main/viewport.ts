@@ -85,22 +85,6 @@ const subdiv = [0, 1, 4, 16, 64, 256, 1024];
 
 
 class ViewportTexture extends Texture {
-    /**
-     * @param {string} path
-     */
-    set_viewport_path(path: string) {
-        if (this.viewport_path === path) {
-            return;
-        }
-        this.viewport_path = path;
-        if (this.get_local_scene()) {
-            this.setup_local_to_scene();
-        }
-    }
-
-    resource_local_to_scene = true;
-    viewport_path = '';
-
     vp: Viewport = null;
 
     proxy = VSG.storage.texture_create();
@@ -131,29 +115,6 @@ class ViewportTexture extends Texture {
 
     get_rid() {
         return this.proxy;
-    }
-
-    /* private */
-
-    setup_local_to_scene() {
-        if (this.vp) {
-            this.vp.viewport_textures.delete(this);
-        }
-        this.vp = null
-        const local_scene = this.get_local_scene();
-        if (!local_scene) {
-            return;
-        }
-
-        const vpn = local_scene.get_node(this.resource_path);
-        this.vp = vpn as Viewport;
-
-        this.vp.viewport_textures.add(this);
-
-        VSG.storage.texture_set_proxy(this.proxy, this.vp.texture_rid);
-
-        Object.assign(this.vp.texture_flags, this.flags);
-        VSG.storage.texture_set_flags(this.vp.texture_rid, this.flags);
     }
 }
 GDCLASS(ViewportTexture, Texture)
@@ -243,11 +204,8 @@ export class Viewport extends Node {
     local_input_handled = false;
     handle_input_locally = true;
 
-    /** @type {World2D} */
     world_2d: World2D = new World2D;
-    /** @type {World} */
     world: World = null;
-    /** @type {World} */
     own_world: World = null;
 
     disable_input = false;
@@ -354,7 +312,7 @@ export class Viewport extends Node {
                 }
             } break;
             case NOTIFICATION_INTERNAL_PHYSICS_PROCESS: {
-                // TODO: physics pick
+                // @Incomplete: physics pick
             } break;
             case NOTIFICATION_WM_MOUSE_EXIT:
             case NOTIFICATION_WM_FOCUS_OUT: {
@@ -681,7 +639,9 @@ export class Viewport extends Node {
                 break;
             }
 
+            let old = p_input;
             p_input = p_input.xformed_by(ci.get_transform());
+            old._free();
             ci = ci.get_parent_item() as Control;
         }
     }
@@ -910,7 +870,10 @@ export class Viewport extends Node {
                     }
                 }
 
+                let old = mb;
                 mb = mb.xformed_by(Transform2D.IDENTITY);
+                old._free();
+
                 mb.global_position.copy(pos);
                 gui.focus_inv_xform.xform(pos, pos);
                 mb.position.copy(pos);
@@ -986,7 +949,11 @@ export class Viewport extends Node {
                 }
 
                 const pos = _i_gui_input_event_Vector2_4.copy(mpos);
+
+                let old = mb;
                 mb = mb.xformed_by(Transform2D.IDENTITY);
+                old._free();
+
                 mb.global_position.copy(pos);
                 gui.focus_inv_xform.xform(pos, pos);
                 mb.position.copy(pos);
@@ -1058,8 +1025,9 @@ export class Viewport extends Node {
             const speed = localizer.basis_xform(mm.speed, _i_gui_input_event_Vector2_7);
             const rel = localizer.basis_xform(mm.relative, _i_gui_input_event_Vector2_8);
 
-            // @Incomplete: recycle input events
+            let old = mm;
             mm = mm.xformed_by(Transform2D.IDENTITY);
+            old._free();
 
             mm.global_position.copy(mpos);
             mm.speed.copy(speed);
@@ -1199,11 +1167,10 @@ export class Viewport extends Node {
 
         const ev = this._make_input_local(p_ev);
         this.input(ev);
+
+        ev._free();
+        p_ev._free();
     }
-    /**
-     * @param {string} p_text
-     */
-    _vp_input_text(p_text: string) { }
     /**
      * @param {InputEvent} p_ev
      */
@@ -1213,6 +1180,9 @@ export class Viewport extends Node {
 
         const ev = this._make_input_local(p_ev);
         this.unhandled_input(ev);
+
+        ev._free();
+        p_ev._free();
     }
     /**
      * @param {InputEvent} ev

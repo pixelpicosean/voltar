@@ -6,9 +6,9 @@ import { ProjectSettings } from 'engine/core/project_settings';
 
 import { NOTIFICATION_EXIT_TREE, Node } from '../main/node';
 import { AreaSpaceOverrideMode } from 'engine/scene/2d/const';
-import { Physics2DServer, AREA_BODY_ADDED } from 'engine/servers/physics_2d/physics_2d_server';
-import { Area2DSW } from 'engine/servers/physics_2d/area_2d_sw';
-import { MotionResult } from 'engine/servers/physics_2d/state';
+import { Physics2DServer, AREA_BODY_ADDED } from 'engine/servers/physics_2d';
+import { Area2DSW } from 'engine/servers/physics_2d';
+import { MotionResult } from 'engine/servers/physics_2d';
 
 import { CollisionObject2D } from './collision_object_2d';
 import {

@@ -25,7 +25,7 @@ import {
 
     LIGHT_DIRECTIONAL_SHADOW_DEPTH_RANGE_STABLE,
     LIGHT_OMNI_SHADOW_DETAIL_HORIZONTAL,
-} from "engine/servers/visual_server";
+} from "engine/servers/visual/visual_server";
 import { VSG } from "engine/servers/visual/visual_server_globals";
 
 import { NOTIFICATION_ENTER_TREE } from "../main/node";

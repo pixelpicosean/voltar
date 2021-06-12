@@ -1,5 +1,5 @@
-import { Space2DSW } from "engine/servers/physics_2d/space_2d_sw";
-import { Physics2DServer } from "engine/servers/physics_2d/physics_2d_server";
+import { Space2DSW } from "engine/servers/physics_2d";
+import { Physics2DServer } from "engine/servers/physics_2d";
 
 
 export class Space2D {

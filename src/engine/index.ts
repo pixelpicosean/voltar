@@ -9,13 +9,13 @@ export * from 'engine/dep/index';
 export * from 'engine/core/v_array';
 export * from 'engine/core/v_object';
 
-export * from 'engine/core/math/convex';
-export * from 'engine/core/math/geometry';
+// export * from 'engine/core/math/convex';
+// export * from 'engine/core/math/geometry';
 export * from 'engine/core/math/math_defs';
 export * from 'engine/core/math/math_funcs';
 export * from 'engine/core/math/vector2';
 export * from 'engine/core/math/vector3';
-export * from 'engine/core/math/pool_vector2_array';
+// export * from 'engine/core/math/pool_vector2_array';
 export * from 'engine/core/math/rect2';
 export * from 'engine/core/math/aabb';
 export * from 'engine/core/math/transform_2d';
@@ -26,17 +26,17 @@ export * from 'engine/core/math/plane';
 export * from 'engine/core/math/basis';
 export * from 'engine/core/math/transform';
 export * from 'engine/core/color';
-export * from 'engine/core/math/pool_color_array';
+// export * from 'engine/core/math/pool_color_array';
 export * from 'engine/core/self_list';
 
 
 export { _yield as yield } from 'engine/core/yield';
 
-export * from 'engine/utils/c';
+// export * from 'engine/utils/c';
 export * from 'engine/utils/color';
-export * from 'engine/utils/deep_merge';
-export * from 'engine/utils/mixin';
-export * from 'engine/utils/trim_canvas';
+// export * from 'engine/utils/deep_merge';
+// export * from 'engine/utils/mixin';
+// export * from 'engine/utils/trim_canvas';
 
 // ------------------------------------------------------------------
 // Resource
@@ -142,10 +142,11 @@ import { OS as OS_t } from 'engine/core/os/os';
 import { ProjectSettings as ProjectSettings_t } from 'engine/core/project_settings';
 import { MessageQueue as MessageQueue_t } from 'engine/core/message_queue';
 import { Engine as Engine_t } from 'engine/core/engine';
-import { VisualServer as VisualServer_t } from 'engine/servers/visual_server';
-import { Physics2DServer as Physics2DServer_t } from 'engine/servers/physics_2d/physics_2d_server';
+import { VisualServer as VisualServer_t } from 'engine/servers/visual/visual_server';
+import { Physics2DServer as Physics2DServer_t } from 'engine/servers/physics_2d';
 import { SceneTree as SceneTree_t } from 'engine/scene/main/scene_tree';
-import { AudioServer as AudioServer_t } from 'engine/audio/audio.js';
+import { AudioServer as AudioServer_t } from 'engine/audio/index';
+
 
 export { VSG } from 'engine/servers/visual/visual_server_globals';
 

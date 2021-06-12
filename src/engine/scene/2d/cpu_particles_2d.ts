@@ -28,7 +28,7 @@ import {
     MULTIMESH_COLOR_8BIT,
     MULTIMESH_CUSTOM_DATA_FLOAT,
     VisualServer,
-} from 'engine/servers/visual_server';
+} from 'engine/servers/visual/visual_server';
 import { VSG } from 'engine/servers/visual/visual_server_globals';
 import { NOTIFICATION_TRANSFORM_CHANGED } from '../const';
 

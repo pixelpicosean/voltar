@@ -39,7 +39,7 @@ import {
     LIGHT_DIRECTIONAL_SHADOW_DEPTH_RANGE_STABLE,
     LIGHT_OMNI_SHADOW_DUAL_PARABOLOID,
     INSTANCE_TYPE_LIGHTMAP_CAPTURE,
-} from "engine/servers/visual_server";
+} from "engine/servers/visual/visual_server";
 import {
     Instance_t,
 } from "engine/servers/visual/visual_server_scene";
@@ -615,8 +615,8 @@ export class RasterizerStorage {
     skeleton_update_list: List<Skeleton_t> = new List;
     onload_update_list: List<Function> = new List;
 
-    canvas: import('./rasterizer_canvas').RasterizerCanvas = null;
-    scene: import('./rasterizer_scene').RasterizerScene = null;
+    canvas: import("./rasterizer_canvas").RasterizerCanvas = null;
+    scene: import("./rasterizer_scene").RasterizerScene = null;
 
     /**
      * @param {WebGLRenderingContext} gl

@@ -6,8 +6,8 @@ import { MessageQueue } from "engine/core/message_queue";
 import { OS } from "engine/core/os/os";
 import { Engine } from "engine/core/engine";
 import { SceneTree } from "engine/scene/main/scene_tree";
-import { VisualServer } from "engine/servers/visual_server";
-import { Physics2DServer } from "engine/servers/physics_2d/physics_2d_server";
+import { VisualServer } from "engine/servers/visual/visual_server";
+import { Physics2DServer } from "engine/servers/physics_2d";
 import { VSG } from "engine/servers/visual/visual_server_globals";
 import { MainTimerSync } from "./main_timer_sync";
 import Stats from "engine/utils/stats";
@@ -123,8 +123,6 @@ export const Main = {
         os.set_main_loop(scene_tree);
 
         this.start_loop();
-
-        console.log(`[Voltar] driver: ${this.global.display.webgl2 ? 'WebGL2' : 'WebGL'}, antialias: ${this.global.display.antialias ? 'ON' : 'OFF'}`)
 
         document.body.appendChild(stats.dom);
     },

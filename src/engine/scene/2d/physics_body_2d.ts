@@ -4,12 +4,12 @@ import { Vector2, Vector2Like } from "engine/core/math/vector2";
 import { Transform2D } from "engine/core/math/transform_2d";
 import { ProjectSettings } from "engine/core/project_settings";
 import { Engine } from "engine/core/engine";
-import { Physics2DServer } from "engine/servers/physics_2d/physics_2d_server";
-import { Body2DSW } from "engine/servers/physics_2d/body_2d_sw";
+import { Physics2DServer } from "engine/servers/physics_2d";
+import { Body2DSW } from "engine/servers/physics_2d";
 import {
     MotionResult,
     SeparationResult,
-} from "engine/servers/physics_2d/state";
+} from "engine/servers/physics_2d";
 
 import { NOTIFICATION_ENTER_TREE } from "../main/node";
 import { PhysicsMaterial } from "../resources/physics_material";
@@ -20,8 +20,8 @@ import { CollisionObject2D } from "./collision_object_2d";
 import { Node2D } from "./node_2d";
 import { remove_item } from "engine/dep/index";
 
-type CollisionObject2DSW = import("engine/servers/physics_2d/collision_object_2d_sw").CollisionObject2DSW;
-type Physics2DDirectBodyStateSW = import("engine/servers/physics_2d/body_2d_sw").Physics2DDirectBodyStateSW;
+type CollisionObject2DSW = import("engine/servers/physics_2d").CollisionObject2DSW;
+type Physics2DDirectBodyStateSW = import("engine/servers/physics_2d").Physics2DDirectBodyStateSW;
 
 export class PhysicsBody2D extends CollisionObject2D {
     get class() { return 'PhysicsBody2D' }

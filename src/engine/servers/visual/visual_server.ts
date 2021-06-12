@@ -7,10 +7,10 @@ import {
 } from "engine/core/math/math_defs";
 import { Color } from "engine/core/color";
 
-import { VSG } from "./visual/visual_server_globals";
-import { VisualServerCanvas } from "./visual/visual_server_canvas";
-import { VisualServerScene } from "./visual/visual_server_scene";
-import { VisualServerViewport } from "./visual/visual_server_viewport";
+import { VSG } from "./visual_server_globals";
+import { VisualServerCanvas } from "./visual_server_canvas";
+import { VisualServerScene } from "./visual_server_scene";
+import { VisualServerViewport } from "./visual_server_viewport";
 
 import { Rasterizer } from "engine/drivers/webgl/rasterizer";
 

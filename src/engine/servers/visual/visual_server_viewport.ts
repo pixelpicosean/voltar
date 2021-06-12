@@ -8,8 +8,8 @@ import { VSG } from "./visual_server_globals";
 import { Canvas } from "./visual_server_canvas";
 import { Scenario_t, Camera_t } from "./visual_server_scene";
 
-type RenderTarget_t = import('engine/drivers/webgl/rasterizer_storage').RenderTarget_t;
-type ShadowAtlas_t = import('engine/drivers/webgl/rasterizer_scene').ShadowAtlas_t;
+type RenderTarget_t = import("engine/drivers/webgl/rasterizer_storage").RenderTarget_t;
+type ShadowAtlas_t = import("engine/drivers/webgl/rasterizer_scene").ShadowAtlas_t;
 
 const VIEWPORT_UPDATE_DISABLED = 0;
 const VIEWPORT_UPDATE_ONCE = 1; //then goes to disabled, must be manually updated
