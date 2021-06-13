@@ -11,31 +11,15 @@ v.preload({
 
 
 class Demo2D extends v.Control {
-    // _init() {
-    //     super._init();
-    //     console.log("Demo2D._init()");
-    // }
-    async _ready() {
+    _ready() {
         console.log("Demo2D is ready!");
-
-        await v.yield(this.get_tree().create_timer(2), "timeout");
-
-        this.get_tree().change_scene("res://scene/demo_3d.tscn");
     }
 }
 v.attach_script("res://scene/demo_2d.tscn", Demo2D);
 
 class Demo3D extends v.Spatial {
-    // _init() {
-    //     super._init();
-    //     console.log("Demo3D._init()");
-    // }
-    async _ready() {
+    _ready() {
         console.log("Demo3D is ready!");
-
-        await v.yield(this.get_tree().create_timer(2), "timeout");
-
-        this.get_tree().change_scene("res://scene/demo_2d.tscn");
     }
 }
 v.attach_script("res://scene/demo_3d.tscn", Demo3D);

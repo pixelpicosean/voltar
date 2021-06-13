@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=2]
+[gd_scene load_steps=10 format=2]
 
 [ext_resource path="res://image/sprites/monitor.png" type="Texture" id=1]
 [ext_resource path="res://image/sprites/alien.png" type="Texture" id=2]
@@ -43,6 +43,22 @@ void fragment() {
 
 [sub_resource type="ShaderMaterial" id=4]
 shader = SubResource( 3 )
+
+[sub_resource type="Animation" id=5]
+resource_name = "rotate"
+loop = true
+tracks/0/type = "value"
+tracks/0/path = NodePath("monitor/alien8:rotation_degrees")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 1 ),
+"transitions": PoolRealArray( 1, 1 ),
+"update": 0,
+"values": [ 0.0, 360.0 ]
+}
 
 [node name="demo" type="Control"]
 anchor_right = 1.0
@@ -139,3 +155,7 @@ margin_bottom = 201.0
 __meta__ = {
 "_edit_use_anchors_": false
 }
+
+[node name="animation_player" type="AnimationPlayer" parent="."]
+autoplay = "rotate"
+anims/rotate = SubResource( 5 )
