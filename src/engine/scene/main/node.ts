@@ -48,43 +48,43 @@ class GroupData {
 }
 
 class Data {
-    filename: string;
+    filename = "";
 
-    parent: Node;
-    owner: Node;
+    parent: Node = null;
+    owner: Node = null;
     children: Node[] = [];
-    pos: number;
-    depth: number;
-    name: string;
-    tree: import('./scene_tree').SceneTree;
-    inside_tree: boolean;
-    ready_notified: boolean;
-    ready_first: boolean;
+    pos = -1;
+    depth = -1;
+    name = "";
+    tree: import('./scene_tree').SceneTree = null;
+    inside_tree = false;
+    ready_notified = false;
+    ready_first = true;
 
-    viewport: import('./viewport').Viewport;
+    viewport: import('./viewport').Viewport = null;
 
     grouped: { [name: string]: GroupData } = Object.create(null);
-    OW: List$Element<Node>;
+    OW: List$Element<Node> = null;
     owned: List<Node> = new List;
 
-    pause_mode: number;
-    pause_owner: Node;
+    pause_mode = PAUSE_MODE_INHERIT;
+    pause_owner: Node = null;
 
-    physics_process: boolean;
-    idle_process: boolean;
+    physics_process = false;
+    idle_process = false;
 
-    physics_process_internal: boolean;
-    idle_process_internal: boolean;
+    physics_process_internal = false;
+    idle_process_internal = false;
 
-    input: boolean;
-    unhandled_input: boolean;
-    unhandled_key_input: boolean;
+    input = false;
+    unhandled_input = false;
+    unhandled_key_input = false;
 
-    parent_owned: boolean;
-    in_constructor: boolean;
-    use_placeholder: boolean;
+    parent_owned = false;
+    in_constructor = true;
+    use_placeholder = false;
 
-    path_cache: string;
+    path_cache: string = null;
 }
 
 
@@ -187,6 +187,7 @@ export class Node extends VObject {
     is_spatial = false;
     is_skeleton = false;
     is_collision_object = false;
+    is_animation_player = false;
 
     _script_ = false;
 
@@ -194,34 +195,6 @@ export class Node extends VObject {
 
     /* virtuals */
 
-    _init() {
-        this.data.pos = -1;
-        this.data.depth = -1;
-        this.data.parent = null;
-        this.data.tree = null;
-        this.data.physics_process = false;
-        this.data.idle_process = false;
-        this.data.physics_process_internal = false;
-        this.data.idle_process_internal = false;
-        this.data.inside_tree = false;
-        this.data.ready_notified = false;
-
-        this.data.owner = null;
-        this.data.OW = null;
-        this.data.input = false;
-        this.data.unhandled_input = false;
-        this.data.unhandled_key_input = false;
-        this.data.pause_mode = PAUSE_MODE_INHERIT;
-        this.data.pause_owner = null;
-        this.data.path_cache = null;
-        this.data.parent_owned = false;
-        this.data.in_constructor = true;
-        this.data.viewport = null;
-        this.data.use_placeholder = false;
-        this.data.ready_first = true;
-
-        orphan_node_count++;
-    }
     _free() {
         this.data.grouped = Object.create(null);
         this.data.owned.clear();

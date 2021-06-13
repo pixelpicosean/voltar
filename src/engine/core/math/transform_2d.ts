@@ -680,6 +680,10 @@ export class Transform2D {
         return this;
     }
 
+    interpolate_with(p_transform: Transform2D, p_c: number, r_out?: Transform2D) {
+        // @Incomplete
+    }
+
     static IDENTITY = new Transform2D;
 }
 

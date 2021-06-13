@@ -455,8 +455,8 @@ export class Vector2 {
     /**
      * Returns a perpendicular vector.
      */
-    tangent(r_out = Vector2.new()): Vector2 {
-        return r_out.set(this.y, -this.x);
+    tangent(r_out?: Vector2): Vector2 {
+        return (r_out || Vector2.new()).set(this.y, -this.x);
     }
 
     aspect() {
@@ -467,23 +467,17 @@ export class Vector2 {
         return this.x === 0 && this.y === 0;
     }
 
-    /**
-     * Returns new Vector2.
-     */
-    linear_interpolate(p_b: Vector2Like, p_t: number) {
-        const res = this.clone();
+    linear_interpolate(p_b: Vector2Like, p_t: number, r_out?: Vector2) {
+        const res = (r_out || Vector2.new()).copy(this);
         res.x += (p_t * (p_b.x - this.x));
         res.y += (p_t * (p_b.y - this.y));
         return res;
     }
 
-    /**
-     * Returns new Vector2.
-     */
-    cubic_interpolate(p_b: Vector2, p_pre_a: Vector2, p_post_b: Vector2, p_t: number) {
+    cubic_interpolate(p_b: Vector2, p_pre_a: Vector2, p_post_b: Vector2, p_t: number, r_out?: Vector2) {
         const t2 = p_t * p_t;
         const t3 = t2 * p_t;
-        return Vector2.new(
+        return (r_out || Vector2.new()).set(
             0.5 * ((this.x * 2) + (-p_pre_a.x + p_b.x) * p_t + (2 * p_pre_a.x - 5 * this.x + 4 * p_b.x - p_post_b.x) * t2 + (-p_pre_a.x + 3 * this.x - 3 * p_b.x + p_post_b.x) * t3),
             0.5 * ((this.y * 2) + (-p_pre_a.y + p_b.y) * p_t + (2 * p_pre_a.y - 5 * this.y + 4 * p_b.y - p_post_b.y) * t2 + (-p_pre_a.y + 3 * this.y - 3 * p_b.y + p_post_b.y) * t3)
         );

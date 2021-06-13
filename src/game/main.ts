@@ -1,10 +1,7 @@
 import * as v from 'engine/index';
-
-import 'extension/2d/vector_graphic';
-
+import Settings from 'gen/project.json';
 
 import { Preloader } from 'game/preloader';
-
 
 v.preload({
     type: "atlas",
@@ -13,19 +10,32 @@ v.preload({
 });
 
 
-import Settings from 'gen/project.json';
-
-
 class Demo2D extends v.Control {
-    _ready() {
+    // _init() {
+    //     super._init();
+    //     console.log("Demo2D._init()");
+    // }
+    async _ready() {
         console.log("Demo2D is ready!");
+
+        await v.yield(this.get_tree().create_timer(2), "timeout");
+
+        this.get_tree().change_scene("res://scene/demo_3d.tscn");
     }
 }
 v.attach_script("res://scene/demo_2d.tscn", Demo2D);
 
 class Demo3D extends v.Spatial {
-    _ready() {
+    // _init() {
+    //     super._init();
+    //     console.log("Demo3D._init()");
+    // }
+    async _ready() {
         console.log("Demo3D is ready!");
+
+        await v.yield(this.get_tree().create_timer(2), "timeout");
+
+        this.get_tree().change_scene("res://scene/demo_2d.tscn");
     }
 }
 v.attach_script("res://scene/demo_3d.tscn", Demo3D);

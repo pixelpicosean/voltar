@@ -64,10 +64,10 @@ export class VObject {
     instance_id = uid++;
     is_queued_for_deletion = false;
 
-    _events: Map<string | Symbol, EventListener[]> = new Map();
+    _events = new Map<string | Symbol, EventListener[]>();
 
     /**
-     * This method is called to reset it while reuse recylced instances.
+     * This method is called immediately after constructor while using `memnew()`
      */
     _init() { }
 

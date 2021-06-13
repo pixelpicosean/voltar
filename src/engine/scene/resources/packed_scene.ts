@@ -1,8 +1,6 @@
 import { memnew } from "engine/core/os/memory";
 import {
-    node_class_map,
     res_class_map,
-
     get_resource_map,
 } from "engine/registry";
 import { Node } from "../main/node";
@@ -45,7 +43,6 @@ export class PackedScene {
             root._init();
         } else if (root_data.type) {
             /* no script, no inheritance. Simple node! \o/ */
-            // root = new (node_class_map[root_data.type]);
             root = memnew(root_data.type);
         }
         node_path_table["."] = root;
@@ -122,7 +119,6 @@ function setup_scene(scene_data: PackedScene, node_path_table: NodePathTable) {
                 child = child_packed_scene.instance();
             } else {
                 /* a normal node */
-                // child = new (node_class_map[node_data.type]);
                 child = memnew(node_data.type);
             }
 

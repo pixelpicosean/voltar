@@ -277,33 +277,21 @@ export class Transform {
         return this.basis.exact_equals(other.basis) && this.origin.exact_equals(other.origin);
     }
 
-    /**
-     * returns new Transform
-     */
-    interpolate_with(p_transform: Transform, p_c: number) {
-        let src_scale = this.basis.get_scale();
-        let src_rot = this.basis.get_rotation_quat();
-        let src_loc = this.origin;
+    interpolate_with(p_transform: Transform, p_c: number, r_out?: Transform) {
+        const src_scale = this.basis.get_scale(_i_interpolate_with_Vector3_1);
+        const src_rot = this.basis.get_rotation_quat(_i_interpolate_with_Quat_1);
+        const src_loc = this.origin;
 
-        let dst_scale = p_transform.basis.get_scale();
-        let dst_rot = p_transform.basis.get_rotation_quat();
-        let dst_loc = p_transform.origin;
+        const dst_scale = p_transform.basis.get_scale(_i_interpolate_with_Vector3_2);
+        const dst_rot = p_transform.basis.get_rotation_quat(_i_interpolate_with_Quat_2);
+        const dst_loc = p_transform.origin;
 
-        let i_rot = Quat.new();
-        let i_scale = Vector3.new();
+        const i_rot = _i_interpolate_with_Quat_3.set(0, 0, 0, 1);
+        const i_scale = _i_interpolate_with_Vector3_3.set(0, 0, 0);
 
-        let interp = Transform.new();
+        const interp = (r_out || Transform.new()).identity();
         interp.basis.set_quat_scale(src_rot.slerp(dst_rot, p_c, i_rot).normalize(), src_scale.linear_interpolate(dst_scale, p_c, i_scale));
         src_loc.linear_interpolate(dst_loc, p_c, interp.origin);
-
-        Quat.free(i_rot);
-        Vector3.free(i_scale);
-
-        Quat.free(dst_rot);
-        Vector3.free(dst_scale);
-
-        Quat.free(src_rot);
-        Vector3.free(src_scale);
 
         return interp;
     }
@@ -312,3 +300,10 @@ export class Transform {
 }
 
 const pool: Transform[] = [];
+
+const _i_interpolate_with_Vector3_1 = new Vector3;
+const _i_interpolate_with_Vector3_2 = new Vector3;
+const _i_interpolate_with_Vector3_3 = new Vector3;
+const _i_interpolate_with_Quat_1 = new Quat;
+const _i_interpolate_with_Quat_2 = new Quat;
+const _i_interpolate_with_Quat_3 = new Quat;

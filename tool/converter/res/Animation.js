@@ -38,7 +38,7 @@ module.exports = (data) => {
             for (let i = 0; i < keys_data.length; i += 12) {
                 times.push(keys_data[i + 0]);
                 transitions.push(keys_data[i + 1]);
-                values.push([
+                values.push(
                     // location
                     keys_data[i + 2],
                     keys_data[i + 3],
@@ -52,7 +52,7 @@ module.exports = (data) => {
                     keys_data[i + 9],
                     keys_data[i + 10],
                     keys_data[i + 11],
-                ])
+                )
             }
             packed_transform = true;
         } else if (track_type === 'method') {
