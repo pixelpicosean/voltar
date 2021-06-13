@@ -196,6 +196,36 @@
                     "@sub#",
                     "3"
                 ]
+            },
+            {
+                "id": 5,
+                "type": "Animation",
+                "name": "rotate",
+                "loop": true,
+                "tracks": [
+                    {
+                        "type": "value",
+                        "path": "monitor/alien8:rotation_degrees",
+                        "interp": 1,
+                        "loop_wrap": true,
+                        "enabled": true,
+                        "keys": {
+                            "times": [
+                                0,
+                                1
+                            ],
+                            "transitions": [
+                                1,
+                                1
+                            ],
+                            "update": 0,
+                            "values": [
+                                0,
+                                360
+                            ]
+                        }
+                    }
+                ]
             }
         ],
         "nodes": [
@@ -408,6 +438,18 @@
                 "margin_left": 18.5,
                 "margin_top": 28,
                 "margin_right": 239.5
+            },
+            {
+                "type": "AnimationPlayer",
+                "name": "animation_player",
+                "parent": ".",
+                "autoplay": "rotate",
+                "anims": {
+                    "rotate": [
+                        "@sub#",
+                        "5"
+                    ]
+                }
             }
         ]
     },

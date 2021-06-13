@@ -1051,8 +1051,8 @@ export class AnimationPlayer extends Node {
             if (track.type === TrackType_VALUE) {
                 if (!p_anim.node_cache[i].property_anim[track.path]) {
                     const pa = p_anim.node_cache[i].property_anim[track.path] = new PropertyAnim;
-                    pa.subpath = paths;
-                    pa.object = get_subpath_target(child, paths);
+                    pa.subpath = paths.slice(1);
+                    pa.object = get_subpath_target(child, pa.subpath);
                     pa.owner = p_anim.node_cache[i];
 
                     const vt = track as ValueTrack;
@@ -1072,7 +1072,7 @@ export class AnimationPlayer extends Node {
 
                     // paths = [object = node, property], so we can try to cache `setter`
                     if (paths.length === 2) {
-                        const setter = pa.object[`set_${paths[paths.length - 1]}`];
+                        const setter = pa.object[`set_${paths[1]}`];
                         if (typeof setter === "function") {
                             pa.setter = setter;
                         }
@@ -1083,13 +1083,13 @@ export class AnimationPlayer extends Node {
             if (track.type === TrackType_BEZIER) {
                 if (!p_anim.node_cache[i].bezier_anim[track.path]) {
                     const pa = p_anim.node_cache[i].bezier_anim[track.path] = new BezierAnim;
-                    pa.bezier_property = paths;
-                    pa.object = get_subpath_target(child, paths);
+                    pa.bezier_property = paths.slice(1);
+                    pa.object = get_subpath_target(child, pa.bezier_property);
                     pa.owner = p_anim.node_cache[i];
 
                     // paths = [object = node, property], so we can try to cache `setter`
                     if (paths.length === 2) {
-                        const setter = pa.object[`set_${paths[paths.length - 1]}`];
+                        const setter = pa.object[`set_${paths[1]}`];
                         if (typeof setter === "function") {
                             pa.setter = setter;
                         }
