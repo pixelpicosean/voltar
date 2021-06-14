@@ -1,4 +1,5 @@
 import { Math_PI } from './math_defs';
+import { clamp } from './math_funcs';
 import { Vector2, Vector2Like } from './vector2';
 import { Rect2 } from './rect2';
 
@@ -44,12 +45,8 @@ export class Transform2D {
     ty = 0;
     _array: number[] = null;
 
-    /**
-     * returns new Vector2
-     */
-    get_origin(out?: Vector2) {
-        out = out || Vector2.new();
-        return out.set(this.tx, this.ty);
+    get_origin(r_out?: Vector2) {
+        return (r_out || Vector2.new()).set(this.tx, this.ty);
     }
     set_origin(value: Vector2Like) {
         this.tx = value.x;
@@ -77,19 +74,14 @@ export class Transform2D {
         return this;
     }
 
-    /**
-     * returns new Vector2
-     */
-    get_scale(out?: Vector2) {
+    get_scale(r_out?: Vector2) {
+        if (!r_out) r_out = Vector2.new();
+
         const basis_determinant = Math.sign(this.a * this.d - this.b * this.c);
-        out = out || Vector2.new();
-        out.x = Math.sqrt(this.a * this.a + this.b * this.b)
-        out.y = Math.sqrt(this.c * this.c + this.d * this.d) * basis_determinant;
-        return out;
+        r_out.x = Math.sqrt(this.a * this.a + this.b * this.b)
+        r_out.y = Math.sqrt(this.c * this.c + this.d * this.d) * basis_determinant;
+        return r_out;
     }
-    /**
-     * @param {Vector2Like} scale
-     */
     set_scale(scale: Vector2Like) {
         let vec = Vector2.new();
         vec.set(this.a, this.b).normalize();
@@ -681,7 +673,49 @@ export class Transform2D {
     }
 
     interpolate_with(p_transform: Transform2D, p_c: number, r_out?: Transform2D) {
-        // @Incomplete
+        if (!r_out) r_out = Transform2D.new();
+
+        const p1 = this.get_origin(_i_interpolate_with_Vector2_1);
+        const p2 = p_transform.get_origin(_i_interpolate_with_Vector2_2);
+
+        const r1 = this.get_rotation();
+        const r2 = p_transform.get_rotation();
+
+        const s1 = this.get_scale(_i_interpolate_with_Vector2_3);
+        const s2 = p_transform.get_scale(_i_interpolate_with_Vector2_4);
+
+        const v1 = _i_interpolate_with_Vector2_5.set(Math.cos(r1), Math.sin(r1));
+        const v2 = _i_interpolate_with_Vector2_6.set(Math.cos(r2), Math.sin(r2));
+
+        let dot = v1.dot(v2);
+
+        dot = clamp(dot, -1, 1);
+
+        const v = _i_interpolate_with_Vector2_7;
+
+        if (dot > 0.9995) {
+            v1.linear_interpolate(v2, p_c, v).normalize();
+        } else {
+            const angle = p_c * Math.acos(dot);
+            const v3 = _i_interpolate_with_Vector2_8.copy(v1).scale(dot).negate()
+                .add(v2).normalize();
+            v.copy(v1).scale(Math.cos(angle)).add(v3.scale(Math.sin(angle)));
+        }
+
+        const angle = Math.atan2(v.y, v.x);
+        const origin = p1.linear_interpolate(p2, p_c, _i_interpolate_with_Vector2_9);
+        const cr = Math.cos(angle);
+        const sr = Math.sin(angle);
+        r_out.a = cr;
+        r_out.b = sr;
+        r_out.c = -sr;
+        r_out.d = cr;
+        r_out.tx = origin.x;
+        r_out.ty = origin.y;
+
+        const basis = s1.linear_interpolate(s2, p_c, _i_interpolate_with_Vector2_10);
+        r_out.scale_basis(basis.x, basis.y);
+        return r_out;
     }
 
     static IDENTITY = new Transform2D;
@@ -691,3 +725,14 @@ export class Transform2D {
  * @type {Transform2D[]}
  */
 const pool: Transform2D[] = [];
+
+const _i_interpolate_with_Vector2_1 = new Vector2;
+const _i_interpolate_with_Vector2_2 = new Vector2;
+const _i_interpolate_with_Vector2_3 = new Vector2;
+const _i_interpolate_with_Vector2_4 = new Vector2;
+const _i_interpolate_with_Vector2_5 = new Vector2;
+const _i_interpolate_with_Vector2_6 = new Vector2;
+const _i_interpolate_with_Vector2_7 = new Vector2;
+const _i_interpolate_with_Vector2_8 = new Vector2;
+const _i_interpolate_with_Vector2_9 = new Vector2;
+const _i_interpolate_with_Vector2_10 = new Vector2;
