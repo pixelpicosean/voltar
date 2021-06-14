@@ -1,9 +1,6 @@
 let Stats: Function = null;
 
 if (process.env.NODE_ENV !== 'production') {
-    // Code will be removed from production build.
-    console.log("Looks like you're a developer.");
-
     Stats = function() {
 
         var mode = 0;
