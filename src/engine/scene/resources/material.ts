@@ -1,6 +1,5 @@
 import { res_class_map } from "engine/registry";
 import { VSG } from "engine/servers/visual/visual_server_globals";
-import { parse_shader_code } from "engine/drivers/webgl/shader_parser";
 
 type Texture_t = import('engine/drivers/webgl/rasterizer_storage').Texture_t;
 type Material_t = import('engine/drivers/webgl/rasterizer_storage').Material_t;
@@ -29,7 +28,7 @@ export class ShaderMaterial extends Material {
     uses_screen_texture = false;
     uses_custom_light = false;
 
-    uniforms: { name: string; type: UniformTypes; value?: number[] | Texture_t; }[] = [];
+    uniforms: { name: string; type: UniformTypes; value?: any }[] = [];
     texture_hints: { [name: string]: Texture_t; } = {};
 
     vs_code = "";
@@ -51,36 +50,47 @@ export class ShaderMaterial extends Material {
 
     }
     _load_data(data: any) {
-        if (data.shader && data.shader.code) {
-            this.set_shader(data.shader.code);
+        if (data.shader) {
+            this.set_shader(
+                data.shader.shader_type,
+                data.shader.uniforms,
+                data.shader.global_code,
+                data.shader.vs_code,
+                data.shader.vs_uniform_code,
+                data.shader.fs_code,
+                data.shader.fs_uniform_code,
+                data.shader.lt_code
+            );
         }
 
         return this;
     }
 
-    set_shader(code: string) {
-        const parsed_code = parse_shader_code(code);
+    set_shader(type: string, uniforms: { name: string, type: UniformTypes, value: any }[], global_code: string, vertex: string, vertex_uniform_code: string, fragment: string, fragment_uniform_code: string, light: string) {
+        this.shader_type = type;
 
-        this.shader_type = parsed_code.type;
+        this.uses_screen_texture = fragment.includes("SCREEN_TEXTURE");
+        this.uses_custom_light = !!light;
 
-        this.uses_screen_texture = parsed_code.uses_screen_texture;
-        this.uses_custom_light = parsed_code.uses_custom_light;
-
-        this.uniforms = parsed_code.uniforms;
-        for (let u of this.uniforms) {
-            if (!Array.isArray(u.value)) {
-                this.texture_hints[u.name] = u.value;
+        if (uniforms && uniforms.length > 0) {
+            this.uniforms = uniforms;
+            for (let u of this.uniforms) {
+                if (!Array.isArray(u.value)) {
+                    this.texture_hints[u.name] = u.value;
+                }
             }
         }
 
-        this.vs_code = parsed_code.vs_code;
-        this.vs_uniform_code = parsed_code.vs_uniform_code;
+        // code
+        this.global_code = global_code || "";
 
-        this.fs_code = parsed_code.fs_code;
-        this.fs_uniform_code = parsed_code.fs_uniform_code;
+        this.vs_code = vertex || "";
+        this.vs_uniform_code = vertex_uniform_code || "";
 
-        this.lt_code = parsed_code.lt_code;
-        this.global_code = parsed_code.global_code;
+        this.fs_code = fragment || "";
+        this.fs_uniform_code = fragment_uniform_code || "";
+
+        this.lt_code = light || "";
     }
 }
 res_class_map['ShaderMaterial'] = ShaderMaterial;

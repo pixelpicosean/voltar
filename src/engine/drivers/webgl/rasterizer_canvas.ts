@@ -303,12 +303,20 @@ export class RasterizerCanvas extends VObject {
         this.resize(size.width, size.height);
 
         const mat = new ShaderMaterial("normal");
-        mat.set_shader(`
-            shader_type canvas_item;
-            void fragment() {
-                COLOR = texture(TEXTURE, UV);
-            }
-        `);
+        mat.set_shader(
+            "canvas_item",
+            null, // uniforms
+
+            null, // global
+
+            null, // vertex
+            null, // vertex uniforms
+
+            `COLOR = texture2D(TEXTURE, UV);`,
+            null, // fragment uniforms
+
+            null  // light
+        );
         this.materials.flat = this.init_shader_material(mat, normal_vs, normal_fs, true);
         this.materials.tile = this.init_shader_material(mat, tile_vs, tile_fs, false);
 
@@ -558,17 +566,14 @@ export class RasterizerCanvas extends VObject {
     init_shader_material(shader_material: ShaderMaterial, vs: string, fs: string, batchable: boolean) {
         const vs_code = vs
             // uniform
-            .replace("/* GLOBALS */", shader_material.vs_uniform_code)
+            .replace("/* GLOBALS */", `${shader_material.global_code}\n${shader_material.vs_uniform_code}`)
             // shader code
             .replace(/\/\* VERTEX_CODE_BEGIN \*\/([\s\S]*?)\/\* VERTEX_CODE_END \*\//, `{\n${shader_material.vs_code}\n}`)
         const fs_code = fs
             // uniform
-            .replace("/* GLOBALS */", shader_material.fs_uniform_code)
+            .replace("/* GLOBALS */", `${shader_material.global_code}\n${shader_material.fs_uniform_code}`)
             // shader code
             .replace(/\/\* FRAGMENT_CODE_BEGIN \*\/([\s\S]*?)\/\* FRAGMENT_CODE_END \*\//, `{\n${shader_material.fs_code}\n}`)
-            // translate Godot API to GLSL
-            .replace(/texture\(/gm, "texture2D(")
-            .replace(/FRAGCOORD/gm, "gl_FragCoord")
 
         const vs_uniforms = parse_uniforms_from_code(vs_code)
             .map(u => ({ type: u.type, name: u.name }))

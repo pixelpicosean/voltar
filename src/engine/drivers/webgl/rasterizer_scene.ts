@@ -87,7 +87,6 @@ import {
 
 import {
     parse_uniforms_from_code,
-    parse_attributes_from_code,
 } from "./shader_parser";
 
 import spatial_vs from "./shaders/spatial.vert";
@@ -650,7 +649,7 @@ const SPATIAL_FEATURES = {
         `,
         fragment: (config: MaterialInstanceConfig) => {
             let code = `
-                vec4 m_albedo_tex = texture(m_texture_albedo, UV);
+                vec4 m_albedo_tex = texture2D(m_texture_albedo, UV);
                 ALBEDO = m_albedo_tex.rgb * m_albedo.rgb;
             `;
             if (config.spatial.uses_alpha) {
@@ -675,7 +674,7 @@ const SPATIAL_FEATURES = {
             uniform highp float m_emission_energy;
         `,
         fragment: (config: MaterialInstanceConfig) => `
-            vec3 m_emission_tex = texture(m_texture_emission, UV).rgb;
+            vec3 m_emission_tex = texture2D(m_texture_emission, UV).rgb;
             EMISSION = (m_emission.rgb + m_emission_tex) * m_emission_energy;
         `,
         value: {
@@ -696,7 +695,7 @@ const SPATIAL_FEATURES = {
             uniform highp float m_rim_tint;
         `,
         fragment: (config: MaterialInstanceConfig) => `
-            vec2 m_rim_tex = texture(m_texture_rim, UV).xy;
+            vec2 m_rim_tex = texture2D(m_texture_rim, UV).xy;
             RIM = m_rim * m_rim_tex.x;
             RIM_TINT = m_rim_tint * m_rim_tex.y;
         `,
@@ -1055,7 +1054,21 @@ export class RasterizerScene {
                 }
             }
 
-            mat.set_shader(`shader_type spatial;\n${uniforms}\nvoid fragment() {\n${fragment}\n}`);
+            mat.set_shader(
+                "spatial",
+
+                null,
+
+                null,
+
+                null,
+                null,
+
+                fragment,
+                uniforms,
+
+                null
+            );
 
             // create material
             base = this.init_shader_material(
@@ -1842,18 +1855,15 @@ export class RasterizerScene {
     init_shader_material(shader_material: ShaderMaterial, vs: string, fs: string, conditions: number[]) {
         let vs_code = vs
             // uniform
-            .replace("/* GLOBALS */", `${shader_material.global_code}\n`)
+            .replace("/* GLOBALS */", `${shader_material.global_code}\n${shader_material.vs_uniform_code}`)
             // shader code
             .replace(/\/\* VERTEX_CODE_BEGIN \*\/([\s\S]*?)\/\* VERTEX_CODE_END \*\//, `{\n${shader_material.vs_code}\n}`)
 
         let fs_code = fs
             // uniform
-            .replace("/* GLOBALS */", `${shader_material.global_code}\n`)
+            .replace("/* GLOBALS */", `${shader_material.global_code}\n${shader_material.fs_uniform_code}`)
             // shader code
             .replace(/\/\* FRAGMENT_CODE_BEGIN \*\/([\s\S]*?)\/\* FRAGMENT_CODE_END \*\//, `{\n${shader_material.fs_code}\n}`)
-            // translate Godot API to GLSL
-            .replace(/\btexture\(/g, "texture2D(")
-            .replace(/\bFRAGCOORD\b/g, "gl_FragCoord")
         if (shader_material.uses_custom_light) {
             fs_code = fs_code.replace(/\/\* LIGHT_CODE_BEGIN \*\/([\s\S]*?)\/\* LIGHT_CODE_END \*\//, `{\n${shader_material.lt_code}\n}`)
         } else {
