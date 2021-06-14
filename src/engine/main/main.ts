@@ -124,7 +124,9 @@ export const Main = {
 
         this.start_loop();
 
-        document.body.appendChild(stats.dom);
+        if (stats.dom) {
+            document.body.appendChild(stats.dom);
+        }
     },
 
     iteration(timestamp: number) {
