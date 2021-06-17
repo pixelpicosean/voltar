@@ -948,7 +948,7 @@ export class VisualServerCanvas {
                         continue;
                     }
 
-                    VSG.canvas_render.canvas_render_items(z_list[i], CANVAS_ITEM_Z_MIN + i, p_canvas.modulate, p_transform);
+                    VSG.canvas_render.canvas_render_items(z_list[i], CANVAS_ITEM_Z_MIN + i, p_canvas.modulate, Transform2D.IDENTITY);
                 }
             } else {
                 for (let i = 0; i < l; i++) {
@@ -976,7 +976,7 @@ export class VisualServerCanvas {
                 for (let i = 0; i < l; i++) {
                     this._render_canvas_item_fast(ci[i].item, p_transform, p_clip_rect, WHITE, item_list, null, null);
                 }
-                VSG.canvas_render.canvas_render_items_array(item_list, p_canvas.modulate, p_transform);
+                VSG.canvas_render.canvas_render_items_array(item_list, p_canvas.modulate, Transform2D.IDENTITY);
             } else {
                 for (let i = 0; i < l; i++) {
                     const ci2 = ci[i];
@@ -1199,13 +1199,11 @@ export class VisualServerCanvas {
         }
 
         const rect = _i_render_canvas_item_Rect2_1.copy(ci.get_rect());
-        const xform = Transform2D.new().copy(ci.xform);
+        const xform = Transform2D.new().copy(p_transform).append(ci.xform);
         if (this.snap_2d_transforms) {
             xform.tx = Math.floor(xform.tx);
             xform.ty = Math.floor(xform.ty);
         }
-        const xx = _i_render_canvas_item_Transform2D_2.copy(xform);
-        xform.copy(p_transform).append(xx);
 
         let global_rect = xform.xform_rect(rect, rect);
         global_rect.x += p_clip_rect.x;
