@@ -117,8 +117,8 @@ export class Engine {
 
             // override
             set_resource_map(resource_map);
-            set_json_pack_list(meta["json_files"].map((url: string) => resource_map[url] ));
-            set_binary_pack_list(meta["binary_files"].map((url: string) => resource_map[url] ));
+            set_json_pack_list(meta["json_files"].map((url: string) => resource_map[url]));
+            set_binary_pack_list(meta["binary_files"].map((url: string) => resource_map[url]));
 
             let post_process_queue: any[] = [];
             const register_post_process = (e: any) => {
@@ -248,7 +248,9 @@ export class Engine {
             });
 
             // no longer need raw image data
-            image_pack.length = 0;
+            if (image_pack) {
+                image_pack.length = 0;
+            }
 
             // no tasks to process
             if (post_process_queue.length === 0) {
@@ -268,7 +270,7 @@ function normalize_resource_object(obj: any, ext: any, sub: any) {
     for (const k in obj) {
         const value = obj[k];
         if (Array.isArray(value)) {
-            if (value.length > 0) {
+            if (value.length === 2) {
                 if (value[0] === sub_head) {
                     obj[k] = sub[value[1]];
                 } else if (value[0] === ext_head) {
@@ -276,6 +278,8 @@ function normalize_resource_object(obj: any, ext: any, sub: any) {
                 } else {
                     obj[k] = normalize_resource_array(value, ext, sub);
                 }
+            } else if (value.length > 0) {
+                obj[k] = normalize_resource_array(value, ext, sub);
             }
         } else if (typeof (value) === 'object') {
             obj[k] = normalize_resource_object(value, ext, sub);
@@ -288,7 +292,7 @@ function normalize_resource_array(arr: any[], ext: any, sub: any) {
     for (let i = 0; i < arr.length; i++) {
         const value = arr[i];
         if (Array.isArray(value)) {
-            if (value.length > 0) {
+            if (value.length === 2) {
                 if (value[0] === sub_head) {
                     arr[i] = sub[value[1]];
                 } else if (value[0] === ext_head) {
@@ -296,6 +300,8 @@ function normalize_resource_array(arr: any[], ext: any, sub: any) {
                 } else {
                     arr[i] = normalize_resource_array(value, ext, sub);
                 }
+            } else if (value.length > 0) {
+                arr[i] = normalize_resource_array(value, ext, sub);
             }
         } else if (typeof (value) === 'object') {
             arr[i] = normalize_resource_object(value, ext, sub);
