@@ -161,11 +161,9 @@ export class Node2D extends CanvasItem {
     set_global_position(value: Vector2Like) {
         this.set_global_position_n(value.x, value.y);
     }
-    /**
-     * returns new Vector2
-     */
-    get_global_position() {
-        return this.get_global_transform().get_origin();
+    get_global_position(r_out?: Vector2) {
+        if (!r_out) r_out = Vector2.new();
+        return this.get_global_transform().get_origin(r_out);
     }
 
     /**
@@ -331,12 +329,19 @@ export class Node2D extends CanvasItem {
     translate(p_amount: Vector2Like) {
         this.set_position_n(this._position.x + p_amount.x, this._position.y + p_amount.y);
     }
+    translate_n(x: number, y: number) {
+        this.set_position_n(this._position.x + x, this._position.y + y);
+    }
     /**
      * @param {Vector2Like} p_amount
      */
     global_translate(p_amount: Vector2Like) {
-        const global_position = this.get_global_position();
+        const global_position = this.get_global_position(_i_translate_Vector2);
         this.set_global_position_n(global_position.x + p_amount.x, global_position.y + p_amount.y);
+    }
+    global_translate_n(x: number, y: number) {
+        const global_position = this.get_global_position(_i_translate_Vector2);
+        this.set_global_position_n(global_position.x + x, global_position.y + y);
     }
     /**
      * @param {number} p_delta
@@ -427,3 +432,5 @@ const _i_move_local_x_vec2 = new Vector2;
 const _i_move_local_y_vec2 = new Vector2;
 
 const _i_to_local_transform2d = new Transform2D;
+
+const _i_translate_Vector2 = new Vector2;
