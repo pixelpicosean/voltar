@@ -89,6 +89,36 @@ export class Spatial extends Node {
         return this.d_data.toplevel;
     }
 
+    look_at(target: Vector3Like, up: Vector3Like) {
+        this.look_at_from_position(this.get_global_transform().origin, target, up);
+    }
+    look_at_n(x: number, y: number, z: number, up_x = 0, up_y = 1, up_z = 0) {
+        let origin = this.get_global_transform().origin;
+        this.look_at_from_position_n(origin.x, origin.y, origin.z, x, y, z, up_x, up_y, up_z);
+    }
+    look_at_from_position(pos: Vector3Like, target: Vector3Like, up: Vector3Like) {
+        const lookat = _i_look_at_Transform.identity();
+        lookat.origin.copy(pos);
+
+        const origional_scale = this.get_scale();
+        lookat.looking_at(target, up);
+        this.set_global_transform(lookat);
+        this.set_scale(origional_scale);
+    }
+    look_at_from_position_n(x: number, y: number, z: number, target_x: number, target_y: number, target_z: number, up_x = 0, up_y = 1, up_z = 0) {
+        const lookat = _i_look_at_Transform.identity();
+        lookat.origin.set(x, y, z);
+
+        const origional_scale = this.get_scale();
+        lookat.looking_at_n(target_x, target_y, target_z, up_x, up_y, up_z);
+        this.set_global_transform(lookat);
+        this.set_scale(origional_scale);
+    }
+
+    get_translation(): Vector3 {
+        return this.d_data.local_transform.origin;
+    }
+
     /**
      * @param {Vector3Like} offset
      */
@@ -112,14 +142,24 @@ export class Spatial extends Node {
     /**
      * @param {Vector3Like} offset
      */
-    translate_object_local(offset: Vector3Like) { }
+    translate_object_local(offset: Vector3Like) {
+        const t = this.get_transform();
+        const s = _i_translate_object_local_Transform_1.identity()
+            .translate(offset);
+        this.set_transform(_i_translate_object_local_Transform_2.copy(t).append(s));
+    }
 
     /**
      * @param {number} x
      * @param {number} y
      * @param {number} z
      */
-    translate_object_local_n(x: number, y: number, z: number) { }
+    translate_object_local_n(x: number, y: number, z: number) {
+        const t = this.get_transform();
+        const s = _i_translate_object_local_Transform_1.identity()
+            .translate_n(x, y, z);
+        this.set_transform(_i_translate_object_local_Transform_2.copy(t).append(s));
+    }
 
     /**
      * @param {number} p_angle
@@ -148,6 +188,24 @@ export class Spatial extends Node {
         this.set_transform(t);
     }
 
+    rotate(p_axis: Vector3Like, p_angle: number) {
+        const t = this.get_transform();
+        t.basis.rotate(p_axis, p_angle);
+        this.set_transform(t);
+    }
+
+    rotate_object_local(axis: Vector3Like, angle: number) {
+        const t = this.get_transform();
+        t.basis.rotate_local(axis, angle);
+        this.set_transform(t);
+    }
+
+    scale_object_local(p_scale: Vector3Like) {
+        const t = this.get_transform();
+        t.basis.scale_local(p_scale);
+        this.set_transform(t);
+    }
+
     /**
      * @param {Vector3Like} p_translation
      */
@@ -168,6 +226,23 @@ export class Spatial extends Node {
         }
     }
 
+    get_rotation(): Vector3 {
+        if (this.d_data.dirty & TRANSFORM_DIRTY_VECTORS) {
+            this.d_data.local_transform.basis.get_scale(this.d_data.scale);
+            this.d_data.local_transform.basis.get_rotation(this.d_data.rotation);
+
+            this.d_data.dirty &= ~TRANSFORM_DIRTY_VECTORS;
+        }
+
+        return this.d_data.rotation;
+    }
+
+    get_rotation_degrees(r_out?: Vector3): Vector3 {
+        if (!r_out) r_out = Vector3.new();
+        r_out.copy(this.get_rotation()).scale(180 / Math.PI);
+        return r_out;
+    }
+
     /**
      * @param {Vector3Like} p_rotation
      */
@@ -182,9 +257,7 @@ export class Spatial extends Node {
      */
     set_rotation_n(x: number, y: number, z: number) {
         if (this.d_data.dirty & TRANSFORM_DIRTY_VECTORS) {
-            let scale = this.d_data.local_transform.basis.get_scale();
-            this.d_data.scale.copy(scale);
-            Vector3.free(scale);
+            this.d_data.local_transform.basis.get_scale(this.d_data.scale);
 
             this.d_data.dirty &= ~TRANSFORM_DIRTY_VECTORS;
         }
@@ -212,6 +285,16 @@ export class Spatial extends Node {
      */
     set_rotation_degrees_n(x: number, y: number, z: number) {
         this.set_rotation_n(x * DEG_2_RAD, y * DEG_2_RAD, z * DEG_2_RAD);
+    }
+
+    get_scale(): Vector3 {
+        if (this.d_data.dirty & TRANSFORM_DIRTY_VECTORS) {
+            this.d_data.local_transform.basis.get_scale(this.d_data.scale);
+            this.d_data.local_transform.basis.get_rotation(this.d_data.rotation);
+
+            this.d_data.dirty &= ~TRANSFORM_DIRTY_VECTORS;
+        }
+        return this.d_data.scale;
     }
 
     /**
@@ -371,7 +454,7 @@ export class Spatial extends Node {
             xx, xy, xz,
             yx, yy, yz,
             zx, zy, zz,
-            x,  y,  z
+            x, y, z
         );
         this.set_global_transform(xform);
         Transform.free(xform);
@@ -404,6 +487,19 @@ export class Spatial extends Node {
             this.d_data.dirty &= ~TRANSFORM_DIRTY_GLOBAL;
         }
         return this.d_data.global_transform;
+    }
+
+    to_local(p_global: Vector3, r_out?: Vector3): Vector3 {
+        if (!r_out) r_out = Vector3.new();
+        _i_local_global_Transform.copy(this.get_global_transform())
+            .affine_invert()
+            .xform(p_global, r_out);
+        return r_out;
+    }
+    to_global(p_local: Vector3, r_out?: Vector3): Vector3 {
+        if (!r_out) r_out = Vector3.new();
+        this.get_global_transform().xform(p_local, r_out);
+        return r_out;
     }
 
     orthonormalize() {
@@ -638,3 +734,10 @@ export class Spatial extends Node {
 }
 
 node_class_map["Spatial"] = GDCLASS(Spatial, Node)
+
+const _i_translate_object_local_Transform_1 = new Transform;
+const _i_translate_object_local_Transform_2 = new Transform;
+
+const _i_look_at_Transform = new Transform;
+
+const _i_local_global_Transform = new Transform;
