@@ -16,6 +16,7 @@ import { AABB } from "engine/core/math/aabb";
 import { Transform } from "engine/core/math/transform";
 import { Color } from "engine/core/color";
 import { cubic_bezier } from "engine/core/math/interpolations";
+import { Plane } from "engine/core/math/plane";
 
 
 export const TrackType_VALUE = 0;      // value
@@ -48,6 +49,43 @@ export const ValueType_AABB = 16;
 export const ValueType_Basis = 17;
 export const ValueType_Transform = 18;
 export const ValueType_Color = 19;
+
+const TypeMap = {
+    number: ValueType_Number,
+    boolean: ValueType_Boolean,
+    string: ValueType_String,
+    any: ValueType_Any,
+
+    TransformKey: ValueType_TransformKey,
+    Vector3: ValueType_Vector3,
+    Quat: ValueType_Quat,
+    Vector2: ValueType_Vector2,
+    Rect2: ValueType_Rect2,
+    Transform2D: ValueType_Transform2D,
+    Plane: ValueType_Plane,
+    AABB: ValueType_AABB,
+    Basis: ValueType_Basis,
+    Transform: ValueType_Transform,
+    Color: ValueType_Color,
+};
+const CtorMap: { [type: string]: new () => any } = {
+    number: null,
+    boolean: null,
+    string: null,
+    any: null,
+
+    TransformKey: null,
+    Vector3: Vector3,
+    Quat: Quat,
+    Vector2: Vector2,
+    Rect2: Rect2,
+    Transform2D: Transform2D,
+    Plane: Plane,
+    AABB: AABB,
+    Basis: Basis,
+    Transform: Transform,
+    Color: Color,
+};
 
 export class Track {
     type = 0;
@@ -144,48 +182,68 @@ export class ValueTrack extends Track {
 
         const len = data.keys.times.length;
 
-        // guess value type
         let ctor = null;
-        const first = data.keys.values[0];
-        // ValueType_Transform2D     ?
-        // ValueType_Plane           ?
-        // ValueType_AABB            ?
-        // ValueType_Basis           ?
-        // ValueType_Transform       ?
-        switch (typeof first) {
-            case "number": {
-                this.value_type = ValueType_Number;
-            } break;
-            case "object": {
-                if (first.x !== undefined && first.y !== undefined) {
-                    if (first.width !== undefined && first.height !== undefined) {
-                        this.value_type = ValueType_Rect2;
-                        ctor = Rect2;
-                    } else if (first.z !== undefined) {
-                        if (first.w !== undefined) {
-                            this.value_type = ValueType_Quat;
-                            ctor = Quat;
-                        } else {
-                            this.value_type = ValueType_Vector3;
-                            ctor = Vector3;
-                        }
-                    } else {
-                        this.value_type = ValueType_Vector2;
-                        ctor = Vector2;
+
+        if (data.value_type) {
+            this.value_type = TypeMap[data.value_type as (keyof typeof TypeMap)] || ValueType_Any;
+            ctor = CtorMap[data.value_type as (keyof typeof CtorMap)] || null;
+        }
+
+        // guess value type
+        if (this.value_type === -1) {
+            // - find a valid value
+            let i = 0;
+            let first = data.keys.values[0];
+            while (first === null && i < data.keys.values.length) {
+                first = data.keys.values[i++];
+            }
+
+            // ValueType_Transform2D     ?
+            // ValueType_Plane           ?
+            // ValueType_AABB            ?
+            // ValueType_Basis           ?
+            // ValueType_Transform       ?
+            switch (typeof first) {
+                case "number": {
+                    this.value_type = ValueType_Number;
+                } break;
+                case "object": {
+                    // is an instance of something, let's skip
+                    if ("class" in first) {
+                        this.value_type = ValueType_Any;
+                        break;
                     }
-                } else if (first.r !== undefined && first.g !== undefined && first.b !== undefined && first.a !== undefined) {
-                    this.value_type = ValueType_Color;
-                    ctor = Color;
-                } else {
-                    this.value_type = ValueType_Any;
-                }
-            } break;
-            case "boolean": {
-                this.value_type = ValueType_Boolean;
-            } break;
-            case "string": {
-                this.value_type = ValueType_String;
-            } break;
+
+                    if (first.x !== undefined && first.y !== undefined) {
+                        if (first.width !== undefined && first.height !== undefined) {
+                            this.value_type = ValueType_Rect2;
+                            ctor = Rect2;
+                        } else if (first.z !== undefined) {
+                            if (first.w !== undefined) {
+                                this.value_type = ValueType_Quat;
+                                ctor = Quat;
+                            } else {
+                                this.value_type = ValueType_Vector3;
+                                ctor = Vector3;
+                            }
+                        } else {
+                            this.value_type = ValueType_Vector2;
+                            ctor = Vector2;
+                        }
+                    } else if (first.r !== undefined && first.g !== undefined && first.b !== undefined && first.a !== undefined) {
+                        this.value_type = ValueType_Color;
+                        ctor = Color;
+                    } else {
+                        this.value_type = ValueType_Any;
+                    }
+                } break;
+                case "boolean": {
+                    this.value_type = ValueType_Boolean;
+                } break;
+                case "string": {
+                    this.value_type = ValueType_String;
+                } break;
+            }
         }
 
         this.values.length = len;

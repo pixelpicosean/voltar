@@ -641,16 +641,47 @@ module.exports.ColorArray = (arr) => {
 
 /**
  * @param {any} value
+ * @param {{ value_type: string }} [r_meta]
  * @returns {any[]}
  */
-module.exports.GeneralArray = (value) => {
+module.exports.GeneralArray = (value, r_meta) => {
     if (Array.isArray(value)) {
+        /** @type {Array} */
+        const array = value;
+
+        if (r_meta) {
+            r_meta.value_type = "any";
+
+            // guess type of array elements
+            let i = 0;
+            let first = array[0];
+            while (first === null && i < array.length) {
+                first = array[i++];
+            }
+
+            if (first.x !== undefined && first.y !== undefined) {
+                if (first.width !== undefined && first.height !== undefined) {
+                    r_meta.value_type = "Rect2";
+                } else if (first.z !== undefined) {
+                    if (first.w !== undefined) {
+                        r_meta.value_type = "Quat";
+                    } else {
+                        r_meta.value_type = "Vector3";
+                    }
+                } else {
+                    r_meta.value_type = "Vector2";
+                }
+            } else if (first.r !== undefined && first.g !== undefined && first.b !== undefined && first.a !== undefined) {
+                r_meta.value_type = "Color";
+            }
+        }
         return value;
     }
 
     if (typeof (value) === 'string') {
         // Empty string?
         if (value.length === 0) {
+            if (r_meta) r_meta.value_type = "any";
             return [];
         }
 
@@ -681,6 +712,8 @@ module.exports.GeneralArray = (value) => {
                 let value = param;
                 if (func) {
                     value = func(`${seg.func}( ${param} )`);
+
+                    if (r_meta) r_meta.value_type = func;
                 }
                 segments.push(value);
             }
@@ -703,9 +736,12 @@ module.exports.GeneralArray = (value) => {
                         } else {
                             segments.push(frag);
                         }
+
+                        if (r_meta) r_meta.value_type = "string";
                     }
                     else if (Number.isFinite(parseFloat(frag))) {
                         segments.push(parseFloat(frag));
+                        if (r_meta) r_meta.value_type = "number";
                     }
                     else if (frag === 'true' || frag === 'false') {
                         if (frag === 'true') {
@@ -714,6 +750,8 @@ module.exports.GeneralArray = (value) => {
                         else if (frag === 'false') {
                             segments.push(false);
                         }
+
+                        if (r_meta) r_meta.value_type = "boolean";
                     }
                     else if (frag === 'null') {
                         segments.push(null);
@@ -728,6 +766,7 @@ module.exports.GeneralArray = (value) => {
         return segments;
     }
 
+    if (r_meta) r_meta.value_type = "undefined";
     return undefined;
 };
 

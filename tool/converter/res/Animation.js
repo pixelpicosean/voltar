@@ -33,6 +33,8 @@ module.exports = (data) => {
         let transitions = [];
         let values = [];
 
+        let meta = { value_type: null };
+
         let packed_transform = false;
         if (track_type === 'transform') {
             for (let i = 0; i < keys_data.length; i += 12) {
@@ -66,7 +68,7 @@ module.exports = (data) => {
         } else {
             times = PoolRealArray(keys_data.times);
             transitions = PoolRealArray(keys_data.transitions);
-            values = GeneralArray(keys_data.values);
+            values = GeneralArray(keys_data.values, meta);
         }
 
         let track = {
@@ -81,7 +83,13 @@ module.exports = (data) => {
                 update: keys_data.update,
                 values,
             },
+
+            value_type: undefined,
         };
+
+        if (meta.value_type && meta.value_type !== "any") {
+            track.value_type = meta.value_type;
+        }
 
         if (track_type === 'transform' && packed_transform) {
             track.value_type = "PackedTransform";
