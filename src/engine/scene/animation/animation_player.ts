@@ -853,8 +853,8 @@ export class AnimationPlayer extends Node {
                         indices.clear();
                         a.value_track_get_key_indices(i, p_time, p_delta, indices);
 
-                        for (let F of indices.buffer) {
-                            const value = vt.values[F].value;
+                        for (let k = 0; k < indices.length; k++) {
+                            const value = vt.values[indices.buffer[k]].value;
                             switch (pa.special) {
                                 case SpecialProperty_NONE: {
                                     if (pa.setter) {
