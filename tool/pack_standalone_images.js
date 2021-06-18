@@ -45,16 +45,20 @@ module.exports.pack_standalone_images = function () {
         let bitmap = fs.readFileSync(url);
         let flags = {
             FILTER: false,
-            REPEAT: false,
+            REPEAT: 0,
             MIPMAPS: false,
         };
         let import_data_url = `${url}.import`;
         if (fs.existsSync(import_data_url)) {
             let import_data = fs.readFileSync(import_data_url, "utf8").split("\n");
             for (let line of import_data) {
-                let match = line.match(/flags\/(\w*)\s*=(true|false)/);
+                let match = line.match(/flags\/(\w*)\s*=(true|false|0|1|2)/);
                 if (match && match[1].toUpperCase() in flags) {
-                    flags[match[1].toUpperCase()] = boolean(match[2]);
+                    if (match[2] !== "true" || match[2] !== "false") {
+                        flags[match[1].toUpperCase()] = parseInt(match[2], 10);
+                    } else {
+                        flags[match[1].toUpperCase()] = boolean(match[2]);
+                    }
                 }
             }
         }
