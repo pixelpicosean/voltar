@@ -93,4 +93,35 @@ export class NoShrinkArray<T> {
         this.length--;
         return first;
     }
+
+    insert(e: T, index: number) {
+        // out of bounds?
+        if (index < 0) {
+            for (let i = 0; i < this.length - 1; i++) {
+                this.buffer[i + 1] = this.buffer[i];
+            }
+            this.buffer[0] = e;
+            this.length += 1;
+            return;
+        } else if (index >= this.length) {
+            index = this.length;
+            this.buffer[this.length] = e;
+            this.length += 1;
+            return;
+        }
+
+        for (let i = this.length - 1; i >= index; i--) {
+            this.buffer[i + 1] = this.buffer[i];
+        }
+        this.buffer[index] = e;
+    }
+    delete(e: T) {
+        const index = this.buffer.indexOf(e);
+        if (index < 0 || index >= this.length) return;
+
+        this.length -= 1;
+        for (let i = index; i < this.length; i++) {
+            this.buffer[i] = this.buffer[i + 1];
+        }
+    }
 }
