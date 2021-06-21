@@ -612,24 +612,24 @@ export class Animation {
                 this._value_track_get_key_indices_in_range(vt, from_time, this.length, p_indices);
                 this._value_track_get_key_indices_in_range(vt, 0, to_time, p_indices);
                 return;
-            } else {
-                if (from_time < 0) {
-                    from_time = 0;
-                }
-                if (from_time > this.length) {
-                    from_time = this.length;
-                }
-
-                if (to_time < 0) {
-                    to_time = 0;
-                }
-                if (to_time > this.length) {
-                    to_time = this.length;
-                }
+            }
+        } else {
+            if (from_time < 0) {
+                from_time = 0;
+            }
+            if (from_time > this.length) {
+                from_time = this.length;
             }
 
-            this._value_track_get_key_indices_in_range(vt, from_time, to_time, p_indices);
+            if (to_time < 0) {
+                to_time = 0;
+            }
+            if (to_time > this.length) {
+                to_time = this.length;
+            }
         }
+
+        this._value_track_get_key_indices_in_range(vt, from_time, to_time, p_indices);
     }
 
     _value_track_get_key_indices_in_range(vt: ValueTrack, from_time: number, to_time: number, p_indices: NoShrinkArray<number>) {
