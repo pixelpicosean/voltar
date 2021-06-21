@@ -412,9 +412,6 @@ export class CanvasItem extends Node {
         }
     }
 
-    /**
-     * @returns {Transform2D}
-     */
     get_canvas_transform(): Transform2D {
         if (this.canvas_layer) {
             return this.canvas_layer.transform;
@@ -425,20 +422,23 @@ export class CanvasItem extends Node {
             return this.get_viewport().canvas_transform;
         }
     }
-    get_viewport_transform() {
+    get_viewport_transform(r_out?: Transform2D) {
+        if (!r_out) r_out = Transform2D.new();
+
         if (this.canvas_layer) {
             if (this.get_viewport()) {
-                return this.get_viewport().get_final_transform().append(this.canvas_layer.transform);
+                return this.get_viewport().get_final_transform(r_out).append(this.canvas_layer.transform);
             } else {
-                return this.canvas_layer.transform;
+                return r_out.copy(this.canvas_layer.transform);
             }
         } else {
-            return this.get_viewport().get_final_transform().append(this.get_viewport().canvas_transform);
+            return this.get_viewport().get_final_transform(r_out).append(this.get_viewport().canvas_transform);
         }
     }
 
-    get_viewport_rect() {
-        return this.get_viewport().get_visible_rect();
+    get_viewport_rect(r_out?: Rect2) {
+        if (!r_out) r_out = Rect2.new();
+        return this.get_viewport().get_visible_rect(r_out);
     }
     get_viewport_rid() {
         return this.get_viewport().get_viewport_rid();
@@ -735,7 +735,7 @@ export class CanvasItem extends Node {
     }
 
     _enter_canvas() {
-        const  ci: CanvasItem = this.get_parent() as CanvasItem;
+        const ci: CanvasItem = this.get_parent() as CanvasItem;
         if (!ci.is_canvas_item || this.toplevel) {
             /** @type {Node} */
             let n: Node = this;
