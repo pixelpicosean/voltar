@@ -305,6 +305,8 @@ export class RasterizerCanvas extends VObject {
         const mat = new ShaderMaterial("normal");
         mat.set_shader(
             "canvas_item",
+            [],
+
             null, // uniforms
 
             null, // global
@@ -602,7 +604,7 @@ export class RasterizerCanvas extends VObject {
         );
         shader.name = shader_material.name;
 
-        const material = VSG.storage.material_create(shader, undefined, shader_material.uses_screen_texture);
+        const material = VSG.storage.material_create(shader);
         material.name = shader_material.name;
         material.batchable = batchable;
         for (let u of shader_material.uniforms) {

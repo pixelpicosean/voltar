@@ -4,7 +4,7 @@ import { GDCLASS } from "engine/core/v_object";
 import { VSG } from "engine/servers/visual/visual_server_globals";
 
 import { Mesh } from "../resources/mesh";
-import { Material } from "../resources/material";
+import { Material, ShaderMaterial } from "../resources/material";
 import { Skin } from "../resources/skin";
 import { NOTIFICATION_ENTER_TREE } from "../main/node";
 import { GeometryInstance } from "./visual_instance";
@@ -62,6 +62,11 @@ export class MeshInstance extends GeometryInstance {
      */
     set_surface_material(p_surface: number, p_material: Material) {
         this.materials[p_surface] = p_material;
+
+        if (p_material.class === "ShaderMaterial" && !p_material.material) {
+            const sm = p_material as ShaderMaterial;
+            p_material.material = VSG.scene_render.init_shader_material(sm, null, null, []);
+        }
         VSG.scene.instance_set_surface_material(this.instance, p_surface, p_material.material);
     }
 

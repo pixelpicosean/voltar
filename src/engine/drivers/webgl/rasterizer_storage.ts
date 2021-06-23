@@ -1456,10 +1456,9 @@ export class RasterizerStorage {
         return shd;
     }
 
-    material_create(shader: Shader_t, param: { [s: string]: number[]; } = {}, uses_screen_texture: boolean = false) {
+    material_create(shader: Shader_t, param: { [s: string]: number[]; } = {}) {
         const mt = new Material_t;
         mt.shader = shader;
-        mt.shader.canvas_item.uses_screen_texture = uses_screen_texture;
 
         for (const k in shader.uniforms) {
             const u = shader.uniforms[k];

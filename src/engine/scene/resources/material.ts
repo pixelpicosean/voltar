@@ -24,9 +24,7 @@ export class ShaderMaterial extends Material {
 
     /** @type {string} */
     shader_type: string = "canvas_item";
-
-    uses_screen_texture = false;
-    uses_custom_light = false;
+    render_modes: string[] = [];
 
     uniforms: { name: string; type: UniformTypes; value?: any }[] = [];
     texture_hints: { [name: string]: Texture_t; } = {};
@@ -53,6 +51,7 @@ export class ShaderMaterial extends Material {
         if (data.shader) {
             this.set_shader(
                 data.shader.shader_type,
+                data.shader.render_modes,
                 data.shader.uniforms,
                 data.shader.global_code,
                 data.shader.vs_code,
@@ -66,11 +65,9 @@ export class ShaderMaterial extends Material {
         return this;
     }
 
-    set_shader(type: string, uniforms: { name: string, type: UniformTypes, value: any }[], global_code: string, vertex: string, vertex_uniform_code: string, fragment: string, fragment_uniform_code: string, light: string) {
+    set_shader(type: string, render_modes: string[], uniforms: { name: string, type: UniformTypes, value: any }[], global_code: string, vertex: string, vertex_uniform_code: string, fragment: string, fragment_uniform_code: string, light: string) {
         this.shader_type = type;
-
-        this.uses_screen_texture = fragment.includes("SCREEN_TEXTURE");
-        this.uses_custom_light = !!light;
+        this.render_modes = render_modes;
 
         if (uniforms && uniforms.length > 0) {
             this.uniforms = uniforms;

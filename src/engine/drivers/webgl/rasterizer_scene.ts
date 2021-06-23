@@ -578,6 +578,11 @@ const SHADER_DEF = {
     USE_SKELETON_SOFTWARE: def_id++,
 
     ALPHA_SCISSOR_USED: def_id++,
+
+    SCREEN_TEXTURE_USED: def_id++,
+    SCREEN_UV_USED: def_id++,
+
+    DEPTH_TEXTURE_USED: def_id++,
 };
 const SHADER_DEF_NAME_TABLE: { [value: number]: keyof typeof SHADER_DEF } = {};
 for (let key in SHADER_DEF) {
@@ -1056,6 +1061,7 @@ export class RasterizerScene {
 
             mat.set_shader(
                 "spatial",
+                [],
 
                 null,
 
@@ -1853,6 +1859,9 @@ export class RasterizerScene {
     }
 
     init_shader_material(shader_material: ShaderMaterial, vs: string, fs: string, conditions: number[]) {
+        if (!vs) vs = spatial_vs;
+        if (!fs) fs = spatial_fs;
+
         let vs_code = vs
             // uniform
             .replace("/* GLOBALS */", `${shader_material.global_code}\n${shader_material.vs_uniform_code}`)
@@ -1864,12 +1873,118 @@ export class RasterizerScene {
             .replace("/* GLOBALS */", `${shader_material.global_code}\n${shader_material.fs_uniform_code}`)
             // shader code
             .replace(/\/\* FRAGMENT_CODE_BEGIN \*\/([\s\S]*?)\/\* FRAGMENT_CODE_END \*\//, `{\n${shader_material.fs_code}\n}`)
-        if (shader_material.uses_custom_light) {
+        if (shader_material.lt_code) {
             fs_code = fs_code.replace(/\/\* LIGHT_CODE_BEGIN \*\/([\s\S]*?)\/\* LIGHT_CODE_END \*\//, `{\n${shader_material.lt_code}\n}`)
         } else {
             fs_code = fs_code
                 .replace("/* LIGHT_CODE_BEGIN */", "")
                 .replace("/* LIGHT_CODE_END */", "")
+        }
+
+        // detect features
+        conditions = conditions.slice();
+
+        const spatial: { [key: string]: number | boolean } = {
+            uses_alpha: shader_material.fs_code.includes("ALPHA"),
+            uses_alpha_scissor: shader_material.vs_code.includes("ALPHA_SCISSOR") || shader_material.fs_code.includes("ALPHA_SCISSOR") || shader_material.lt_code.includes("ALPHA_SCISSOR"),
+            unshaded: shader_material.render_modes.includes("unshaded"),
+            no_depth_test: shader_material.render_modes.includes("depth_test_disable"),
+            uses_screen_texture: shader_material.fs_code.includes("SCREEN_TEXTURE"),
+            uses_depth_texture: shader_material.vs_code.includes("DEPTH_TEXTURE") || shader_material.fs_code.includes("DEPTH_TEXTURE") || shader_material.lt_code.includes("DEPTH_TEXTURE"),
+            uses_time: shader_material.vs_code.includes("TIME") || shader_material.fs_code.includes("TIME") || shader_material.lt_code.includes("TIME"),
+            uses_tangent: shader_material.vs_code.includes("TANGENT") || shader_material.fs_code.includes("TANGENT") || shader_material.lt_code.includes("TANGENT"),
+        };
+        if (shader_material.render_modes.length) {
+            for (let mode of shader_material.render_modes) {
+                switch (mode) {
+                    case "blend_mix": {
+                        spatial.blend_mode = BLEND_MODE_MIX;
+                    } break;
+                    case "blend_add": {
+                        spatial.blend_mode = BLEND_MODE_ADD;
+                    } break;
+                    case "blend_sub": {
+                        spatial.blend_mode = BLEND_MODE_SUB;
+                    } break;
+                    case "blend_mul": {
+                        spatial.blend_mode = BLEND_MODE_MUL;
+                    } break;
+
+                    case "depth_draw_opaque": {
+                        spatial.depth_draw_mode = DEPTH_DRAW_OPAQUE;
+                    } break;
+                    case "depth_draw_always": {
+                        spatial.depth_draw_mode = DEPTH_DRAW_ALWAYS;
+                    } break;
+                    case "depth_draw_never": {
+                        spatial.depth_draw_mode = DEPTH_DRAW_NEVER;
+                    } break;
+                    case "depth_draw_alpha_prepass": {
+                        spatial.depth_draw_mode = DEPTH_DRAW_ALPHA_PREPASS;
+                    } break;
+
+                    case "cull_front": {
+                        spatial.cull_mode = CULL_MODE_FRONT;
+                    } break;
+                    case "cull_back": {
+                        spatial.cull_mode = CULL_MODE_BACK;
+                    } break;
+                    case "cull_disabled": {
+                        spatial.cull_mode = CULL_MODE_DISABLED;
+                    } break;
+
+                    case "diffuse_lambert": {
+                        // @Incomplete
+                        add_to_condition(conditions, "DIFFUSE_LAMBERT_WRAP");
+                    } break;
+                    case "diffuse_lambert_wrap": {
+                        add_to_condition(conditions, "DIFFUSE_LAMBERT_WRAP");
+                    } break;
+                    case "diffuse_oren_nayar": {
+                        add_to_condition(conditions, "DIFFUSE_OREN_NAYAR");
+                    } break;
+                    case "diffuse_burley": {
+                        add_to_condition(conditions, "DIFFUSE_BURLEY");
+                    } break;
+                    case "diffuse_toon": {
+                        add_to_condition(conditions, "DIFFUSE_TOON");
+                    } break;
+
+                    case "specular_schlick_ggx": {
+                        add_to_condition(conditions, "SPECULAR_SCHLICK_GGX");
+                    } break;
+                    case "specular_blinn": {
+                        add_to_condition(conditions, "SPECULAR_BLINN");
+                    } break;
+                    case "specular_phong": {
+                        add_to_condition(conditions, "SPECULAR_PHONE");
+                    } break;
+                    case "specular_toon": {
+                        add_to_condition(conditions, "SPECULAR_TOON");
+                    } break;
+                    case "specular_disabled": {
+                        // @Incomplete
+                        add_to_condition(conditions, "SPECULAR_SCHLICK_GGX");
+                    } break;
+
+                    case "vertex_lighting": {
+                        // @Incomplete
+                        // add_to_condition(conditions, "USE_VERTEX_LIGHTING");
+                    } break;
+                    case "shadow_to_opacity": {
+                        add_to_condition(conditions, "USE_SHADOW_TO_OPACITY");
+                    } break;
+                }
+            }
+        }
+        if (spatial.uses_screen_texture) {
+            add_to_condition(conditions, "SCREEN_TEXTURE_USED");
+        }
+        if (shader_material.fs_code.includes("SCREEN_UV")) {
+            add_to_condition(conditions, "SCREEN_UV_USED");
+        }
+        if (spatial.uses_depth_texture) {
+            add_to_condition(conditions, "DEPTH_TEXTURE_USED");
         }
 
         let def_code = get_shader_def_code(conditions);
@@ -1899,8 +2014,9 @@ export class RasterizerScene {
             uniforms
         );
         shader.name = shader_material.name;
+        Object.assign(shader.spatial, spatial);
 
-        const material = VSG.storage.material_create(shader, undefined, shader_material.uses_screen_texture);
+        const material = VSG.storage.material_create(shader);
         material.name = shader_material.name;
         material.batchable = false;
         for (let u of shader_material.uniforms) {
