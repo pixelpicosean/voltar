@@ -34,6 +34,7 @@ module.exports = (data) => {
         type: "Shader",
 
         shader_type: shader_state.type,
+        render_modes: shader_state.render_modes,
 
         uniforms: shader_state.uniforms,
 

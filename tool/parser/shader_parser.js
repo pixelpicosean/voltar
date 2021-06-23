@@ -174,8 +174,21 @@ module.exports.parse_shader_code = function parse_shader_code(code) {
     let type_match = code.match(/shader_type\s*(canvas_item|spatial);/);
     let type = type_match ? type_match[1] : "canvas_item";
 
+    let render_modes = [];
+
+    let has_render_mode = code.includes("render_mode");
+    if (has_render_mode) {
+        let render_mode_index = code.indexOf("render_mode");
+        let mode_code = code.substring(render_mode_index + "render_mode".length).trim();
+        mode_code = mode_code.substring(0, mode_code.indexOf(";"));
+        render_modes = mode_code.split(",").map(mode => mode.trim());
+    }
+
     let global_start = 0;
-    if (type_match) {
+    if (has_render_mode) {
+        let render_mode_index = code.indexOf("render_mode");
+        global_start = render_mode_index + code.substr(render_mode_index).indexOf(";") + 1;
+    } else if (type_match) {
         global_start = type_match.index + type_match[0].length;
     }
 
@@ -219,6 +232,8 @@ module.exports.parse_shader_code = function parse_shader_code(code) {
 
     return {
         type,
+
+        render_modes,
 
         global_code,
 
