@@ -1986,6 +1986,9 @@ export class RasterizerScene {
         if (spatial.uses_depth_texture) {
             add_to_condition(conditions, "DEPTH_TEXTURE_USED");
         }
+        if (shader_material.fs_code.includes("NORMALMAP")) {
+            add_to_condition(conditions, "ENABLE_NORMALMAP");
+        }
 
         let def_code = get_shader_def_code(conditions);
         vs_code = `${def_code}\n${vs_code}`;
