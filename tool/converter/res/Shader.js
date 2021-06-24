@@ -59,5 +59,9 @@ module.exports.is_tres = true;
 function translate_godot_function_names(code) {
     return code
         .replace(/\btexture\(/g, "texture2D(")
+
+        .replace(/\btextureLod\(/g, "texture2D(")
+        .replace(/\btextureCubeLod\(/g, "textureCube(")
+
         .replace(/\bFRAGCOORD\b/g, "gl_FragCoord")
 }
