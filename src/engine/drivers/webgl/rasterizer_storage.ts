@@ -1450,6 +1450,7 @@ export class RasterizerStorage {
                 shader.data.uniforms
             );
             shd.name = shader.name;
+            Object.assign(shd.spatial, shader.spatial);
             table[id] = shd;
         }
 
