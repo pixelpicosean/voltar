@@ -540,6 +540,7 @@ const SHADER_DEF = {
 
     USE_LIGHTMAP: def_id++,
     USE_LIGHTING: def_id++,
+    USE_VERTEX_LIGHTING: def_id++,
 
     USE_SHADOW: def_id++,
     USE_SHADOW_TO_OPACITY: def_id++,
@@ -802,7 +803,7 @@ export class RasterizerScene {
             ],
             TIME: [0],
             VIEWPORT_SIZE: [0, 0],
-            SCREEN_PIXEL_SIZE: [0, 0],
+            screen_pixel_size: [0, 0],
 
             LIGHT_SPECULAR: [0],
             LIGHT_COLOR: [0, 0, 0, 0],
@@ -1986,6 +1987,9 @@ export class RasterizerScene {
         if (spatial.uses_depth_texture) {
             add_to_condition(conditions, "DEPTH_TEXTURE_USED");
         }
+        if (spatial.uses_tangent) {
+            add_to_condition(conditions, "ENABLE_TANGENT_INTERP");
+        }
         if (shader_material.fs_code.includes("NORMALMAP")) {
             add_to_condition(conditions, "ENABLE_NORMALMAP");
         }
@@ -2143,20 +2147,29 @@ export class RasterizerScene {
     }
 
     _add_geometry_with_material(p_geometry: Geometry_t, p_instance: Instance_t, p_material: Material_t, p_depth_pass: boolean, p_shadow_pass: boolean) {
-        let has_base_alpha = p_material.shader.spatial.uses_alpha && !p_material.shader.spatial.uses_alpha_scissor;
-        let has_blend_alpha = false;
+        let has_base_alpha = (p_material.shader.spatial.uses_alpha && !p_material.shader.spatial.uses_alpha_scissor) || p_material.shader.spatial.uses_screen_texture || p_material.shader.spatial.uses_depth_texture;
+        let has_blend_alpha = p_material.shader.spatial.blend_mode !== BLEND_MODE_MIX;
         let has_alpha = has_base_alpha || has_blend_alpha;
 
         let mirror = p_instance.mirror;
+
+        if (p_material.shader.spatial.cull_mode === CULL_MODE_DISABLED) {
+            mirror = false;
+        } else if (p_material.shader.spatial.cull_mode === CULL_MODE_FRONT) {
+            mirror = !mirror;
+        }
 
         if (p_material.shader.spatial.uses_screen_texture) {
             this.state.used_screen_texture = true;
         }
 
         if (p_depth_pass) {
-            if (has_blend_alpha || p_material.shader.spatial.uses_depth_texture) {
+            if (has_blend_alpha || p_material.shader.spatial.uses_depth_texture || (has_base_alpha && p_material.shader.spatial.depth_draw_mode !== DEPTH_DRAW_ALPHA_PREPASS)) {
                 return;
             }
+
+            // @Incomplete
+            // if (!p_material.shader.spatial.uses_alpha_scissor && !p_material.shader.spatial.wi)
 
             has_alpha = false;
         }
@@ -2549,7 +2562,7 @@ export class RasterizerScene {
 
                 this.set_uniform_v("TIME", this.storage.frame.time, true, true);
                 this.set_uniform_v("VIEWPORT_SIZE", this.state.viewport_size.as_array(), true, true);
-                this.set_uniform_v("SCREEN_PIXEL_SIZE", this.state.screen_pixel_size.as_array(), true, true);
+                this.set_uniform_v("screen_pixel_size", this.state.screen_pixel_size.as_array(), true, true);
             }
 
             if (rebind_light && light) {
@@ -2620,6 +2633,7 @@ export class RasterizerScene {
         this.set_shader_condition("LIGHT_USE_PSSM4", false);
         this.set_shader_condition("LIGHT_USE_PSSM2", false);
         this.set_shader_condition("LIGHT_USE_PSSM_BLEND", false);
+        this.set_shader_condition("USE_VERTEX_LIGHTING", false);
         this.set_shader_condition("USE_LIGHTMAP", false);
         this.set_shader_condition("FOG_DEPTH_ENABLED", false);
         this.set_shader_condition("FOG_HEIGHT_ENABLED", false);
@@ -3165,13 +3179,19 @@ export class RasterizerScene {
         let shader = this.state.current_shader;
 
         if (shader.spatial.uses_screen_texture && this.storage.frame.current_rt) {
-            this.bind_texture(VSG.config.max_texture_image_units - 4, this.storage.frame.current_rt.copy_screen_effect.gl_color);
-            this.set_uniform_n("SCREEN_TEXTURE", VSG.config.max_texture_image_units - 4, true, true);
+            let tex = p_material.textures["SCREEN_TEXTURE"];
+            if (!tex) {
+                tex = p_material.textures["SCREEN_TEXTURE"] = new Texture_t;
+            }
+            tex.gl_tex = this.storage.frame.current_rt.copy_screen_effect.gl_color;
         }
 
         if (shader.spatial.uses_depth_texture && this.storage.frame.current_rt) {
-            this.bind_texture(VSG.config.max_texture_image_units - 4, this.storage.frame.current_rt.copy_screen_effect.gl_depth);
-            this.set_uniform_n("DEPTH_TEXTURE", VSG.config.max_texture_image_units - 4, true, true);
+            let tex = p_material.textures["DEPTH_TEXTURE"];
+            if (!tex) {
+                tex = p_material.textures["DEPTH_TEXTURE"] = new Texture_t;
+            }
+            tex.gl_tex = this.storage.frame.current_rt.gl_depth;
         }
 
         if (shader.spatial.no_depth_test || shader.spatial.uses_depth_texture) {
