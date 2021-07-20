@@ -426,7 +426,7 @@ export class ProceduralSky extends Sky {
         }
 
         let img = this._generate_sky();
-        VSG.storage.texture_allocate(this.texture, img.width, img.height, 0, PIXEL_FORMAT_RGBA8, TEXTURE_TYPE_2D, { FILTER: true, REPEAT: true });
+        VSG.storage.texture_allocate(this.texture, img.width, img.height, 0, PIXEL_FORMAT_RGBA8, TEXTURE_TYPE_2D, { FILTER: true, REPEAT: 1 });
         VSG.storage.texture_set_data(this.texture, img.data);
         this._radiance_changed();
     }

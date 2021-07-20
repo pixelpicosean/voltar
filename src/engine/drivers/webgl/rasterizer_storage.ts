@@ -165,8 +165,8 @@ export class Texture_t {
     path = "";
     flags = {
         FILTER: false,
-        REPEAT: false,
         MIPMAPS: false,
+        REPEAT: 0,
     };
 
     self() {
@@ -1007,9 +1007,12 @@ export class RasterizerStorage {
             gl.texParameteri(rid.target, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
         }
 
-        if (rid.flags.REPEAT) {
+        if (rid.flags.REPEAT === 1) {
             gl.texParameterf(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
             gl.texParameterf(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
+        } else if (rid.flags.REPEAT === 2) {
+            gl.texParameterf(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.MIRRORED_REPEAT);
+            gl.texParameterf(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.MIRRORED_REPEAT);
         } else {
             gl.texParameterf(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
             gl.texParameterf(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
@@ -1039,9 +1042,12 @@ export class RasterizerStorage {
             gl.texParameteri(rid.target, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
         }
 
-        if (rid.flags.REPEAT) {
+        if (rid.flags.REPEAT === 1) {
             gl.texParameterf(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
             gl.texParameterf(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
+        } else if (rid.flags.REPEAT === 2) {
+            gl.texParameterf(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.MIRRORED_REPEAT);
+            gl.texParameterf(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.MIRRORED_REPEAT);
         } else {
             gl.texParameterf(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
             gl.texParameterf(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
@@ -1083,9 +1089,14 @@ export class RasterizerStorage {
         gl.activeTexture(gl.TEXTURE0);
         gl.bindTexture(rid.target, rid.gl_tex);
 
-        if (rid.flags.REPEAT && rid.target !== gl.TEXTURE_CUBE_MAP) {
-            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
-            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
+        if (rid.flags.REPEAT > 0 && rid.target !== gl.TEXTURE_CUBE_MAP) {
+            if (rid.flags.REPEAT === 1) {
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
+            } else if (rid.flags.REPEAT === 2) {
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.MIRRORED_REPEAT);
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.MIRRORED_REPEAT);
+            }
         } else {
             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);

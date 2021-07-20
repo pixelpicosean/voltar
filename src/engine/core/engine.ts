@@ -13,7 +13,7 @@ import { get_extname } from 'engine/utils/string';
 import { VSG } from 'engine/servers/visual/visual_server_globals';
 
 import { PackedScene } from 'engine/scene/resources/packed_scene';
-import { ImageTexture } from 'engine/scene/resources/texture';
+import { ImageFlags, ImageTexture } from 'engine/scene/resources/texture';
 
 import {
     prepare_for_load,
@@ -227,7 +227,7 @@ export class Engine {
 
             // process preload resources
             // - create textures for standalone images
-            let standalone_image_meta = meta["standalone_images"] as { pack_id: number, images: { key: string, flags: { FILTER?: boolean, REPEAT?: boolean, MIRROR?: boolean } }[] };
+            let standalone_image_meta = meta["standalone_images"] as { pack_id: number, images: { key: string, flags: ImageFlags }[] };
             let image_pack = get_json_data(standalone_image_meta.pack_id) as string[];
             standalone_image_meta.images.forEach(({ key, flags }, i) => {
                 let ext = get_extname(key);

@@ -1,6 +1,6 @@
 import { VObject } from "engine/core/v_object";
 import { get_resource_map } from "engine/registry";
-import { ImageTexture } from "engine/scene/resources/texture";
+import { ImageFlags, ImageTexture } from "engine/scene/resources/texture";
 
 import { LoadTypes } from "./const";
 import { decompress } from "./z";
@@ -120,7 +120,7 @@ export function load_image(url: string, key?: string, load_callback?: (image: HT
     return task.data;
 }
 
-export function load_texture(url: string, key?: string, flags?: { FILTER?: boolean, REPEAT?: boolean, MIPMAPS?: boolean }, load_callback?: (tex: ImageTexture) => void): ImageTexture {
+export function load_texture(url: string, key?: string, flags?: ImageFlags, load_callback?: (tex: ImageTexture) => void): ImageTexture {
     let task: Task<ImageTexture> = new Task;
     task.key = key;
     task.url = url;
@@ -303,7 +303,7 @@ interface Atlas {
     },
 }
 
-export function load_atlas(url: string, flags?: { FILTER?: boolean, REPEAT?: boolean, MIPMAPS?: boolean }): any {
+export function load_atlas(url: string, flags?: ImageFlags): any {
     let resources = get_resource_map();
 
     let atlas_task = create_xhr_task("json", "text", (text: string) => {

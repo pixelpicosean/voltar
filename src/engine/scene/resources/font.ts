@@ -296,8 +296,8 @@ export class DynamicFont extends VObject {
 
         ctx.texture.create_from_image(ctx.canvas, {
             FILTER: true,
-            REPEAT: false,
-            MIPMAP: false,
+            MIPMAPS: false,
+            REPEAT: 0,
         });
 
         return ctx.texture;

@@ -31,8 +31,8 @@ export type RawImageData = Uint8Array | Uint16Array | Float32Array;
 
 export interface ImageFlags {
     FILTER?: boolean;
-    REPEAT?: boolean;
-    MIPMAP?: boolean;
+    MIPMAPS?: boolean;
+    REPEAT?: 0|1|2;
 }
 
 const WHITE = new Color(1, 1, 1, 1);
@@ -40,10 +40,10 @@ const WHITE = new Color(1, 1, 1, 1);
 export class Texture extends Resource {
     get class() { return 'Texture' }
 
-    flags = {
+    flags: ImageFlags = {
         FILTER: false,
-        REPEAT: false,
         MIPMAPS: false,
+        REPEAT: 0,
     };
 
     uvs = [0, 0, 1, 1];

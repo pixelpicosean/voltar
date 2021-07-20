@@ -102,14 +102,17 @@ class ViewportTexture extends Texture {
     get_size() { return this.vp.size }
     has_alpha() { return false }
 
-    set_flags(value: { REPEAT: boolean, FILTER: boolean, MIPMAPS: boolean }) {
+    set_flags(value: { REPEAT: 0|1|2, FILTER: boolean, MIPMAPS: boolean }) {
         Object.assign(this.flags, value);
 
         if (!this.vp) {
             return;
         }
 
-        this.vp.texture_flags = this.flags;
+        this.vp.texture_flags.FILTER = !!this.flags.FILTER;
+        this.vp.texture_flags.MIPMAPS = !!this.flags.MIPMAPS;
+        this.vp.texture_flags.REPEAT = this.flags.REPEAT || 0;
+
         VSG.storage.texture_set_flags(this.vp.texture_rid, this.flags);
     }
 
@@ -215,8 +218,8 @@ export class Viewport extends Node {
     texture_rid = VSG.viewport.viewport_get_texture(this.viewport);
     texture_flags = {
         FILTER: false,
-        REPEAT: false,
         MIPMAPS: false,
+        REPEAT: 0,
     };
 
     usage = USAGE_3D;
