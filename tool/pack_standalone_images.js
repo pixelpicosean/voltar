@@ -54,10 +54,10 @@ module.exports.pack_standalone_images = function () {
             for (let line of import_data) {
                 let match = line.match(/flags\/(\w*)\s*=(true|false|0|1|2)/);
                 if (match && match[1].toUpperCase() in flags) {
-                    if (match[2] !== "true" || match[2] !== "false") {
-                        flags[match[1].toUpperCase()] = parseInt(match[2], 10);
-                    } else {
+                    if (match[2] === "true" || match[2] === "false") {
                         flags[match[1].toUpperCase()] = boolean(match[2]);
+                    } else {
+                        flags[match[1].toUpperCase()] = parseInt(match[2], 10);
                     }
                 }
             }

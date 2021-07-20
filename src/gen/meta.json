@@ -15,7 +15,7 @@
                 "key": "media/aa.png",
                 "flags": {
                     "FILTER": false,
-                    "REPEAT": false,
+                    "REPEAT": 0,
                     "MIPMAPS": false
                 }
             },
@@ -23,7 +23,7 @@
                 "key": "media/palette.png",
                 "flags": {
                     "FILTER": false,
-                    "REPEAT": false,
+                    "REPEAT": 0,
                     "MIPMAPS": false
                 }
             }

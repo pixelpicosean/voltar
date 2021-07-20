@@ -188,6 +188,7 @@
                 "id": 3,
                 "type": "Shader",
                 "shader_type": "canvas_item",
+                "render_modes": [],
                 "uniforms": [],
                 "global_code": "",
                 "vs_code": "",
@@ -8916,7 +8917,8 @@
                                     "z": 0
                                 }
                             ]
-                        }
+                        },
+                        "value_type": "Vector3"
                     },
                     {
                         "type": "value",
@@ -8946,7 +8948,8 @@
                                     "z": 0
                                 }
                             ]
-                        }
+                        },
+                        "value_type": "Vector3"
                     }
                 ]
             },
@@ -8984,7 +8987,8 @@
                                     "z": 0
                                 }
                             ]
-                        }
+                        },
+                        "value_type": "Vector3"
                     }
                 ]
             }
