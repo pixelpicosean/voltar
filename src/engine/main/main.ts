@@ -56,24 +56,26 @@ export const Main = {
         os = new OS;
         os.initialize_core();
 
-        this.engine = new Engine;
+        Main.engine = new Engine;
 
-        this.global = new ProjectSettings(...settings);
-        this.input_map = new InputMap;
+        Main.global = new ProjectSettings(...settings);
+        Main.input_map = new InputMap;
 
-        this.input_map.load_from_globals();
+        Main.input_map.load_from_globals();
 
         message_queue = new MessageQueue;
 
-        os.video_mode.width = this.global.display.width;
-        os.video_mode.height = this.global.display.height;
-        os.video_mode.resizable = this.global.display.resizable;
-        os.screen_orientation = this.global.display.orientation;
+        os.video_mode.width = Main.global.display.width;
+        os.video_mode.height = Main.global.display.height;
+        os.video_mode.resizable = Main.global.display.resizable;
+        os.screen_orientation = Main.global.display.orientation;
 
-        document.title = this.global.application.name;
+        Main.engine.target_fps = Main.global.debug.force_fps;
 
-        window.addEventListener('load', this.setup2, false);
-        document.addEventListener('DOMContentLoaded', this.setup2, false);
+        document.title = Main.global.application.name;
+
+        window.addEventListener('load', Main.setup2, false);
+        document.addEventListener('DOMContentLoaded', Main.setup2, false);
     },
 
     setup2() {
@@ -129,7 +131,27 @@ export const Main = {
         }
     },
 
-    iteration(timestamp: number) {
+    mainloop_callback() {
+        Main.raf_id = requestAnimationFrame(Main.mainloop_callback);
+
+        const current_ticks = OS.get_singleton().get_ticks_usec();
+
+        if (current_ticks < Main.target_ticks) {
+            return;
+        }
+
+        const target_fps = Engine.get_singleton().target_fps;
+        if (target_fps > 0) {
+            if (current_ticks - Main.target_ticks > 1000000) {
+                Main.target_ticks = current_ticks;
+            }
+            Main.target_ticks += Math.floor(1000000 / target_fps);
+        }
+
+        Main.iteration();
+    },
+
+    iteration() {
         stats.begin();
 
         this.iterating++;
@@ -227,12 +249,10 @@ export const Main = {
         this.iterating--;
 
         stats.end();
-
-        this.raf_id = requestAnimationFrame(this.iteration);
     },
 
     start_loop() {
-        this.raf_id = requestAnimationFrame(this.iteration);
+        this.raf_id = requestAnimationFrame(Main.mainloop_callback);
     },
     end_loop() {
         cancelAnimationFrame(this.raf_id);
@@ -240,4 +260,4 @@ export const Main = {
 };
 
 Main.setup2 = Main.setup2.bind(Main);
-Main.iteration = Main.iteration.bind(Main);
+Main.mainloop_callback = Main.mainloop_callback.bind(Main);

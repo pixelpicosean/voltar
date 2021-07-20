@@ -66,6 +66,11 @@ module.exports.convert_project_settings = (project_url) => {
         application.name = string(settings.application['config/name']);
         real_settings.application = application;
     }
+    if (settings.debug) {
+        let debug = {};
+        debug.force_fps = int(settings.debug['settings/fps/force_fps']);
+        real_settings.debug = debug;
+    }
     if (settings.display || settings.rendering) {
         settings.display = settings.display || {};
         settings.rendering = settings.rendering || {};

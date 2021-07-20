@@ -9,10 +9,14 @@ import { KEYS } from "./os/keyboard";
 type Node = import("engine/scene/main/node").Node;
 
 interface ApplicationSettings {
-    name?: string
-    main_scene?: { instance: () => Node }
-    pause_on_blur?: boolean
-    min_update_step?: number
+    name?: string;
+    main_scene?: { instance: () => Node };
+    pause_on_blur?: boolean;
+    min_update_step?: number;
+}
+
+interface DebugSettings {
+    force_fps?: number;
 }
 
 interface DisplaySettings {
@@ -65,6 +69,7 @@ interface LayerMap {
 
 export interface Settings {
     application?: ApplicationSettings;
+    debug?: DebugSettings;
     display?: DisplaySettings;
     physics?: PhysicsSettings;
     input?: InputSettings;
@@ -77,6 +82,9 @@ const DefaultSettings: Settings = {
         main_scene: undefined,
         pause_on_blur: false,
         min_update_step: 1 / 10,
+    },
+    debug: {
+        force_fps: 0,
     },
     display: {
         view: "game",
@@ -128,6 +136,7 @@ export class ProjectSettings {
     static get_singleton() { return singleton }
 
     application: ApplicationSettings;
+    debug: DebugSettings;
     display: DisplaySettings;
     physics: PhysicsSettings;
     input: InputSettings;
@@ -137,6 +146,7 @@ export class ProjectSettings {
         if (!singleton) singleton = this;
 
         this.application = DefaultSettings.application;
+        this.debug = DefaultSettings.debug;
         this.display = DefaultSettings.display;
         this.physics = DefaultSettings.physics;
         this.input = DefaultSettings.input;
