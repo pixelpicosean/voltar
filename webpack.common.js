@@ -49,6 +49,16 @@ module.exports = {
         new CleanWebpackPlugin,
         new HtmlWebpackPlugin({
             template: path.resolve(__dirname, "index.html"),
+            title: (() => {
+                const fs = require("fs");
+                try {
+                    const str = fs.readFileSync(path.resolve(__dirname, "src/gen/project.json"), "utf8");
+                    const proj = JSON.parse(str);
+                    return proj.application.name;
+                } catch (e) {
+                    return "Voltar";
+                }
+            })(),
         }),
     ],
 };
