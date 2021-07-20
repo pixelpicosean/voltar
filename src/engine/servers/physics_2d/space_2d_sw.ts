@@ -77,16 +77,7 @@ const seps = [new Vector2];
  * @param {_RestCallbackData2D} rd
  */
 function _rest_cbk_result(p_point_A: Vector2, p_point_B: Vector2, rd: _RestCallbackData2D) {
-    if (!rd.valid_dir.is_zero()) {
-        if (p_point_A.distance_squared_to(p_point_B) > rd.valid_depth * rd.valid_depth) {
-            return;
-        }
-        if (rd.valid_dir.dot((p_point_A.clone().subtract(p_point_B).normalize())) < Math.PI * 0.25) {
-            return;
-        }
-    }
-
-    const contact_rel = p_point_B.clone().subtract(p_point_A);
+    const contact_rel = _i_rest_cbk_Vector2_1.copy(p_point_B).subtract(p_point_A);
     const len = contact_rel.length();
 
     if (len < rd.min_allowed_depth) {
@@ -97,13 +88,28 @@ function _rest_cbk_result(p_point_A: Vector2, p_point_B: Vector2, rd: _RestCallb
         return;
     }
 
+    const normal = _i_rest_cbk_Vector2_2.copy(contact_rel).scale(1 / len);
+
+    if (!rd.valid_dir.is_zero()) {
+        if (len > rd.valid_depth) {
+            return;
+        }
+
+        if (rd.valid_dir.dot(normal) > -CMP_EPSILON) {
+            return;
+        }
+    }
+
     rd.best_len = len;
     rd.best_contact.copy(p_point_B);
-    rd.best_normal.copy(contact_rel).scale(1 / len);
+    rd.best_normal.copy(normal);
     rd.best_object = rd.object;
     rd.best_shape = rd.shape;
     rd.best_local_shape = rd.local_shape;
 }
+
+const _i_rest_cbk_Vector2_1 = new Vector2;
+const _i_rest_cbk_Vector2_2 = new Vector2;
 
 enum ElapsedTime {
     INTEGRATE_FORCES,
@@ -115,6 +121,15 @@ enum ElapsedTime {
 }
 
 class _RestCallbackData2D {
+    static new() {
+        let inst = pool_rcd.pop();
+        if (!inst) return new _RestCallbackData2D;
+        return inst.reset();
+    }
+    static free(inst: _RestCallbackData2D) {
+        pool_rcd.push(inst);
+    }
+
     object: CollisionObject2DSW = null;
     best_object: CollisionObject2DSW = null;
     local_shape = 0;
@@ -144,8 +159,7 @@ class _RestCallbackData2D {
         return this;
     }
 }
-
-const rcd = new _RestCallbackData2D;
+const pool_rcd: _RestCallbackData2D[] = []
 
 export class Space2DSW {
     elapsed_time: number[] = Array(ElapsedTime.MAX);
@@ -382,7 +396,7 @@ export class Space2DSW {
             r_result.collider_id = null;
             r_result.collider_shape = 0;
         }
-        let body_aabb = Rect2.new();
+        let body_aabb = _i_test_body_motion_Rect2_1.set(0, 0, 0, 0);
 
         let shapes_found = false;
 
@@ -411,7 +425,6 @@ export class Space2DSW {
                 r_result.motion.copy(p_motion);
             }
 
-            Rect2.free(body_aabb);
             return false;
         }
 
@@ -420,15 +433,18 @@ export class Space2DSW {
 
         let excluded_shape_pair_count = 0;
 
-        let separation_margin = Math.min(p_margin, Math.max(0, p_motion.length() - CMP_EPSILON));
+        const motion_length = p_motion.length();
+        const motion_normal = _i_test_body_motion_Vector2_1.copy(p_motion).scale(1 / motion_length);
 
-        let body_transform = p_from.clone();
+        let body_transform = _i_test_body_motion_Transform2_1.copy(p_from);
+
+        let recovered = false;
 
         {
             // STEP 1, FREE BODY IF STUCK
 
             let recover_attempts = 4;
-            let sr = get_sr();
+            const sr = get_sr();
 
             do {
                 cbk.reset();
@@ -456,7 +472,7 @@ export class Space2DSW {
                         continue;
                     }
 
-                    let body_shape_xform = body_transform.clone().append(body_shape.xform);
+                    let body_shape_xform = _i_test_body_motion_Transform2_2.copy(body_transform).append(body_shape.xform);
                     for (let i = 0; i < amount; i++) {
                         let col_obj = this.intersection_query_results[i];
                         let shape_idx = this.intersection_query_subindex_results[i];
@@ -468,14 +484,15 @@ export class Space2DSW {
                             }
                         }
 
-                        let col_obj_shape_xform = col_obj.transform.clone().append(col_obj.shapes[shape_idx].xform);
+                        let col_obj_shape_xform = _i_test_body_motion_Transform2_3.copy(col_obj.transform).append(col_obj.shapes[shape_idx].xform);
 
                         if (col_obj.shapes[shape_idx].one_way_collision) {
-                            let axis = col_obj_shape_xform.get_axis(1).normalize();
-                            cbk.valid_dir.copy(axis);
-                            Vector2.free(axis);
+                            cbk.valid_dir.copy(
+                                col_obj_shape_xform.get_axis(1, _i_test_body_motion_Vector2_2).normalize()
+                            );
 
-                            cbk.valid_depth = Math.max(p_margin, col_obj.shapes[shape_idx].one_way_collision_margin);
+                            const owc_margin = col_obj.shapes[shape_idx].one_way_collision_margin;
+                            cbk.valid_depth = Math.max(owc_margin, p_margin);
                             cbk.invalid_by_dir = 0;
 
                             if (col_obj.type === CollisionObject2DSW$Type.BODY) {
@@ -483,15 +500,13 @@ export class Space2DSW {
                                 if (b.mode === BodyMode.KINEMATIC || b.mode === BodyMode.RIGID) {
                                     // fix for moving platforms (kinematic and dynamic), margin is increased by
                                     // how much it moved in the give direction
-                                    let lv = b.linear_velocity.clone();
+                                    let lv = _i_test_body_motion_Vector2_3.copy(b.linear_velocity);
                                     // compute displacement from linear velocity
                                     let motion = lv.scale(Physics2DDirectBodyStateSW.singleton.step);
                                     let motion_len = motion.length();
                                     motion.normalize();
-                                    let neg_dir = cbk.valid_dir.clone().negate();
+                                    let neg_dir = _i_test_body_motion_Vector2_4.copy(cbk.valid_dir).negate();
                                     cbk.valid_depth += motion_len * Math.max(motion.dot(neg_dir), 0);
-                                    Vector2.free(neg_dir);
-                                    Vector2.free(lv);
                                 }
                             }
                         } else {
@@ -504,7 +519,7 @@ export class Space2DSW {
                         let did_collide = false;
 
                         let against_shape = col_obj.shapes[shape_idx].shape;
-                        if (CollisionSolver2DSW.solve(body_shape.shape, body_shape_xform, Vector2.ZERO, against_shape, col_obj_shape_xform, Vector2.ZERO, cbkres, cbk, null, separation_margin)) {
+                        if (CollisionSolver2DSW.solve(body_shape.shape, body_shape_xform, Vector2.ZERO, against_shape, col_obj_shape_xform, Vector2.ZERO, cbkres, cbk, null, p_margin)) {
                             did_collide = cbk.passed > current_passed; // more passed, so collision actually existed
                         }
 
@@ -521,30 +536,37 @@ export class Space2DSW {
                         if (did_collide) {
                             collided = true;
                         }
-
-                        Transform2D.free(col_obj_shape_xform);
                     }
-                    Transform2D.free(body_shape_xform);
                 }
 
                 if (!collided) {
                     break;
                 }
 
-                let recover_motion = Vector2.new();
+                let recover_motion = _i_test_body_motion_Vector2_5.set(0, 0);
 
                 for (let i = 0; i < cbk.amount; i++) {
-                    recover_motion.add(
-                        (sr[i * 2 + 1].x - sr[i * 2 + 0].x) * 0.4,
-                        (sr[i * 2 + 1].y - sr[i * 2 + 0].y) * 0.4
-                    );
+                    const a = sr[i * 2 + 0];
+                    const b = sr[i * 2 + 1];
+
+                    const n = _i_test_body_motion_Vector2_6.copy(a).subtract(b).normalize();
+                    const d = n.dot(b);
+
+                    const depth = n.dot(_i_test_body_motion_Vector2_7.copy(a).add(recover_motion)) - d;
+                    if (depth > 0) {
+                        recover_motion.subtract(
+                            n.x * depth * 0.4,
+                            n.y * depth * 0.4
+                        );
+                    }
                 }
 
                 if (recover_motion.is_zero()) {
                     collided = false;
-                    Vector2.free(recover_motion);
                     break;
                 }
+
+                recovered = true;
 
                 body_transform.tx += recover_motion.x;
                 body_transform.ty += recover_motion.y;
@@ -553,9 +575,6 @@ export class Space2DSW {
                 body_aabb.y += recover_motion.y;
 
                 recover_attempts--;
-
-                Vector2.free(recover_motion);
-
             } while (recover_attempts);
         }
 
@@ -566,7 +585,7 @@ export class Space2DSW {
         {
             // STEP 2 ATTEMPT MOTION
 
-            let motion_aabb = body_aabb.clone();
+            let motion_aabb = _i_test_body_motion_Rect2_2.copy(body_aabb);
             motion_aabb.x += p_motion.x;
             motion_aabb.y += p_motion.y;
             motion_aabb.merge_with(body_aabb);
@@ -584,7 +603,7 @@ export class Space2DSW {
                     continue;
                 }
 
-                let body_shape_xform = body_transform.clone().append(body_shape.xform);
+                let body_shape_xform = _i_test_body_motion_Transform2_4.copy(body_transform).append(body_shape.xform);
 
                 let stuck = false;
 
@@ -616,37 +635,35 @@ export class Space2DSW {
                         continue;
                     }
 
-                    let col_obj_shape_xform = col_obj.transform.clone().append(against_shape.xform);
+                    let col_obj_shape_xform = _i_test_body_motion_Transform2_5.copy(col_obj.transform).append(against_shape.xform);
                     // test initial overlap, does it collide if going all the way?
                     if (!CollisionSolver2DSW.solve(body_shape.shape, body_shape_xform, p_motion, against_shape.shape, col_obj_shape_xform, Vector2.ZERO, null, null, null, 0)) {
-                        Transform2D.free(col_obj_shape_xform);
                         continue;
                     }
 
                     // test initial overlap
                     if (CollisionSolver2DSW.solve(body_shape.shape, body_shape_xform, Vector2.ZERO, against_shape.shape, col_obj_shape_xform, Vector2.ZERO, null, null, null, 0)) {
                         if (against_shape.one_way_collision) {
-                            Transform2D.free(col_obj_shape_xform);
-                            continue;
+                            const direction = col_obj_shape_xform.get_axis(1, _i_test_body_motion_Vector2_8).normalize();
+                            if (motion_normal.dot(direction) < 0) {
+                                continue;
+                            }
                         }
 
                         stuck = true;
-                        Transform2D.free(col_obj_shape_xform);
                         break;
                     }
 
                     // just do kinematic solving
                     let low = 0.0;
                     let hi = 1.0;
-                    let mnormal = p_motion.normalized();
-                    let motion_s = p_motion.clone();
 
                     for (let k = 0; k < 8; k++) {
                         let ofs = (low + hi) * 0.5;
 
-                        seps[0].copy(mnormal);
-                        motion_s.copy(p_motion).scale(ofs);
-                        let collided = CollisionSolver2DSW.solve(body_shape.shape, body_shape_xform, motion_s, against_shape.shape, col_obj_shape_xform, Vector2.ZERO, null, null, seps, 0);
+                        _i_sep[0].copy(motion_normal);
+                        const motion_ofs = _i_test_body_motion_Vector2_10.copy(p_motion).scale(ofs);
+                        let collided = CollisionSolver2DSW.solve(body_shape.shape, body_shape_xform, motion_ofs, against_shape.shape, col_obj_shape_xform, Vector2.ZERO, null, null, _i_sep, 0);
 
                         if (collided) {
                             hi = ofs;
@@ -656,26 +673,23 @@ export class Space2DSW {
                     }
 
                     if (against_shape.one_way_collision) {
-                        let cd = get_cd();;
-                        cbk.reset();
+                        let cd = get_cd();
+                        const cbk = new CollCbkData;
                         cbk.max = 1;
                         cbk.amount = 0;
                         cbk.passed = 0;
                         cbk.ptr = cd;
-                        let axis = col_obj_shape_xform.get_axis(1).normalize();
-                        cbk.valid_dir.copy(axis);
-                        Vector2.free(axis);
+                        cbk.valid_dir.copy(
+                            col_obj_shape_xform.get_axis(1, _i_test_body_motion_Vector2_11).normalize()
+                        );
 
-                        cbk.valid_depth = Number.MAX_VALUE;
+                        cbk.valid_depth = 10e20;
 
-                        seps[0].copy(mnormal);
+                        _i_sep[0].copy(motion_normal);
 
-                        motion_s.copy(p_motion).scale(hi + this.contact_max_allowed_penetration);
-                        let collided = CollisionSolver2DSW.solve(body_shape.shape, body_shape_xform, motion_s, against_shape.shape, col_obj_shape_xform, Vector2.ZERO, _shape_col_cbk, cbk, seps, 0);
+                        const motion_s = _i_test_body_motion_Vector2_12.copy(p_motion).scale(hi + this.contact_max_allowed_penetration);
+                        let collided = CollisionSolver2DSW.solve(body_shape.shape, body_shape_xform, motion_s, against_shape.shape, col_obj_shape_xform, Vector2.ZERO, _shape_col_cbk, cbk, _i_sep, 0);
                         if (!collided || cbk.amount === 0) {
-                            Vector2.free(motion_s);
-                            Vector2.free(mnormal);
-                            Transform2D.free(col_obj_shape_xform);
                             continue;
                         }
                     }
@@ -684,22 +698,15 @@ export class Space2DSW {
                         best_safe = low;
                         best_unsafe = hi;
                     }
-
-                    Vector2.free(motion_s);
-                    Vector2.free(mnormal);
-                    Transform2D.free(col_obj_shape_xform);
                 }
 
                 if (stuck) {
                     safe = 0.0;
                     unsafe = 0.0;
                     best_shape = body_shape_idx;
-
-                    Transform2D.free(body_shape_xform);
                     break;
                 }
                 if (best_safe === 1) {
-                    Transform2D.free(body_shape_xform);
                     continue;
                 }
                 if (best_safe < safe) {
@@ -707,29 +714,28 @@ export class Space2DSW {
                     unsafe = best_unsafe;
                     best_shape = body_shape_idx;
                 }
-
-                Transform2D.free(body_shape_xform);
             }
-
-            Rect2.free(motion_aabb);
         }
 
         let collided = false;
-        if (safe >= 1) {
-            best_shape = -1; // no best shape with cast, reset to -1
-        }
 
-        {
+        if (recovered || safe < 1) {
+            if (safe >= 1) {
+                best_shape = -1; // no best shape with cast, reset to -1
+            }
+
             // it collided, let's get the reset info in unsafe advance
-            let ugt = body_transform.clone();
+            let ugt = _i_test_body_motion_Transform2_6.copy(body_transform);
             ugt.tx += p_motion.x * unsafe;
             ugt.ty += p_motion.y * unsafe;
 
-            rcd.reset();
+            const rcd = _RestCallbackData2D.new();
             rcd.best_len = 0;
             rcd.best_object = null;
             rcd.best_shape = 0;
-            rcd.min_allowed_depth = this.test_motion_min_contact_depth;
+
+            // Allowed depth can't be lower than motion length, in order to handle contacts at low speed
+            rcd.min_allowed_depth = Math.min(motion_length, this.test_motion_min_contact_depth);
 
             // optimization
             let from_shape = best_shape !== -1 ? best_shape : 0;
@@ -746,7 +752,7 @@ export class Space2DSW {
                     continue;
                 }
 
-                let body_shape_xform = ugt.clone().append(body_shape.xform);
+                let body_shape_xform = _i_test_body_motion_Transform2_7.copy(ugt).append(body_shape.xform);
 
                 body_aabb.x += p_motion.x * unsafe;
                 body_aabb.y += p_motion.y * unsafe;
@@ -777,13 +783,27 @@ export class Space2DSW {
                         continue;
                     }
 
-                    let col_obj_shape_xform = col_obj.transform.clone().append(against_shape.xform);
+                    let col_obj_shape_xform = _i_test_body_motion_Transform2_8.copy(col_obj.transform).append(against_shape.xform);
 
                     if (against_shape.one_way_collision) {
-                        let naxis = col_obj_shape_xform.get_axis(1).normalize();
-                        rcd.valid_dir.copy(naxis);
-                        Vector2.free(naxis);
-                        rcd.valid_depth = 10e20;
+                        rcd.valid_dir.copy(
+                            col_obj_shape_xform.get_axis(1, _i_test_body_motion_Vector2_13).normalize()
+                        );
+
+                        const owc_margin = against_shape.one_way_collision_margin;
+                        rcd.valid_depth = Math.max(owc_margin, p_margin);
+
+                        if (col_obj.type === CollisionObject2DSW$Type.BODY) {
+                            const b = col_obj as Body2DSW;
+                            if (b.mode === BodyMode.KINEMATIC || b.mode === BodyMode.RIGID) {
+                                const lv = _i_test_body_motion_Vector2_14.copy(b.linear_velocity);
+                                const motion = lv.scale(Physics2DDirectBodyStateSW.singleton.step);
+                                const motion_len = motion.length();
+                                motion.normalize();
+                                const neg_dir = _i_test_body_motion_Vector2_15.copy(rcd.valid_dir).negate();
+                                rcd.valid_depth += motion_len * Math.max(motion.dot(neg_dir), 0);
+                            }
+                        }
                     } else {
                         rcd.valid_dir.set(0, 0);
                         rcd.valid_depth = 0;
@@ -794,14 +814,9 @@ export class Space2DSW {
                     rcd.local_shape = j;
                     let sc = CollisionSolver2DSW.solve(body_shape.shape, body_shape_xform, Vector2.ZERO, against_shape.shape, col_obj_shape_xform, Vector2.ZERO, _rest_cbk_result, rcd, null, p_margin);
                     if (!sc) {
-                        Transform2D.free(col_obj_shape_xform);
                         continue;
                     }
-
-                    Transform2D.free(col_obj_shape_xform);
                 }
-
-                Transform2D.free(body_shape_xform);
             }
 
             if (rcd.best_len !== 0) {
@@ -815,10 +830,10 @@ export class Space2DSW {
                     r_result.collider_metadata = rcd.best_object.get_shape_metadata(rcd.best_shape);
 
                     let body: Body2DSW = rcd.best_object as Body2DSW;
-                    let body_origin = body_transform.get_origin();
-                    let from_origin = p_from.get_origin();
+                    let body_origin = body_transform.get_origin(_i_test_body_motion_Vector2_16);
+                    let from_origin = p_from.get_origin(_i_test_body_motion_Vector2_17);
 
-                    let rel_vec = r_result.collision_point.clone().subtract(body_origin);
+                    let rel_vec = _i_test_body_motion_Vector2_18.copy(r_result.collision_point).subtract(body_origin);
                     r_result.collider_velocity.set(
                         -body.angular_velocity * rel_vec.y,
                         body.angular_velocity * rel_vec.x
@@ -827,30 +842,22 @@ export class Space2DSW {
                     r_result.motion.copy(p_motion).scale(safe);
                     r_result.remainder.copy(p_motion).subtract(p_motion.x * safe, p_motion.y * safe);
                     r_result.motion.add(body_origin.subtract(from_origin));
-
-                    Vector2.free(rel_vec);
-                    Vector2.free(from_origin);
-                    Vector2.free(body_origin);
                 }
 
                 collided = true;
             }
 
-            Transform2D.free(ugt);
+            _RestCallbackData2D.free(rcd);
         }
 
         if (!collided && r_result) {
             r_result.motion.copy(p_motion);
             r_result.remainder.set(0, 0);
-            let origin = body_transform.get_origin();
-            let from_origin = p_from.get_origin();
+            let origin = body_transform.get_origin(_i_test_body_motion_Vector2_19);
+            let from_origin = p_from.get_origin(_i_test_body_motion_Vector2_20);
             r_result.motion.add(origin.subtract(from_origin));
-            Vector2.free(from_origin);
-            Vector2.free(origin);
         }
 
-        Transform2D.free(body_transform);
-        Rect2.free(body_aabb);
         return collided;
     }
     test_body_ray_separation(p_body: Body2DSW, p_transform: Transform2D, p_infinite_inertia: boolean, r_recover_motion: Vector2, r_results: SeparationResult[], p_result_max: number, p_margin: number) {
@@ -1086,6 +1093,37 @@ export class Space2DSW {
     }
 }
 
+const _i_test_body_motion_Vector2_1 = new Vector2;
+const _i_test_body_motion_Vector2_2 = new Vector2;
+const _i_test_body_motion_Vector2_3 = new Vector2;
+const _i_test_body_motion_Vector2_4 = new Vector2;
+const _i_test_body_motion_Vector2_5 = new Vector2;
+const _i_test_body_motion_Vector2_6 = new Vector2;
+const _i_test_body_motion_Vector2_7 = new Vector2;
+const _i_test_body_motion_Vector2_8 = new Vector2;
+const _i_test_body_motion_Vector2_10 = new Vector2;
+const _i_test_body_motion_Vector2_11 = new Vector2;
+const _i_test_body_motion_Vector2_12 = new Vector2;
+const _i_test_body_motion_Vector2_13 = new Vector2;
+const _i_test_body_motion_Vector2_14 = new Vector2;
+const _i_test_body_motion_Vector2_15 = new Vector2;
+const _i_test_body_motion_Vector2_16 = new Vector2;
+const _i_test_body_motion_Vector2_17 = new Vector2;
+const _i_test_body_motion_Vector2_18 = new Vector2;
+const _i_test_body_motion_Vector2_19 = new Vector2;
+const _i_test_body_motion_Vector2_20 = new Vector2;
+const _i_sep = [new Vector2];
+const _i_test_body_motion_Rect2_1 = new Rect2;
+const _i_test_body_motion_Rect2_2 = new Rect2;
+const _i_test_body_motion_Transform2_1 = new Transform2D;
+const _i_test_body_motion_Transform2_2 = new Transform2D;
+const _i_test_body_motion_Transform2_3 = new Transform2D;
+const _i_test_body_motion_Transform2_4 = new Transform2D;
+const _i_test_body_motion_Transform2_5 = new Transform2D;
+const _i_test_body_motion_Transform2_6 = new Transform2D;
+const _i_test_body_motion_Transform2_7 = new Transform2D;
+const _i_test_body_motion_Transform2_8 = new Transform2D;
+
 export class RayResult {
     position = new Vector2;
     normal = new Vector2;
@@ -1155,25 +1193,25 @@ export class Physics2DDirectSpaceStateSW {
     _free() { }
 
     intersect_ray(p_from: Vector2, p_to: Vector2, r_result: RayResult, p_exclude: Set<CollisionObject2DSW> = new Set, p_collision_mask: number = 0xFFFFFFFF, p_collide_with_bodies: boolean = true, p_collide_with_areas: boolean = false) {
-        let begin = p_from.clone();
-        let end = p_to.clone();
-        let normal = end.clone().subtract(begin).normalize();
+        let begin = _i_intersect_ray_Vector2_1.copy(p_from);
+        let end = _i_intersect_ray_Vector2_2.copy(p_to);
+        let normal = _i_intersect_ray_Vector2_3.copy(end).subtract(begin).normalize();
 
         let amount = this.space.broadphase.cull_segment(begin, end, this.space.intersection_query_results, INTERSECTION_QUERY_MAX, this.space.intersection_query_subindex_results);
 
         let collided = false;
-        let res_point = Vector2.new();
-        let res_normal = Vector2.new();
+        let res_point = _i_intersect_ray_Vector2_4.set(0, 0);
+        let res_normal = _i_intersect_ray_Vector2_5.set(0, 0);
         let res_shape = 0;
         let res_obj: CollisionObject2DSW = null;
         let min_d = 1e10;
 
-        let inv_xform = Transform2D.new();
-        let local_from = Vector2.new();
-        let local_to = Vector2.new();
-        let shape_point = Vector2.new();
-        let shape_normal = Vector2.new();
-        let xform = Transform2D.new();
+        let inv_xform = _i_intersect_ray_Transform2D_1.identity();
+        let local_from = _i_intersect_ray_Vector2_6.set(0, 0);
+        let local_to = _i_intersect_ray_Vector2_7.set(0, 0);
+        let shape_point = _i_intersect_ray_Vector2_8.set(0, 0);
+        let shape_normal = _i_intersect_ray_Vector2_9.set(0, 0);
+        let xform = _i_intersect_ray_Transform2D_2.identity();
         for (let i = 0; i < amount; i++) {
             if (!_can_collide_with(this.space.intersection_query_results[i], p_collision_mask, p_collide_with_bodies, p_collide_with_areas)) {
                 continue;
@@ -1212,21 +1250,8 @@ export class Physics2DDirectSpaceStateSW {
                 }
             }
         }
-        Transform2D.free(xform);
-        Vector2.free(shape_normal);
-        Vector2.free(shape_point);
-        Vector2.free(local_to);
-        Vector2.free(local_from);
-        Transform2D.free(inv_xform);
 
         if (!collided) {
-            Vector2.free(res_point);
-            Vector2.free(res_normal);
-
-            Vector2.free(normal);
-            Vector2.free(end);
-            Vector2.free(begin);
-
             return false;
         }
 
@@ -1236,13 +1261,6 @@ export class Physics2DDirectSpaceStateSW {
         r_result.position.copy(res_point);
         r_result.rid = res_obj.self;
         r_result.shape = res_shape;
-
-        Vector2.free(res_point);
-        Vector2.free(res_normal);
-
-        Vector2.free(normal);
-        Vector2.free(end);
-        Vector2.free(begin);
 
         return true;
     }
@@ -1254,7 +1272,7 @@ export class Physics2DDirectSpaceStateSW {
     intersect_shape(p_shape: Shape2DSW, p_xform: Transform2D, p_motion: Vector2, p_margin: number, r_result: ShapeResult[], p_result_max: number, p_exclude: CollisionObject2DSW[] = undefined, p_collision_mask: number = 0xFFFFFFFF, p_collide_with_bodies: boolean = true, p_collide_with_areas: boolean = false) {
         if (p_result_max <= 0) return 0;
 
-        let aabb = p_xform.xform_rect(p_shape.aabb);
+        let aabb = p_xform.xform_rect(p_shape.aabb, _i_intersect_shape_Rect2_1);
         aabb.grow_by(p_margin);
 
         let amount = this.space.broadphase.cull_aabb(aabb, this.space.intersection_query_results, INTERSECTION_QUERY_MAX, this.space.intersection_query_subindex_results);
@@ -1285,16 +1303,13 @@ export class Physics2DDirectSpaceStateSW {
             cc++;
         }
 
-        Rect2.free(aabb);
-
         return cc;
     }
 
     cast_motion(p_shape: Shape2DSW, p_xform: Transform2D, p_motion: Vector2, p_margin: number, p_closest: { safe: number, unsafe: number }, p_result_max: number, p_exclude: CollisionObject2DSW[] = undefined, p_collision_mask: number = 0xFFFFFFFF, p_collide_with_bodies: boolean = true, p_collide_with_areas: boolean = false) {
-        let aabb = p_xform.xform_rect(p_shape.aabb);
-        let ext = Rect2.new(aabb.x + p_motion.x, aabb.y + p_motion.y, aabb.width, aabb.height);
+        let aabb = p_xform.xform_rect(p_shape.aabb, _i_cast_motion_Rect2_1);
+        let ext = _i_cast_motion_Rect2_2.set(aabb.x + p_motion.x, aabb.y + p_motion.y, aabb.width, aabb.height);
         aabb.merge_with(ext);
-        Rect2.free(ext);
         aabb.grow_by(p_margin);
 
         let amount = this.space.broadphase.cull_aabb(aabb, this.space.intersection_query_results, INTERSECTION_QUERY_MAX, this.space.intersection_query_subindex_results);
@@ -1302,7 +1317,7 @@ export class Physics2DDirectSpaceStateSW {
         let best_safe = 1;
         let best_unsafe = 1;
 
-        let col_obj_xform = Transform2D.new();
+        let col_obj_xform = _i_cast_motion_Transform2D_1.identity();
         for (let i = 0; i < amount; i++) {
             if (!_can_collide_with(this.space.intersection_query_results[i], p_collision_mask, p_collide_with_bodies, p_collide_with_areas)) {
                 continue;
@@ -1321,17 +1336,14 @@ export class Physics2DDirectSpaceStateSW {
             }
 
             if (CollisionSolver2DSW.solve(p_shape, p_xform, Vector2.ZERO, col_obj.get_shape(shape_idx), col_obj_xform, Vector2.ZERO, null, null, null, p_margin)) {
-                Transform2D.free(col_obj_xform);
-
-                Rect2.free(aabb);
                 return false;
             }
 
             let low = 0;
             let hi = 1;
-            let mnormal = p_motion.normalized();
+            let mnormal = _i_cast_motion_Vector2_1.copy(p_motion).normalize();
 
-            let motion_with_ofs = Vector2.new();
+            let motion_with_ofs = _i_cast_motion_Vector2_2.set(0, 0);
             for (let j = 0; j < 8; j++) {
                 let ofs = (low + hi) * 0.5;
 
@@ -1345,21 +1357,15 @@ export class Physics2DDirectSpaceStateSW {
                     low = ofs;
                 }
             }
-            Vector2.free(motion_with_ofs);
-
-            Vector2.free(mnormal);
 
             if (low < best_safe) {
                 best_safe = low;
                 best_unsafe = hi;
             }
         }
-        Transform2D.free(col_obj_xform);
 
         p_closest.safe = best_safe;
         p_closest.unsafe = best_unsafe;
-
-        Rect2.free(aabb);
 
         return true;
     }
@@ -1367,10 +1373,9 @@ export class Physics2DDirectSpaceStateSW {
     collide_shape(p_shape: Shape2DSW, p_shape_xform: Transform2D, p_motion: Vector2, p_margin: number, r_results: Vector2[], p_result_max: number, r_result: { count: number }, p_exclude: CollisionObject2DSW[] = undefined, p_collision_mask: number = 0xFFFFFFFF, p_collide_with_bodies: boolean = true, p_collide_with_areas: boolean = false) {
         if (p_result_max <= 0) return 0;
 
-        let aabb = p_shape_xform.xform_rect(p_shape.aabb);
-        let ext = Rect2.new(aabb.x + p_motion.x, aabb.y + p_motion.y, aabb.width, aabb.height);
+        let aabb = p_shape_xform.xform_rect(p_shape.aabb, _i_collide_shape_Rect2_1);
+        let ext = _i_collide_shape_Rect2_2.set(aabb.x + p_motion.x, aabb.y + p_motion.y, aabb.width, aabb.height);
         aabb.merge_with(ext);
-        Rect2.free(ext);
         aabb.grow_by(p_margin);
 
         let amount = this.space.broadphase.cull_aabb(aabb, this.space.intersection_query_results, INTERSECTION_QUERY_MAX, this.space.intersection_query_subindex_results);
@@ -1400,30 +1405,26 @@ export class Physics2DDirectSpaceStateSW {
             cbk.valid_dir.set(0, 0);
             cbk.valid_depth = 0;
 
-            let local_xform = col_obj.transform.clone().append(col_obj.get_shape_transform(shape_idx));
+            let local_xform = _i_collide_shape_Transform2D_1.copy(col_obj.transform).append(col_obj.get_shape_transform(shape_idx));
             if (CollisionSolver2DSW.solve(p_shape, p_shape_xform, p_motion, col_obj.get_shape(shape_idx), local_xform, Vector2.ZERO, cbkres, cbk, null, p_margin)) {
                 collided = cbk.amount > 0;
             }
-            Transform2D.free(local_xform);
         }
 
         r_result.count = cbk.amount;
-
-        Rect2.free(aabb);
 
         return collided;
     }
 
     rest_info(p_shape: Shape2DSW, p_shape_xform: Transform2D, p_motion: Vector2, p_margin: number, r_info: ShapeRestInfo, p_exclude: CollisionObject2DSW[] = undefined, p_collision_mask: number = 0xFFFFFFFF, p_collide_with_bodies: boolean = true, p_collide_with_areas: boolean = false) {
-        let aabb = p_shape_xform.xform_rect(p_shape.aabb);
-        let ext = Rect2.new(aabb.x + p_motion.x, aabb.y + p_motion.y, aabb.width, aabb.height);
+        let aabb = p_shape_xform.xform_rect(p_shape.aabb, _i_rest_info_Rect2_1);
+        let ext = _i_rest_info_Rect2_2.set(aabb.x + p_motion.x, aabb.y + p_motion.y, aabb.width, aabb.height);
         aabb.merge_with(ext);
-        Rect2.free(ext);
         aabb.grow_by(p_margin);
 
         let amount = this.space.broadphase.cull_aabb(aabb, this.space.intersection_query_results, INTERSECTION_QUERY_MAX, this.space.intersection_query_subindex_results);
 
-        rcd.reset();
+        const rcd = _RestCallbackData2D.new();
         rcd.best_len = 0;
         rcd.best_object = null;
         rcd.best_shape = 0;
@@ -1447,16 +1448,14 @@ export class Physics2DDirectSpaceStateSW {
             rcd.shape = shape_idx;
             rcd.local_shape = 0;
 
-            let local_xform = col_obj.transform.clone().append(col_obj.get_shape_transform(shape_idx));
+            let local_xform = _i_rest_info_Transform2D_1.copy(col_obj.transform).append(col_obj.get_shape_transform(shape_idx));
             let sc = CollisionSolver2DSW.solve(p_shape, p_shape_xform, p_motion, col_obj.get_shape(shape_idx), local_xform, Vector2.ZERO, _rest_cbk_result, rcd, null, p_margin);
-            Transform2D.free(local_xform);
             if (!sc) {
                 continue;
             }
         }
 
         if (rcd.best_len === 0 || !rcd.best_object) {
-            Rect2.free(aabb);
             return false;
         }
 
@@ -1468,19 +1467,17 @@ export class Physics2DDirectSpaceStateSW {
         r_info.metadata = rcd.best_object.get_shape_metadata(rcd.best_shape);
         if (rcd.best_object.type === CollisionObject2DSW$Type.BODY) {
             let body: Body2DSW = rcd.best_object as Body2DSW;
-            let origin = body.transform.get_origin();
-            let rel_vec = r_info.point.clone().subtract(origin);
+            let origin = body.transform.get_origin(_i_rest_info_Vector2_1);
+            let rel_vec = _i_rest_info_Vector2_2.copy(r_info.point).subtract(origin);
             r_info.linear_velocity.set(
                 -body.angular_velocity * rel_vec.y,
                 body.angular_velocity * rel_vec.x
             ).add(body.linear_velocity);
-            Vector2.free(rel_vec);
-            Vector2.free(origin);
         } else {
             r_info.linear_velocity.set(0, 0);
         }
 
-        Rect2.free(aabb);
+        _RestCallbackData2D.free(rcd);
 
         return true;
     }
@@ -1490,7 +1487,7 @@ export class Physics2DDirectSpaceStateSW {
             return 0;
         }
 
-        let aabb = Rect2.new(
+        let aabb = _i_intersect_point_impl_Rect2_1.set(
             p_point.x - 0.00001,
             p_point.y - 0.00001,
             0.00002,
@@ -1503,7 +1500,7 @@ export class Physics2DDirectSpaceStateSW {
 
         let cc = 0;
 
-        let local_point = Vector2.new();
+        let local_point = _i_intersect_point_impl_Vector2_1.set(0, 0);
         for (let i = 0; i < amount; i++) {
             if (!_can_collide_with(space.intersection_query_results[i], p_collision_mask, p_collide_with_bodies, p_collide_with_areas)) {
                 continue;
@@ -1527,10 +1524,9 @@ export class Physics2DDirectSpaceStateSW {
 
             let shape = col_obj.get_shape(shape_idx);
 
-            let combined_xform = col_obj.transform.clone().append(col_obj.get_shape_transform(shape_idx));
+            let combined_xform = _i_intersect_point_impl_Transform2D_1.copy(col_obj.transform).append(col_obj.get_shape_transform(shape_idx));
             combined_xform.affine_inverse()
                 .xform(p_point, local_point);
-            Transform2D.free(combined_xform);
 
             if (!shape.contains_point(local_point)) {
                 continue;
@@ -1547,9 +1543,6 @@ export class Physics2DDirectSpaceStateSW {
 
             cc++;
         }
-        Vector2.free(local_point);
-
-        Rect2.free(aabb);
 
         return cc;
     }
@@ -1570,3 +1563,37 @@ function _can_collide_with(p_object: CollisionObject2DSW, p_collision_mask: numb
 
     return true;
 }
+
+const _i_intersect_ray_Vector2_1 = new Vector2;
+const _i_intersect_ray_Vector2_2 = new Vector2;
+const _i_intersect_ray_Vector2_3 = new Vector2;
+const _i_intersect_ray_Vector2_4 = new Vector2;
+const _i_intersect_ray_Vector2_5 = new Vector2;
+const _i_intersect_ray_Vector2_6 = new Vector2;
+const _i_intersect_ray_Vector2_7 = new Vector2;
+const _i_intersect_ray_Vector2_8 = new Vector2;
+const _i_intersect_ray_Vector2_9 = new Vector2;
+const _i_intersect_ray_Transform2D_1 = new Transform2D;
+const _i_intersect_ray_Transform2D_2 = new Transform2D;
+
+const _i_intersect_shape_Rect2_1 = new Rect2;
+
+const _i_cast_motion_Vector2_1 = new Vector2;
+const _i_cast_motion_Vector2_2 = new Vector2;
+const _i_cast_motion_Rect2_1 = new Rect2;
+const _i_cast_motion_Rect2_2 = new Rect2;
+const _i_cast_motion_Transform2D_1 = new Transform2D;
+
+const _i_collide_shape_Rect2_1 = new Rect2;
+const _i_collide_shape_Rect2_2 = new Rect2;
+const _i_collide_shape_Transform2D_1 = new Transform2D;
+
+const _i_rest_info_Vector2_1 = new Vector2;
+const _i_rest_info_Vector2_2 = new Vector2;
+const _i_rest_info_Rect2_1 = new Rect2;
+const _i_rest_info_Rect2_2 = new Rect2;
+const _i_rest_info_Transform2D_1 = new Transform2D;
+
+const _i_intersect_point_impl_Vector2_1 = new Vector2;
+const _i_intersect_point_impl_Rect2_1 = new Rect2;
+const _i_intersect_point_impl_Transform2D_1 = new Transform2D;

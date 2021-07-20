@@ -1,18 +1,12 @@
 import { Vector2 } from "engine/core/math/vector2";
-import { Rect2 } from "engine/core/math/rect2";
-import { Transform2D } from "engine/core/math/transform_2d";
 
 import {
-    INTERSECTION_QUERY_MAX,
     CollisionObject2DSW$Type,
-    BodyState,
 } from "engine/scene/2d/const";
 import { Node2D } from "engine/scene/2d/node_2d";
+import { CMP_EPSILON } from "engine/core/math/math_defs";
 
-type Space2DSW = import("./space_2d_sw").Space2DSW;
-type Body2DSW = import("./body_2d_sw").Body2DSW;
 type CollisionObject2DSW = import("./collision_object_2d_sw").CollisionObject2DSW;
-type Shape2DSW = import("./shape_2d_sw").Shape2DSW;
 
 export class MotionResult {
     motion = new Vector2;
@@ -64,21 +58,6 @@ export class CollCbkData {
     }
 }
 
-function _can_collide_with(p_object: CollisionObject2DSW, p_collision_mask: number, p_collide_with_bodies: boolean, p_collide_with_areas: boolean) {
-    if (!(p_object.collision_layer & p_collision_mask)) {
-        return false;
-    }
-
-    if (p_object.type === CollisionObject2DSW$Type.AREA && !p_collide_with_areas) {
-        return false;
-    }
-    if (p_object.type === CollisionObject2DSW$Type.BODY && !p_collide_with_bodies) {
-        return false;
-    }
-
-    return true;
-}
-
 export class SeparationResult {
     collision_depth = 0;
     collision_point = new Vector2;
@@ -118,21 +97,29 @@ export function _shape_col_cbk(p_point_A: Vector2, p_point_B: Vector2, p_userdat
         return;
     }
 
-    if (!cbk.valid_dir.is_zero()) {
-        if (p_point_A.distance_squared_to(p_point_B) > cbk.valid_depth * cbk.valid_depth) {
-            cbk.invalid_by_dir++;
-            return;
-        }
-        const rel_dir = p_point_A.clone().subtract(p_point_B).normalize();
+    const rel_dir = _i_shape_col_cbk_Vector2_1.copy(p_point_A).subtract(p_point_B);
+    const rel_dir_n = _i_shape_col_cbk_Vector2_2.copy(rel_dir).normalize();
+    const rel_length2 = rel_dir.length_squared();
 
-        if (cbk.valid_dir.dot(rel_dir) < 0.7071) { // sqrt(2) / 2 - 45 degrees
-            cbk.invalid_by_dir++;
-            return;
+    if (!cbk.valid_dir.is_zero()) {
+        if (cbk.valid_depth < 10e20) {
+            if (
+                rel_length2 > cbk.valid_depth * cbk.valid_depth
+                ||
+                (rel_length2 > CMP_EPSILON && cbk.valid_dir.dot(rel_dir_n) < CMP_EPSILON)
+            ) {
+                cbk.invalid_by_dir++;
+                return;
+            }
+        } else {
+            if (rel_length2 > 0 && cbk.valid_dir.dot(rel_dir_n) < CMP_EPSILON) {
+                return;
+            }
         }
     }
 
     if (cbk.amount === cbk.max) {
-        let min_depth = Number.MAX_VALUE;
+        let min_depth = 1e20;
         let min_depth_idx = 0;
         for (let i = 0; i < cbk.amount; i++) {
             const d = cbk.ptr[i * 2 + 0].distance_squared_to(cbk.ptr[i * 2 + 1]);
@@ -142,8 +129,7 @@ export function _shape_col_cbk(p_point_A: Vector2, p_point_B: Vector2, p_userdat
             }
         }
 
-        let d = p_point_A.distance_squared_to(p_point_B);
-        if (d < min_depth) {
+        if (rel_length2 < min_depth) {
             return;
         }
         cbk.ptr[min_depth_idx * 2 + 0].copy(p_point_A);
@@ -156,3 +142,6 @@ export function _shape_col_cbk(p_point_A: Vector2, p_point_B: Vector2, p_userdat
         cbk.passed++;
     }
 }
+
+const _i_shape_col_cbk_Vector2_1 = new Vector2;
+const _i_shape_col_cbk_Vector2_2 = new Vector2;

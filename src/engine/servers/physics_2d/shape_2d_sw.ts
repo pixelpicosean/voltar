@@ -79,10 +79,12 @@ export class Shape2DSW {
     project_range_castv(p_cast: Vector2, p_normal: Vector2, p_transform: Transform2D, r_result: { min: number; max: number; }): { min: number; max: number; } {
         return null;
     }
-    get_support(p_normal: Vector2): Vector2 {
+    get_support(p_normal: Vector2, r_out?: Vector2): Vector2 {
+        if (!r_out) r_out = Vector2.new();
+
         let res = get_support_vec2();
         this.get_supports(p_normal, res, 0);
-        return res[0].clone();
+        return r_out.copy(res[0]);
     }
     get_supports(p_normal: Vector2, p_supports: Vector2[], r_amount: number): number {
         return 0;
@@ -135,7 +137,7 @@ export class Shape2DSW {
     }
 
     get_supports_transformed_cast(p_cast: Vector2, p_normal: Vector2, p_xform: Transform2D, r_supports: Vector2[], r_amount: number): number {
-        let inv_normal = p_xform.xform_inv(p_normal).normalize();
+        let inv_normal = p_xform.basis_xform_inv(p_normal, _i_g_s_t_c_Vector2_1).normalize();
 
         r_amount = this.get_supports(inv_normal, r_supports, r_amount);
         for (let i = 0; i < r_amount; i++) {
@@ -143,32 +145,28 @@ export class Shape2DSW {
         }
 
         if (r_amount === 1) {
-            let cast_n = p_cast.normalized();
+            let cast_n = _i_g_s_t_c_Vector2_2.copy(p_cast).normalize();
             if (Math.abs(p_normal.dot(cast_n)) < (1 - _SEGMENT_IS_VALID_SUPPORT_THRESHOLD)) {
                 r_amount = 2;
                 r_supports[1].copy(r_supports[0]).add(p_cast);
             } else if (p_cast.dot(p_normal) > 0) {
                 r_supports[0].add(p_cast);
             }
-            Vector2.free(cast_n);
         } else {
-            let cast_n = p_cast.normalized();
+            let cast_n = _i_g_s_t_c_Vector2_2.copy(p_cast).normalize();
             if (Math.abs(p_normal.dot(cast_n)) < (1 - _SEGMENT_IS_VALID_SUPPORT_THRESHOLD)) {
-                let s_1_minus_0 = r_supports[1].clone().subtract(r_supports[0]);
+                let s_1_minus_0 = _i_g_s_t_c_Vector2_3.copy(r_supports[1]).subtract(r_supports[0]);
                 if (s_1_minus_0.dot(p_cast) > 0) {
                     r_supports[1].add(p_cast);
                 } else {
                     r_supports[0].add(p_cast);
                 }
-                Vector2.free(s_1_minus_0);
             } else if (p_cast.dot(p_normal) > 0) {
                 r_supports[0].add(p_cast);
                 r_supports[1].add(p_cast);
             }
-            Vector2.free(cast_n);
         }
 
-        Vector2.free(inv_normal);
         return r_amount;
     }
 
@@ -180,9 +178,9 @@ export class Shape2DSW {
      * @return {{min: number, max: number}}
      */
     __default_project_range_cast(p_cast: Vector2, p_normal: Vector2, p_transform: Transform2D, r_result: { min: number; max: number; }): { min: number; max: number; } {
-        const res_a = { min: 0, max: 0 };
-        const res_b = { min: 0, max: 0 };
-        const ofsb = p_transform.clone().translate(p_cast.x, p_cast.y);
+        const ofsb = _i_d_p_r_c_Transform2D_1.copy(p_transform).translate(p_cast.x, p_cast.y);
+        res_a.min = res_a.max = 0;
+        res_b.min = res_b.max = 0;
         // @ts-ignore
         this.project_range(p_normal, p_transform, res_a);
         // @ts-ignore
@@ -210,15 +208,12 @@ export class SegmentShape2DSW extends Shape2DSW {
         this.normal.copy(p_normal);
     }
 
-    /**
-     * Returns a new Vector2
-     */
-    get_xformed_normal(p_xform: Transform2D) {
-        const aa = p_xform.xform(this.a);
-        const bb = p_xform.xform(this.b);
-        const res = bb.subtract(aa).normalize().tangent();
-        Vector2.free(aa);
-        Vector2.free(bb);
+    get_xformed_normal(p_xform: Transform2D, r_out?: Vector2) {
+        if (!r_out) r_out = Vector2.new();
+
+        const aa = p_xform.xform(this.a, _i_g_x_n_Vector2_1);
+        const bb = p_xform.xform(this.b, _i_g_x_n_Vector2_2);
+        const res = bb.subtract(aa).normalize().tangent(r_out);
         return res;
     }
 
@@ -232,14 +227,13 @@ export class SegmentShape2DSW extends Shape2DSW {
             return 2;
         }
 
-        let sub = this.b.clone().subtract(this.a);
+        let sub = _i_g_s_Vector2_1.copy(this.b).subtract(this.a);
         let dp = p_normal.dot(sub);
         if (dp > 0) {
             r_supports[0].copy(this.b);
         } else {
             r_supports[0].copy(this.a);
         }
-        Vector2.free(sub);
         return 1;
     }
 
@@ -269,15 +263,16 @@ export class SegmentShape2DSW extends Shape2DSW {
      * @returns {number}
      */
     get_moment_of_inertia(p_mass: number, p_scale: Vector2): number {
-        const s = [this.a.clone().multiply(p_scale), this.b.clone().multiply(p_scale)];
+        const s = [
+            _i_g_m_o_i_Vector2_1.copy(this.a).multiply(p_scale),
+            _i_g_m_o_i_Vector2_2.copy(this.b).multiply(p_scale),
+        ];
 
         const l = s[1].distance_to(s[0]);
         const ofs = s[0].add(s[1]).scale(0.5);
 
         const len2 = ofs.length_squared();
 
-        Vector2.free(s[0]);
-        Vector2.free(s[1]);
         return p_mass * (l * l / 12 + len2);
     }
 
@@ -287,11 +282,11 @@ export class SegmentShape2DSW extends Shape2DSW {
     set_data(p_data: Rect2) {
         this.a.set(p_data.x, p_data.y);
         this.b.set(p_data.width, p_data.height);
-        const sub = this.b.clone().subtract(this.a);
-        const n = sub.tangent();
+        const sub = _i_s_d_Vector2_1.copy(this.b).subtract(this.a);
+        const n = sub.tangent(_i_s_d_Vector2_2);
         this.normal.copy(n);
 
-        const aabb = Rect2.new(this.a.x, this.a.y);
+        const aabb = _i_s_d_Rect2_1.set(this.a.x, this.a.y, 0, 0);
         aabb.expand_to(this.b);
         if (aabb.width === 0) {
             aabb.width = 0.001;
@@ -300,10 +295,6 @@ export class SegmentShape2DSW extends Shape2DSW {
             aabb.height = 0.001;
         }
         this.configure(aabb.x, aabb.y, aabb.width, aabb.height);
-
-        Vector2.free(sub);
-        Vector2.free(n);
-        Rect2.free(aabb);
     }
 
     /**
@@ -314,16 +305,13 @@ export class SegmentShape2DSW extends Shape2DSW {
      */
     project_range(p_normal: Vector2, p_transform: Transform2D, r_result: { min: number; max: number; }): { min: number; max: number; } {
         // real large
-        const aa = p_transform.xform(this.a);
-        const bb = p_transform.xform(this.b);
+        const aa = p_transform.xform(this.a, _i_p_r_Vector2_1);
+        const bb = p_transform.xform(this.b, _i_p_r_Vector2_2);
         r_result.max = p_normal.dot(aa);
         r_result.min = p_normal.dot(bb);
         if (r_result.max < r_result.min) {
             let tmp = r_result.max; r_result.max = r_result.min; r_result.min = tmp;
         }
-
-        Vector2.free(aa);
-        Vector2.free(bb);
         return r_result;
     }
 }
@@ -351,15 +339,14 @@ export class RayShape2DSW extends Shape2DSW {
      */
     project_rangev(p_normal: Vector2, p_transform: Transform2D, r_result: { min: number; max: number; }): { min: number; max: number; } {
         // real large
-        const vec = Vector2.new(0, this.length);
+        const vec = _i_p_rv_Vector2_1.set(0, this.length);
 
-        const origin = p_transform.get_origin();
+        const origin = p_transform.get_origin(_i_p_rv_Vector2_2);
         r_result.max = p_normal.dot(origin);
         r_result.min = p_normal.dot(p_transform.xform(vec, vec));
         if (r_result.max < r_result.min) {
             let tmp = r_result.max; r_result.max = r_result.min; r_result.min = tmp;
         }
-        Vector2.free(origin);
 
         return r_result;
     }
@@ -413,16 +400,13 @@ export class RayShape2DSW extends Shape2DSW {
      */
     project_range(p_normal: Vector2, p_transform: Transform2D, r_result: { min: number; max: number; }): { min: number; max: number; } {
         // real large
-        const vec = Vector2.new(0, this.length);
-        const origin = p_transform.get_origin();
+        const vec = _i_rs_p_r_Vector2_1.set(0, this.length);
+        const origin = p_transform.get_origin(_i_rs_p_r_Vector2_2);
         r_result.max = p_normal.dot(origin);
         r_result.min = p_normal.dot(p_transform.xform(vec, vec));
         if (r_result.max < r_result.min) {
             let tmp = r_result.max; r_result.max = r_result.min; r_result.min = tmp;
         }
-
-        Vector2.free(origin);
-        Vector2.free(vec);
         return r_result;
     }
 }
@@ -460,7 +444,7 @@ export class CircleShape2DSW extends Shape2DSW {
      * @returns {boolean}
      */
     intersect_segment(p_begin: Vector2, p_end: Vector2, r_point: Vector2, r_normal: Vector2): boolean {
-        const line_vec = p_end.clone().subtract(p_begin);
+        const line_vec = _i_i_s_Vector2_1.copy(p_end).subtract(p_begin);
 
         const a = line_vec.dot(line_vec);
         const b = 2 * p_begin.dot(line_vec);
@@ -481,7 +465,6 @@ export class CircleShape2DSW extends Shape2DSW {
         r_point.copy(p_begin).add(line_vec.x * res, line_vec.y * res);
         r_normal.copy(r_point).normalize();
 
-        Vector2.free(line_vec);
         return true;
     }
     /**
@@ -505,20 +488,17 @@ export class CircleShape2DSW extends Shape2DSW {
      * @return {{min: number, max: number}}
      */
     project_range(p_normal: Vector2, p_transform: Transform2D, r_result: { min: number; max: number; }): { min: number; max: number; } {
-        const origin = p_transform.get_origin();
+        const origin = p_transform.get_origin(_i_cs_p_r_Vector2_1);
 
         // real large
         const d = p_normal.dot(origin);
 
         // figure out scale at point
-        const local_normal = p_transform.basis_xform_inv(p_normal);
+        const local_normal = p_transform.basis_xform_inv(p_normal, _i_cs_p_r_Vector2_2);
         const scale = local_normal.length();
 
         r_result.min = d - (this.radius) * scale;
         r_result.max = d + (this.radius) * scale;
-
-        Vector2.free(local_normal);
-        Vector2.free(origin);
 
         return r_result;
     }
@@ -538,7 +518,7 @@ export class RectangleShape2DSW extends Shape2DSW {
         return this.project_range(p_normal, p_transform, r_result);
     }
     get_supports(p_normal: Vector2, r_supports: Vector2[], r_amount: number): number {
-        let ag = Vector2.new();
+        let ag = _i_rs_g_s_Vector2_1.set(0, 0);
 
         for (let i = 0; i < 2; i++) {
             if (i === 0) {
@@ -583,8 +563,6 @@ export class RectangleShape2DSW extends Shape2DSW {
             (p_normal.y < 0) ? -this.half_extents.y : this.half_extents.y
         );
 
-        Vector2.free(ag);
-
         return 1;
     }
 
@@ -615,10 +593,8 @@ export class RectangleShape2DSW extends Shape2DSW {
      * @returns {number}
      */
     get_moment_of_inertia(p_mass: number, p_scale: Vector2): number {
-        const he2 = this.half_extents.clone().scale(2).multiply(p_scale);
-        const res = p_mass * he2.dot(he2) / 12;
-        Vector2.free(he2);
-        return res;
+        const he2 = _i_rs_g_m_o_i_Vector2_1.copy(this.half_extents).scale(2).multiply(p_scale);
+        return p_mass * he2.dot(he2) / 12;
     }
 
     set_data(p_data: Vector2) {
@@ -639,7 +615,7 @@ export class RectangleShape2DSW extends Shape2DSW {
         r_result.max = -1e20;
         r_result.min = 1e20;
 
-        const local_normal = Vector2.new();
+        const local_normal = _i_rects_p_r_Vector2_1;
         for (let i = 0; i < 4; i++) {
             local_normal.set(
                 ((i & 1) * 2 - 1) * this.half_extents.x,
@@ -655,67 +631,51 @@ export class RectangleShape2DSW extends Shape2DSW {
                 r_result.min = d;
             }
         }
-        Vector2.free(local_normal);
 
         return r_result;
     }
 
-    /**
-     * Returns new Vector2
-     */
-    get_circle_axis(p_xform: Transform2D, p_xform_inv: Transform2D, p_circle: Vector2) {
-        const local_v = p_xform_inv.xform(p_circle);
-        const he = Vector2.new(
+    get_circle_axis(p_xform: Transform2D, p_xform_inv: Transform2D, p_circle: Vector2, r_out?: Vector2) {
+        if (!r_out) r_out = Vector2.new();
+        const local_v = p_xform_inv.xform(p_circle, _i_g_c_a_Vector2_1);
+        const he = r_out.set(
             (local_v.x < 0) ? -this.half_extents.x : this.half_extents.x,
             (local_v.y < 0) ? -this.half_extents.y : this.half_extents.y
         );
-        Vector2.free(local_v);
         return p_xform.xform(he, he).subtract(p_circle).normalize();
     }
-    /**
-     * Returns new Vector2
-     */
-    get_box_axis(p_xform: Transform2D, p_xform_inv: Transform2D, p_B: RectangleShape2DSW, p_B_xform: Transform2D, p_B_xform_inv: Transform2D) {
-        const a = Vector2.new();
-        const b = Vector2.new();
+    get_box_axis(p_xform: Transform2D, p_xform_inv: Transform2D, p_B: RectangleShape2DSW, p_B_xform: Transform2D, p_B_xform_inv: Transform2D, r_out?: Vector2) {
+        if (!r_out) r_out = Vector2.new();
+
+        const a = _i_g_b_a_Vector2_1.set(0, 0);
+        const b = _i_g_b_a_Vector2_2.set(0, 0);
 
         {
-            const local_v = Vector2.new();
-            const B_origin = p_B_xform.get_origin();
+            const local_v = _i_g_b_a_Vector2_3.set(0, 0);
+            const B_origin = p_B_xform.get_origin(_i_g_b_a_Vector2_4);
             p_xform_inv.xform(B_origin, local_v);
-            Vector2.free(B_origin);
 
-            const he = Vector2.new(
+            const he = _i_g_b_a_Vector2_5.set(
                 (local_v.x < 0) ? -this.half_extents.x : this.half_extents.x,
                 (local_v.y < 0) ? -this.half_extents.y : this.half_extents.y
             )
 
             p_xform.xform(he, a);
-
-            Vector2.free(local_v);
-            Vector2.free(he);
         }
         {
-            const local_v = Vector2.new();
-            const origin = p_xform.get_origin();
+            const local_v = _i_g_b_a_Vector2_6.set(0, 0);
+            const origin = p_xform.get_origin(_i_g_b_a_Vector2_7);
             p_B_xform_inv.xform(origin, local_v);
-            Vector2.free(origin);
 
-            const he = Vector2.new(
+            const he = _i_g_b_a_Vector2_8.set(
                 (local_v.x < 0) ? -p_B.half_extents.x : p_B.half_extents.x,
                 (local_v.y < 0) ? -p_B.half_extents.y : p_B.half_extents.y
             )
 
             p_xform.xform(he, b);
-
-            Vector2.free(local_v);
-            Vector2.free(he);
         }
 
-        a.subtract(b).normalize();
-
-        Vector2.free(b);
-        return a;
+        return a.subtract(b).normalize();
     }
 }
 RectangleShape2DSW.prototype.project_range_castv = Shape2DSW.prototype.__default_project_range_cast;
@@ -740,7 +700,7 @@ export class CapsuleShape2DSW extends Shape2DSW {
         return this.project_range(p_normal, p_transform, r_result);
     }
     get_supports(p_normal: Vector2, r_supports: Vector2[], r_amount: number): number {
-        let n = p_normal.clone();
+        let n = _i_cap_g_p_Vector2_1.copy(p_normal);
 
         let d = n.y;
 
@@ -763,30 +723,28 @@ export class CapsuleShape2DSW extends Shape2DSW {
             r_supports[0].copy(n);
         }
 
-        Vector2.free(n);
         return r_amount;
     }
     contains_point(p_point: Vector2): boolean {
-        let p = p_point.clone();
+        let p = _i_cap_c_p_Vector2_1.copy(p_point);
         p.y = Math.abs(p.y);
         p.y -= this.height * 0.5;
         if (p.y < 0) {
             p.y = 0;
         }
 
-        Vector2.free(p);
         return p.length_squared() < this.radius * this.radius;
     }
     intersect_segment(p_begin: Vector2, p_end: Vector2, r_point: Vector2, r_normal: Vector2): boolean {
         let d = 1e10;
-        let n = p_end.clone().subtract(p_begin).normalize();
+        let n = _i_cap_i_s_Vector2_1.copy(p_end).subtract(p_begin).normalize();
         let collided = false;
 
-        let begin = Vector2.new();
-        let end = Vector2.new();
-        let line_vec = Vector2.new();
-        let point = Vector2.new();
-        let pointf = Vector2.new();
+        let begin = _i_cap_i_s_Vector2_2.set(0, 0);
+        let end = _i_cap_i_s_Vector2_3.set(0, 0);
+        let line_vec = _i_cap_i_s_Vector2_4.set(0, 0);
+        let point = _i_cap_i_s_Vector2_5.set(0, 0);
+        let pointf = _i_cap_i_s_Vector2_6.set(0, 0);
         for (let i = 0; i < 2; i++) {
             begin.copy(p_begin);
             end.copy(p_end);
@@ -823,15 +781,10 @@ export class CapsuleShape2DSW extends Shape2DSW {
                 collided = true;
             }
         }
-        Vector2.free(pointf);
-        Vector2.free(point);
-        Vector2.free(line_vec);
-        Vector2.free(end);
-        Vector2.free(begin);
 
-        let rpos = Vector2.new();
-        let rnorm = Vector2.new();
-        let rect = Rect2.new(-this.radius, -this.height * 0.5, this.radius * 2, this.height);
+        let rpos = _i_cap_i_s_Vector2_7.set(0, 0);
+        let rnorm = _i_cap_i_s_Vector2_8.set(0, 0);
+        let rect = _i_cap_i_s_Rect2_1.set(-this.radius, -this.height * 0.5, this.radius * 2, this.height);
         if (rect.intersects_segment(p_begin, p_end, rpos, rnorm)) {
             let pd = n.dot(rpos);
             if (pd < d) {
@@ -841,19 +794,12 @@ export class CapsuleShape2DSW extends Shape2DSW {
                 collided = true;
             }
         }
-        Rect2.free(rect);
-        Vector2.free(rnorm);
-        Vector2.free(rpos);
-
-        Vector2.free(n);
 
         return collided;
     }
     get_moment_of_inertia(p_mass: number, p_scale: Vector2): number {
-        let he2 = Vector2.new(this.radius * 2, this.height + this.radius * 2).multiply(p_scale);
-        let res = p_mass * he2.dot(he2) / 12.0;
-        Vector2.free(he2);
-        return res;
+        let he2 = _i_cap_g_m_o_i_Vector2_1.set(this.radius * 2, this.height + this.radius * 2).multiply(p_scale);
+        return p_mass * he2.dot(he2) / 12.0;
     }
     set_data(p_data: Vector2) {
         this.radius = p_data.x;
@@ -868,24 +814,21 @@ export class CapsuleShape2DSW extends Shape2DSW {
         r_result.min = Number.MAX_VALUE;
         r_result.max = -Number.MAX_VALUE;
 
-        let n = p_transform.basis_xform_inv(p_normal).normalize();
+        let n = p_transform.basis_xform_inv(p_normal, _i_cap_p_r_Vector2_1).normalize();
         let h = (n.y > 0) ? this.height : -this.height;
 
         n.scale(this.radius);
         n.y += h * 0.5;
 
-        let nn = Vector2.new();
+        let nn = _i_cap_p_r_Vector2_2;
         r_result.max = p_normal.dot(p_transform.xform(n, nn));
         r_result.min = p_normal.dot(p_transform.xform(n.negate(), nn));
-        Vector2.free(nn);
 
         if (r_result.max < r_result.min) {
             let tmp = r_result.max;
             r_result.max = r_result.min;
             r_result.min = tmp;
         }
-
-        Vector2.free(n);
 
         return r_result;
     }
@@ -934,20 +877,14 @@ export class ConvexPolygonShape2DSW extends Shape2DSW {
     get_segment_normal(p_idx: number) {
         return this._points[p_idx].normal;
     }
-    /**
-     * Returns a new Vector2
-     */
-    get_xformed_segment_normal(p_xform: Transform2D, p_idx: number) {
-        const a = this._points[p_idx].pos.clone();
+    get_xformed_segment_normal(p_xform: Transform2D, p_idx: number, r_out?: Vector2) {
+        if (!r_out) r_out = Vector2.new();
+
+        const a = _i_g_x_s_n_Vector2_1.copy(this._points[p_idx].pos);
         p_idx++;
-        const b = this._points[p_idx === this._points.length ? 0 : p_idx].pos.clone();
+        const b = _i_g_x_s_n_Vector2_2.copy(this._points[p_idx === this._points.length ? 0 : p_idx].pos);
 
-        const normal = p_xform.xform(b, b).subtract(p_xform.xform(a, a)).normalize().tangent();
-
-        Vector2.free(a);
-        Vector2.free(b);
-
-        return normal;
+        return p_xform.xform(b, b).subtract(p_xform.xform(a, a)).normalize().tangent(r_out);
     }
 
     project_rangev(p_normal: Vector2, p_transform: Transform2D, r_result: { min: number; max: number; }): { min: number; max: number; } {
@@ -1005,11 +942,13 @@ export class ConvexPolygonShape2DSW extends Shape2DSW {
      * @returns {boolean}
      */
     intersect_segment(p_begin: Vector2, p_end: Vector2, r_point: Vector2, r_normal: Vector2): boolean {
-        const n = p_end.clone().subtract(p_begin).normalize();
+        const n = _i_con_i_s_Vector2_1.copy(p_end).subtract(p_begin).normalize();
         let d = 1e10, nd = 0;
         let inters = false;
 
-        const res = [Vector2.new()];
+        const res = _i_con_i_s_res;
+        res[0].set(0, 0);
+
         for (let i = 0, len = this._points.length; i < len; i++) {
             if (!segment_intersects_segment_2d(p_begin, p_end, this._points[i].pos, this._points[(i + 1) % len].pos, res)) {
                 continue;
@@ -1030,7 +969,6 @@ export class ConvexPolygonShape2DSW extends Shape2DSW {
             }
         }
 
-        Vector2.free(res[0]);
         return inters;
     }
     /**
@@ -1039,9 +977,9 @@ export class ConvexPolygonShape2DSW extends Shape2DSW {
      * @returns {number}
      */
     get_moment_of_inertia(p_mass: number, p_scale: Vector2): number {
-        const aabb = Rect2.new();
-        const pos = Vector2.new();
-        const size = Vector2.new();
+        const aabb = _i_con_g_m_o_i_Rect2_1.set(0, 0, 0, 0);
+        const pos = _i_con_g_m_o_i_Vector2_1.set(0, 0);
+        const size = _i_con_g_m_o_i_Vector2_2.set(0, 0);
 
         aabb.x = this._points[0].pos.x * p_scale.x;
         aabb.y = this._points[0].pos.y * p_scale.y;
@@ -1049,12 +987,7 @@ export class ConvexPolygonShape2DSW extends Shape2DSW {
             aabb.expand_to(pos.copy(this._points[i].pos).multiply(p_scale));
         }
 
-        const res = p_mass * size.set(aabb.width, aabb.height).dot(size) / 12.0 + p_mass * pos.set(aabb.x + aabb.width * 0.5, aabb.y + aabb.height * 0.5).length_squared();
-
-        Vector2.free(size);
-        Vector2.free(pos);
-        Rect2.free(aabb);
-        return res;
+        return p_mass * size.set(aabb.width, aabb.height).dot(size) / 12.0 + p_mass * pos.set(aabb.x + aabb.width * 0.5, aabb.y + aabb.height * 0.5).length_squared();
     }
 
     set_data(p_data: Vector2[]) {
@@ -1062,15 +995,13 @@ export class ConvexPolygonShape2DSW extends Shape2DSW {
         for (let i = 0; i < point_count; i++) {
             this._points[i] = new Point(p_data[i].x, p_data[i].y);
         }
-        const n = Vector2.new(), t = Vector2.new();
+        const n = _i_con_s_d_Vector2_1.set(0, 0), t = _i_con_s_d_Vector2_2.set(0, 0);
         for (let i = 0; i < point_count; i++) {
             n.copy(this._points[(i + 1) % point_count].pos).subtract(this._points[i].pos);
             this._points[i].normal.copy(n.tangent(t).normalize());
         }
-        Vector2.free(t);
-        Vector2.free(n);
 
-        let aabb = Rect2.new();
+        let aabb = _i_con_s_d_Rect2_1.set(0, 0, 0, 0);
         aabb.x = this._points[0].pos.x;
         aabb.y = this._points[0].pos.y;
         for (let i = 1; i < point_count; i++) {
@@ -1078,8 +1009,6 @@ export class ConvexPolygonShape2DSW extends Shape2DSW {
         }
 
         this.configure(aabb.x, aabb.y, aabb.width, aabb.height);
-
-        Rect2.free(aabb);
     }
 
     /**
@@ -1091,7 +1020,7 @@ export class ConvexPolygonShape2DSW extends Shape2DSW {
     project_range(p_normal: Vector2, p_transform: Transform2D, r_result: { min: number; max: number; }): { min: number; max: number; } {
         // no matter the angle, the box is mirrored anyway
 
-        const pos = Vector2.new();
+        const pos = _i_con_p_r_Vector2_1;
         r_result.min = r_result.max = p_normal.dot(p_transform.xform(this._points[0].pos, pos));
 
         let i = 0, d = 0, len = this._points.length;
@@ -1105,10 +1034,96 @@ export class ConvexPolygonShape2DSW extends Shape2DSW {
             }
         }
 
-        Vector2.free(pos);
         return r_result;
     }
 }
 ConvexPolygonShape2DSW.prototype.project_range_castv = Shape2DSW.prototype.__default_project_range_cast;
 // @ts-ignore
 ConvexPolygonShape2DSW.prototype.project_range_cast = Shape2DSW.prototype.__default_project_range_cast;
+
+const _i_g_x_n_Vector2_1 = new Vector2;
+const _i_g_x_n_Vector2_2 = new Vector2;
+
+const _i_g_c_a_Vector2_1 = new Vector2;
+
+const _i_g_b_a_Vector2_1 = new Vector2;
+const _i_g_b_a_Vector2_2 = new Vector2;
+const _i_g_b_a_Vector2_3 = new Vector2;
+const _i_g_b_a_Vector2_4 = new Vector2;
+const _i_g_b_a_Vector2_5 = new Vector2;
+const _i_g_b_a_Vector2_6 = new Vector2;
+const _i_g_b_a_Vector2_7 = new Vector2;
+const _i_g_b_a_Vector2_8 = new Vector2;
+
+const _i_g_x_s_n_Vector2_1 = new Vector2;
+const _i_g_x_s_n_Vector2_2 = new Vector2;
+
+const _i_g_s_t_c_Vector2_1 = new Vector2;
+const _i_g_s_t_c_Vector2_2 = new Vector2;
+const _i_g_s_t_c_Vector2_3 = new Vector2;
+
+const _i_d_p_r_c_Transform2D_1 = new Transform2D;
+
+const res_a = { min: 0, max: 0 };
+const res_b = { min: 0, max: 0 };
+
+const _i_g_s_Vector2_1 = new Vector2;
+
+const _i_g_m_o_i_Vector2_1 = new Vector2;
+const _i_g_m_o_i_Vector2_2 = new Vector2;
+
+const _i_s_d_Vector2_1 = new Vector2;
+const _i_s_d_Vector2_2 = new Vector2;
+const _i_s_d_Rect2_1 = new Rect2;
+
+const _i_p_r_Vector2_1 = new Vector2;
+const _i_p_r_Vector2_2 = new Vector2;
+
+const _i_p_rv_Vector2_1 = new Vector2;
+const _i_p_rv_Vector2_2 = new Vector2;
+
+const _i_rs_p_r_Vector2_1 = new Vector2;
+const _i_rs_p_r_Vector2_2 = new Vector2;
+
+const _i_i_s_Vector2_1 = new Vector2;
+
+const _i_cs_p_r_Vector2_1 = new Vector2;
+const _i_cs_p_r_Vector2_2 = new Vector2;
+
+const _i_rs_g_s_Vector2_1 = new Vector2;
+
+const _i_rs_g_m_o_i_Vector2_1 = new Vector2;
+
+const _i_rects_p_r_Vector2_1 = new Vector2;
+
+const _i_cap_g_p_Vector2_1 = new Vector2;
+
+const _i_cap_c_p_Vector2_1 = new Vector2;
+
+const _i_cap_i_s_Vector2_1 = new Vector2;
+const _i_cap_i_s_Vector2_2 = new Vector2;
+const _i_cap_i_s_Vector2_3 = new Vector2;
+const _i_cap_i_s_Vector2_4 = new Vector2;
+const _i_cap_i_s_Vector2_5 = new Vector2;
+const _i_cap_i_s_Vector2_6 = new Vector2;
+const _i_cap_i_s_Vector2_7 = new Vector2;
+const _i_cap_i_s_Vector2_8 = new Vector2;
+const _i_cap_i_s_Rect2_1 = new Rect2;
+
+const _i_cap_g_m_o_i_Vector2_1 = new Vector2;
+
+const _i_cap_p_r_Vector2_1 = new Vector2;
+const _i_cap_p_r_Vector2_2 = new Vector2;
+
+const _i_con_i_s_Vector2_1 = new Vector2;
+const _i_con_i_s_res = [new Vector2];
+
+const _i_con_g_m_o_i_Vector2_1 = new Vector2;
+const _i_con_g_m_o_i_Vector2_2 = new Vector2;
+const _i_con_g_m_o_i_Rect2_1 = new Rect2;
+
+const _i_con_s_d_Vector2_1 = new Vector2;
+const _i_con_s_d_Vector2_2 = new Vector2;
+const _i_con_s_d_Rect2_1 = new Rect2;
+
+const _i_con_p_r_Vector2_1 = new Vector2;

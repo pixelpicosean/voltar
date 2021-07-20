@@ -43,9 +43,9 @@ export function segment_intersects_segment_2d(p_from_a: Vector2, p_to_a: Vector2
  * @param {Vector2} c2
  */
 export function get_closest_points_between_segments(p1: Vector2, q1: Vector2, p2: Vector2, q2: Vector2, c1: Vector2, c2: Vector2) {
-    const d1 = q1.clone().subtract(p1);
-    const d2 = q2.clone().subtract(p2);
-    const r = p1.clone().subtract(p2);
+    const d1 = _i_g_c_p_b_s_Vector2_1.copy(q1).subtract(p1);
+    const d2 = _i_g_c_p_b_s_Vector2_2.copy(q2).subtract(p2);
+    const r = _i_g_c_p_b_s_Vector2_3.copy(p1).subtract(p2);
     const a = d1.dot(d1);
     const e = d2.dot(d2);
     const f = d2.dot(r);
@@ -55,15 +55,8 @@ export function get_closest_points_between_segments(p1: Vector2, q1: Vector2, p2
         // Both segments degenerate into points
         c1.copy(p1);
         c2.copy(p2);
-        const c = c1.clone().subtract(c2);
-        const res = Math.sqrt(c.dot(c));
-
-        Vector2.free(d1);
-        Vector2.free(d2);
-        Vector2.free(r);
-        Vector2.free(c);
-
-        return res;
+        const c = _i_g_c_p_b_s_Vector2_4.copy(c1).subtract(c2);
+        return Math.sqrt(c.dot(c));
     }
     if (a <= CMP_EPSILON) {
         // First segment degenerates into a point
@@ -105,38 +98,23 @@ export function get_closest_points_between_segments(p1: Vector2, q1: Vector2, p2
     }
     c1.copy(p1).add(d1.scale(s));
     c2.copy(p2).add(d2.scale(t));
-    const c = c1.clone().subtract(c2);
-    const res = Math.sqrt(c.dot(c));
-
-    Vector2.free(d1);
-    Vector2.free(d2);
-    Vector2.free(r);
-    Vector2.free(c);
-
-    return res;
+    const c = _i_g_c_p_b_s_Vector2_5.copy(c1).subtract(c2);
+    return Math.sqrt(c.dot(c));
 }
 
-/**
- * Returns a new Vector2
- */
-export function get_closest_point_to_segment_uncapped_2d(p_point: Vector2, p_segment: Vector2[]) {
-    const p = p_point.clone().subtract(p_segment[0]);
-    const n = p_segment[1].clone().subtract(p_segment[0]);
+export function get_closest_point_to_segment_uncapped_2d(p_point: Vector2, p_segment: Vector2[], r_out?: Vector2) {
+    if (!r_out) r_out = Vector2.new();
+
+    const p = _i_g_c_p_t_s_u_2_Vector2_1.copy(p_point).subtract(p_segment[0]);
+    const n = _i_g_c_p_t_s_u_2_Vector2_2.copy(p_segment[1]).subtract(p_segment[0]);
     const l2 = n.length_squared();
     if (l2 < 1e-20) {
-        Vector2.free(n);
-        Vector2.free(p);
-
-        return p_segment[0].clone();
+        return r_out.copy(p_segment[0]);
     }
 
     const d = n.dot(p) / l2;
 
-    const ret = p_segment[0].clone().add(n.scale(d));
-
-    Vector2.free(n);
-    Vector2.free(p);
-    return ret;
+    return r_out.copy(p_segment[0]).add(n.scale(d));
 }
 
 /**
@@ -169,3 +147,12 @@ export function convex_hull_2d(p: Vector2[]): Vector2[] {
     console.warn('"convex_hull_2d" is not supported yet!');
     return [];
 }
+
+const _i_g_c_p_b_s_Vector2_1 = new Vector2;
+const _i_g_c_p_b_s_Vector2_2 = new Vector2;
+const _i_g_c_p_b_s_Vector2_3 = new Vector2;
+const _i_g_c_p_b_s_Vector2_4 = new Vector2;
+const _i_g_c_p_b_s_Vector2_5 = new Vector2;
+
+const _i_g_c_p_t_s_u_2_Vector2_1 = new Vector2;
+const _i_g_c_p_t_s_u_2_Vector2_2 = new Vector2;

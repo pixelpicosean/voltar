@@ -257,19 +257,21 @@ export class Transform2D {
         return r_out;
     }
 
-    get_elements(p_row: number) {
+    get_elements(p_row: number, r_out?: Vector2) {
+        if (!r_out) r_out = Vector2.new();
         switch (p_row) {
-            case 0: return Vector2.new(this.a, this.b);
-            case 1: return Vector2.new(this.c, this.d);
-            case 2: return Vector2.new(this.tx, this.ty);
+            case 0: return r_out.set(this.a, this.b);
+            case 1: return r_out.set(this.c, this.d);
+            case 2: return r_out.set(this.tx, this.ty);
         }
     }
 
-    get_axis(p_axis: number) {
+    get_axis(p_axis: number, r_out?: Vector2) {
+        if (!r_out) r_out = Vector2.new();
         switch (p_axis) {
-            case 0: return Vector2.new(this.a, this.b);
-            case 1: return Vector2.new(this.c, this.d);
-            case 2: return Vector2.new(this.tx, this.ty);
+            case 0: return r_out.set(this.a, this.b);
+            case 1: return r_out.set(this.c, this.d);
+            case 2: return r_out.set(this.tx, this.ty);
         }
     }
 
