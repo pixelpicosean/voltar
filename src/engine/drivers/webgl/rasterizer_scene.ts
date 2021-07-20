@@ -2794,24 +2794,23 @@ export class RasterizerScene {
     _set_cull(p_front: boolean, p_disabled: boolean, p_reverse_cull: boolean) {
         const gl = this.gl;
 
-        let front = p_front;
         if (p_reverse_cull) {
-            front = !front;
+            p_front = !p_front;
         }
 
-        if (p_disabled !== this.state.gl.CULL_FACE) {
+        if ((!p_disabled) === this.state.gl.CULL_FACE) {
             if (p_disabled) {
                 gl.disable(gl.CULL_FACE);
             } else {
                 gl.enable(gl.CULL_FACE);
             }
 
-            this.state.gl.CULL_FACE = p_disabled;
+            this.state.gl.CULL_FACE = !p_disabled;
         }
 
-        if (front !== this.state.gl.CULL_FRONT) {
-            gl.cullFace(front ? gl.FRONT : gl.BACK);
-            this.state.gl.CULL_FRONT = front;
+        if ((!p_front) !== this.state.gl.CULL_FRONT) {
+            gl.cullFace(p_front ? gl.FRONT : gl.BACK);
+            this.state.gl.CULL_FRONT = !p_front;
         }
     }
 
