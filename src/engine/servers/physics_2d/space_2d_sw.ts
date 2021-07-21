@@ -30,6 +30,7 @@ import {
 
     _shape_col_cbk,
 } from "./state";
+import { NoShrinkArray } from "engine/core/v_array";
 
 type Node2D = import("engine/scene/2d/node_2d").Node2D;
 
@@ -391,7 +392,7 @@ export class Space2DSW {
         return 0;
     }
 
-    test_body_motion(p_body: Body2DSW, p_from: Transform2D, p_motion: Vector2, p_infinite_inertia: boolean, p_margin: number, r_result: MotionResult, p_exclude_raycast_shapes: boolean = true) {
+    test_body_motion(p_body: Body2DSW, p_from: Transform2D, p_motion: Vector2, p_infinite_inertia: boolean, p_margin: number, r_result: MotionResult, p_exclude_raycast_shapes: boolean = true, p_exclude: NoShrinkArray<any> = null) {
         if (r_result) {
             r_result.collider_id = null;
             r_result.collider_shape = 0;
@@ -475,6 +476,9 @@ export class Space2DSW {
                     let body_shape_xform = _i_test_body_motion_Transform2_2.copy(body_transform).append(body_shape.xform);
                     for (let i = 0; i < amount; i++) {
                         let col_obj = this.intersection_query_results[i];
+                        if (p_exclude && p_exclude.has(col_obj.self)) {
+                            continue;
+                        }
                         let shape_idx = this.intersection_query_subindex_results[i];
 
                         if (col_obj.type === CollisionObject2DSW$Type.BODY) {
@@ -498,7 +502,7 @@ export class Space2DSW {
                             if (col_obj.type === CollisionObject2DSW$Type.BODY) {
                                 let b: Body2DSW = col_obj as Body2DSW;
                                 if (b.mode === BodyMode.KINEMATIC || b.mode === BodyMode.RIGID) {
-                                    // fix for moving platforms (kinematic and dynamic), margin is increased by
+                                    // fix_ for moving platforms (kinematic and dynamic), margin is increased by
                                     // how much it moved in the give direction
                                     let lv = _i_test_body_motion_Vector2_3.copy(b.linear_velocity);
                                     // compute displacement from linear velocity
@@ -612,6 +616,9 @@ export class Space2DSW {
 
                 for (let i = 0; i < amount; i++) {
                     let col_obj = this.intersection_query_results[i];
+                    if (p_exclude && p_exclude.has(col_obj.self)) {
+                        continue;
+                    }
                     let col_shape_idx = this.intersection_query_subindex_results[i];
                     let against_shape = col_obj.shapes[col_shape_idx];
 
@@ -761,6 +768,9 @@ export class Space2DSW {
 
                 for (let i = 0; i < amount; i++) {
                     let col_obj = this.intersection_query_results[i];
+                    if (p_exclude && p_exclude.has(col_obj.self)) {
+                        continue;
+                    }
                     let shape_idx = this.intersection_query_subindex_results[i];
 
                     if (col_obj.type === CollisionObject2DSW$Type.BODY) {
@@ -827,6 +837,9 @@ export class Space2DSW {
                     r_result.collision_local_shape = rcd.best_local_shape;
                     r_result.collision_normal.copy(rcd.best_normal);
                     r_result.collision_point.copy(rcd.best_contact);
+                    r_result.collision_depth = rcd.best_len;
+                    r_result.collision_safe_fraction = safe;
+                    r_result.collision_unsafe_fraction = unsafe;
                     r_result.collider_metadata = rcd.best_object.get_shape_metadata(rcd.best_shape);
 
                     let body: Body2DSW = rcd.best_object as Body2DSW;

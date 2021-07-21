@@ -15,6 +15,9 @@ export class MotionResult {
     collision_point = new Vector2;
     collision_normal = new Vector2;
     collider_velocity = new Vector2;
+    collision_depth = 0;
+    collision_safe_fraction = 0;
+    collision_unsafe_fraction = 0;
     collision_local_shape = 0;
     collider_id: Node2D = null;
     collider: CollisionObject2DSW = null;
@@ -28,6 +31,9 @@ export class MotionResult {
         this.collision_point.set(0, 0);
         this.collision_normal.set(0, 0);
         this.collider_velocity.set(0, 0);
+        this.collision_depth = 0;
+        this.collision_safe_fraction = 0;
+        this.collision_unsafe_fraction = 0;
         this.collision_local_shape = 0;
         this.collider_id = null;
         this.collider = null;

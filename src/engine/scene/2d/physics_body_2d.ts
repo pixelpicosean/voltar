@@ -19,6 +19,8 @@ import { NOTIFICATION_LOCAL_TRANSFORM_CHANGED } from "./canvas_item";
 import { CollisionObject2D } from "./collision_object_2d";
 import { Node2D } from "./node_2d";
 import { remove_item } from "engine/dep/index";
+import { CMP_EPSILON } from "engine/core/math/math_defs";
+import { NoShrinkArray } from "engine/core/v_array";
 
 type CollisionObject2DSW = import("engine/servers/physics_2d").CollisionObject2DSW;
 type Physics2DDirectBodyStateSW = import("engine/servers/physics_2d").Physics2DDirectBodyStateSW;
@@ -385,6 +387,8 @@ const get_sep_res = () => {
 
 const FLOOR_ANGLE_THRESHOLD = 0.01;
 
+const body_velocity = new Vector2;
+
 export class KinematicBody2D extends PhysicsBody2D {
     get class() { return 'KinematicBody2D' }
 
@@ -484,9 +488,9 @@ export class KinematicBody2D extends PhysicsBody2D {
     separate_raycast_shapes(p_infinite_inertia: boolean, r_collision: Collision) {
         const sep_res = get_sep_res();
 
-        const gt = this.get_global_transform().clone();
+        const gt = _i_srs_Transform2D_1.copy(this.get_global_transform());
 
-        const recover = Vector2.new();
+        const recover = _i_srs_Vector2_1.set(0, 0);
         const hits = this.rid.space.test_body_ray_separation(this.rid, gt, p_infinite_inertia, recover, sep_res, 8, this.margin);
         let deepest = -1;
         let deepest_depth = 0;
@@ -512,53 +516,70 @@ export class KinematicBody2D extends PhysicsBody2D {
             r_collision.travel.copy(recover);
             r_collision.remainder.set(0, 0);
 
-            Transform2D.free(gt);
-            Vector2.free(recover);
             return true;
         } else {
-            Transform2D.free(gt);
-            Vector2.free(recover);
             return false;
         }
     }
 
     /**
-     * Returns a new Vector2
+     * Note: the returned Vector2 is reused, DONT free it or save locally
      */
-    move_and_slide(p_linear_velocity: Vector2, p_up_direction: Vector2 = Vector2.ZERO, p_stop_on_slope: boolean = false, p_max_slides: number = 4, p_floor_max_angle: number = Math.PI * 0.25, p_infinite_inertia: boolean = true) {
-        let body_velocity = p_linear_velocity.clone();
-        let body_velocity_normal = body_velocity.normalized();
-        let up_direction = p_up_direction.normalized();
+    move_and_slide(p_linear_velocity: Vector2, p_up_direction: Vector2 = Vector2.ZERO, p_stop_on_slope: boolean = false, p_max_slides: number = 4, p_floor_max_angle: number = Math.PI * 0.25, p_infinite_inertia: boolean = true): Vector2 {
+        body_velocity.copy(p_linear_velocity);
+        const body_velocity_normal = _i_mas_Vector2_4.copy(body_velocity).normalize();
+        const up_direction = _i_mas_Vector2_5.copy(p_up_direction).normalize();
 
-        let current_floor_velocity = this.floor_velocity.clone();
-        if (this.on_floor && this.on_floor_body) {
+        // hack_ in order to work with calling from _process as well as from _physics_process
+        const delta = Engine.get_singleton().is_in_physics_frame() ? this.get_physics_process_delta_time() : this.get_process_delta_time();
+
+        const current_floor_velocity = _i_mas_Vector2_6.copy(this.floor_velocity);
+
+        if ((this.on_floor || this.on_wall) && this.on_floor_body) {
             // this approach makes sure there is less delay between the actual body velocity
             // and the one we saved
-            let bs = Physics2DServer.get_singleton().body_get_direct_state(this.on_floor_body as Body2DSW);
+            const bs = Physics2DServer.get_singleton().body_get_direct_state(this.on_floor_body as Body2DSW);
             if (bs) {
                 current_floor_velocity.copy(bs.get_linear_velocity());
             }
         }
 
-        // hack in order to work with calling from _process as well as from _physics_process
-        let motion = current_floor_velocity.clone().add(body_velocity).scale(Engine.get_singleton().is_in_physics_frame() ? this.get_physics_process_delta_time() : this.get_process_delta_time());
+        for (let i = 0; i < this.colliders.length; i++) {
+            Collision.free(this.colliders[i]);
+        }
+        this.colliders.length = 0;
 
         this.on_floor = false;
-        this.on_floor_body = null;
         this.on_ceiling = false;
         this.on_wall = false;
-        this.colliders.length = 0;
         this.floor_normal.set(0, 0);
         this.floor_velocity.set(0, 0);
 
-        while (p_max_slides) {
+        if (!current_floor_velocity.is_zero()) {
+            const floor_collision = Collision.create();
+            const exclude = body_excludes;
+            exclude.clear();
+            exclude.push(this.on_floor_body);
+            const motion = _i_mas_Vector2_7.copy(current_floor_velocity).scale(delta);
+            if (this._move(motion, p_infinite_inertia, floor_collision, true, false, false, exclude)) {
+                this.colliders.push(floor_collision);
+                this._set_collision_direction(floor_collision, up_direction, p_floor_max_angle);
+            } else {
+                Collision.free(floor_collision);
+            }
+        }
+        this.on_floor_body = null;
+        const motion = _i_mas_Vector2_1.copy(body_velocity).scale(delta);
+
+        let sliding_enabled = !p_stop_on_slope;
+        for (let iteration = 0; iteration < p_max_slides; iteration++) {
             let collision = Collision.create();
             let found_collision = false;
 
             for (let i = 0; i < 2; i++) {
                 let collided = false;
                 if (i === 0) { // collide
-                    collided = this._move(motion, p_infinite_inertia, collision);
+                    collided = this._move(motion, p_infinite_inertia, collision, true, false, !sliding_enabled);
                     if (!collided) {
                         motion.set(0, 0); // clear because no collision happened and motion completed
                     }
@@ -574,67 +595,45 @@ export class KinematicBody2D extends PhysicsBody2D {
                     found_collision = true;
 
                     this.colliders.push(collision);
-                    motion.copy(collision.remainder);
 
-                    if (up_direction.is_zero()) {
-                        // all is a wall
-                        this.on_wall = true;
-                    } else {
-                        let negate_floor_direction = up_direction.clone().negate();
-                        if (Math.acos(collision.normal.dot(up_direction)) <= p_floor_max_angle + FLOOR_ANGLE_THRESHOLD) { // floor
-                            this.on_floor = true;
-                            this.floor_normal.copy(collision.normal);
-                            this.on_floor_body = collision.collider_rid;
-                            this.floor_velocity.copy(collision.collider_vel);
+                    this._set_collision_direction(collision, up_direction, p_floor_max_angle);
 
-                            if (p_stop_on_slope) {
-                                let vec = body_velocity_normal.clone().add(up_direction);
-                                if (vec.length() < 0.01 && collision.travel.length() < 1) {
-                                    let gt = this.get_global_transform().clone();
-                                    let proj = collision.travel.clone().slide(up_direction);
-                                    gt.tx -= proj.x;
-                                    gt.ty -= proj.y;
-                                    this.set_global_transform(gt);
-                                    Vector2.free(proj);
-                                    Transform2D.free(gt);
-
-                                    Vector2.free(vec);
-                                    Collision.free(collision);
-                                    Vector2.free(motion);
-                                    Vector2.free(current_floor_velocity);
-                                    Vector2.free(up_direction);
-                                    Vector2.free(body_velocity_normal);
-                                    Vector2.free(body_velocity);
-
-                                    return Vector2.new(0, 0);
-                                }
+                    if (this.on_floor && p_stop_on_slope) {
+                        if (_i_mas_Vector2_2.copy(body_velocity_normal).add(up_direction).length() < 0.01) {
+                            const gt = _i_mas_Transform2D_1.copy(this.get_global_transform());
+                            if (collision.travel.length() > this.margin) {
+                                const slided = _i_mas_Vector2_3.copy(collision.travel).slide(up_direction);
+                                gt.tx -= slided.x;
+                                gt.ty -= slided.y;
+                            } else {
+                                gt.tx -= collision.travel.x;
+                                gt.ty -= collision.travel.y;
                             }
-                        } else if (Math.acos(collision.normal.dot(negate_floor_direction)) <= p_floor_max_angle + FLOOR_ANGLE_THRESHOLD) { // ceiling
-                            this.on_ceiling = true;
-                        } else {
-                            this.on_wall = true;
+                            this.set_global_transform(gt);
+                            return body_velocity.set(0, 0);
                         }
-                        Vector2.free(negate_floor_direction);
                     }
 
-                    motion.slide(collision.normal);
-                    body_velocity.slide(collision.normal);
+                    if (sliding_enabled || !this.on_floor) {
+                        motion.copy(collision.remainder).slide(collision.normal);
+                        body_velocity.slide(collision.normal);
+                    } else {
+                        motion.copy(collision.remainder);
+                    }
                 }
+
+                sliding_enabled = true;
             }
 
             if (!found_collision || motion.is_zero()) {
-                Collision.free(collision);
                 break;
             }
-
-            Collision.free(collision);
-            p_max_slides--;
         }
 
-        Vector2.free(motion);
-        Vector2.free(current_floor_velocity);
-        Vector2.free(up_direction);
-        Vector2.free(body_velocity_normal);
+        if (!this.on_floor && !this.on_wall) {
+            // Add last platform velocity when just left a moving platform.
+            return body_velocity.add(current_floor_velocity);
+        }
 
         return body_velocity;
     }
@@ -648,19 +647,18 @@ export class KinematicBody2D extends PhysicsBody2D {
      * @param {boolean} [p_infinite_inertia]
      */
     move_and_slide_with_snap(p_linear_velocity: Vector2, p_snap: Vector2, p_up_direction: Vector2 = Vector2.ZERO, p_stop_on_slope: boolean = false, p_max_slides: number = 4, p_floor_max_angle: number = Math.PI * 0.25, p_infinite_inertia: boolean = true) {
-        let up_direction = p_up_direction.normalized();
-        let was_on_floor = this.on_floor;
+        const up_direction = _i_mas_ws_Vector2_1.copy(p_up_direction).normalize();
+        const was_on_floor = this.on_floor;
 
-        let ret = this.move_and_slide(p_linear_velocity, up_direction, p_stop_on_slope, p_max_slides, p_floor_max_angle, p_infinite_inertia);
+        const ret = this.move_and_slide(p_linear_velocity, up_direction, p_stop_on_slope, p_max_slides, p_floor_max_angle, p_infinite_inertia);
         if (!was_on_floor || p_snap.is_zero()) {
-            Vector2.free(up_direction);
             return ret;
         }
 
-        let col = Collision.create();
-        let gt = this.get_global_transform().clone();
+        const col = Collision.create();
+        const gt = _i_mas_ws_Transform2D_1.copy(this.get_global_transform());
 
-        if (this._move(p_snap, p_infinite_inertia, col, false, true)) {
+        if (this._move(p_snap, p_infinite_inertia, col, false, true, false)) {
             let apply = true;
             if (!up_direction.is_zero()) {
                 if (Math.acos(col.normal.dot(up_direction)) <= p_floor_max_angle + FLOOR_ANGLE_THRESHOLD) {
@@ -669,9 +667,11 @@ export class KinematicBody2D extends PhysicsBody2D {
                     this.on_floor_body = col.collider_rid;
                     this.floor_velocity.copy(col.collider_vel);
                     if (p_stop_on_slope) {
-                        col.travel
-                            .copy(up_direction)
-                            .scale(up_direction.dot(col.travel))
+                        if (col.travel.length() > this.margin) {
+                            col.travel.copy(up_direction).scale(up_direction.dot(col.travel))
+                        } else {
+                            col.travel.set(0, 0);
+                        }
                     }
                 } else {
                     apply = false;
@@ -685,7 +685,6 @@ export class KinematicBody2D extends PhysicsBody2D {
             }
         }
 
-        Transform2D.free(gt);
         Collision.free(col);
         return ret;
     }
@@ -750,17 +749,47 @@ export class KinematicBody2D extends PhysicsBody2D {
         this.set_notify_local_transform(true);
     }
 
-    /**
-     * @param {Vector2} p_motion
-     * @param {boolean} p_infinite_inertia
-     * @param {Collision} r_collision
-     * @param {boolean} [p_exclude_raycast_shapes]
-     * @param {boolean} [p_test_only]
-     */
-    _move(p_motion: Vector2, p_infinite_inertia: boolean, r_collision: Collision, p_exclude_raycast_shapes: boolean = true, p_test_only: boolean = false) {
-        const gt = this.get_global_transform().clone();
+    _move(p_motion: Vector2, p_infinite_inertia: boolean, r_collision: Collision, p_exclude_raycast_shapes: boolean = true, p_test_only: boolean = false, p_cancel_sliding: boolean = true, p_exclude: NoShrinkArray<any> = null) {
+        const gt = _i_move_Transform2D.copy(this.get_global_transform());
         motion_result.reset();
-        const colliding = Physics2DServer.get_singleton().body_test_motion(this.rid, gt, p_motion, p_infinite_inertia, this.margin, motion_result, p_exclude_raycast_shapes);
+
+        const colliding = Physics2DServer.get_singleton().body_test_motion(this.rid, gt, p_motion, p_infinite_inertia, this.margin, motion_result, p_exclude_raycast_shapes, p_exclude);
+
+        // Restore direction of motion to be along original motion,
+        // in order to avoid sliding due to recovery,
+        // but only if collision depth is low enough to avoid tunneling.
+        if (p_cancel_sliding) {
+            const motion_length = p_motion.length();
+            let precision = 0.001;
+
+            if (colliding) {
+                precision += motion_length * (motion_result.collision_unsafe_fraction - motion_result.collision_safe_fraction);
+
+                if (motion_result.collision_depth > this.margin + precision) {
+                    p_cancel_sliding = false;
+                }
+            }
+
+            if (p_cancel_sliding) {
+                // When motion is null, recovery is the resulting motion.
+                const motion_normal = _i_move_Vector2_1.set(0, 0);
+                if (motion_length > CMP_EPSILON) {
+                    motion_normal.copy(p_motion).scale(1 / motion_length);
+                }
+
+                // Check depth of recovery.
+                const projected_length = motion_result.motion.dot(motion_normal);
+                const recovery = _i_move_Vector2_2.copy(motion_normal).scale(-projected_length).add(motion_result.motion);
+                const recovery_length = recovery.length();
+                // Fixes cases where canceling slide causes the motion to go too deep into the ground,
+                // because we're only taking rest information into account and not general recovery.
+                if (recovery_length < this.margin + precision) {
+                    // Apply adjustment to motion.
+                    motion_result.motion.copy(motion_normal).scale(projected_length);
+                    motion_result.remainder.copy(p_motion).subtract(motion_result.motion);
+                }
+            }
+        }
 
         if (colliding) {
             r_collision.collider_metadata = motion_result.collider_metadata;
@@ -781,11 +810,56 @@ export class KinematicBody2D extends PhysicsBody2D {
             this.set_global_transform(gt);
         }
 
-        Transform2D.free(gt);
         return colliding;
+    }
+
+    _set_collision_direction(p_collision: Collision, p_up_direction: Vector2, p_floor_max_angle: number) {
+        this.on_floor = false;
+        this.on_ceiling = false;
+        this.on_wall = false;
+        if (p_up_direction.is_zero()) {
+            // all is a wall
+            this.on_wall = true;
+        } else {
+            if (Math.acos(p_collision.normal.dot(p_up_direction)) <= p_floor_max_angle + FLOOR_ANGLE_THRESHOLD) {
+                this.on_floor = true;
+                this.floor_normal.copy(p_collision.normal);
+                this.on_floor_body = p_collision.collider_rid;
+                this.floor_velocity.copy(p_collision.collider_vel);
+            } else if (Math.acos(p_collision.normal.dot(_i_s_c_d_Vector2_1.copy(p_up_direction).negate())) <= p_floor_max_angle + FLOOR_ANGLE_THRESHOLD) {
+                this.on_ceiling = true;
+            } else {
+                this.on_wall = true;
+                this.on_floor_body = p_collision.collider_rid;
+                this.floor_velocity.copy(p_collision.collider_vel);
+            }
+        }
     }
 }
 node_class_map['KinematicBody2D'] = GDCLASS(KinematicBody2D, PhysicsBody2D)
+
+const _i_move_Vector2_1 = new Vector2;
+const _i_move_Vector2_2 = new Vector2;
+const _i_move_Transform2D = new Transform2D;
+
+const _i_s_c_d_Vector2_1 = new Vector2;
+
+const _i_mas_Vector2_1 = new Vector2;
+const _i_mas_Vector2_2 = new Vector2;
+const _i_mas_Vector2_3 = new Vector2;
+const _i_mas_Vector2_4 = new Vector2;
+const _i_mas_Vector2_5 = new Vector2;
+const _i_mas_Vector2_6 = new Vector2;
+const _i_mas_Vector2_7 = new Vector2;
+const _i_mas_Transform2D_1 = new Transform2D;
+
+const _i_mas_ws_Vector2_1 = new Vector2;
+const _i_mas_ws_Transform2D_1 = new Transform2D;
+
+const _i_srs_Vector2_1 = new Vector2;
+const _i_srs_Transform2D_1 = new Transform2D;
+
+const body_excludes = new NoShrinkArray<any>();
 
 class ShapePair {
     body_shape: number;

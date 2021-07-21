@@ -31,6 +31,7 @@ import {
 
     _shape_col_cbk,
 } from './state';
+import { NoShrinkArray } from 'engine/core/v_array';
 
 type Node2D = import("engine/scene/2d/node_2d").Node2D;
 type CanvasLayer = import("engine/scene/main/canvas_layer").CanvasLayer;
@@ -379,10 +380,10 @@ export class Physics2DServer {
             }
         }
     }
-    body_test_motion(p_body: Body2DSW, p_from: Transform2D, p_motion: Vector2, p_infinite_inertia: boolean, p_margin: number = 0.001, r_result: MotionResult = null, p_exclude_raycast_shapes: boolean = true) {
+    body_test_motion(p_body: Body2DSW, p_from: Transform2D, p_motion: Vector2, p_infinite_inertia: boolean, p_margin: number = 0.001, r_result: MotionResult = null, p_exclude_raycast_shapes: boolean = true, p_excludes: NoShrinkArray<any> = null) {
         this._update_shapes();
 
-        return p_body.space.test_body_motion(p_body, p_from, p_motion, p_infinite_inertia, p_margin, r_result, p_exclude_raycast_shapes);
+        return p_body.space.test_body_motion(p_body, p_from, p_motion, p_infinite_inertia, p_margin, r_result, p_exclude_raycast_shapes, p_excludes);
     }
 
     /* JOINT API */

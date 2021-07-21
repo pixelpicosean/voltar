@@ -124,4 +124,9 @@ export class NoShrinkArray<T> {
             this.buffer[i] = this.buffer[i + 1];
         }
     }
+
+    has(e: T): boolean {
+        const index = this.buffer.indexOf(e);
+        return index >= 0 && index < this.length;
+    }
 }
