@@ -15,7 +15,7 @@ export * from 'engine/core/math/math_defs';
 export * from 'engine/core/math/math_funcs';
 export * from 'engine/core/math/vector2';
 export * from 'engine/core/math/vector3';
-// export * from 'engine/core/math/pool_vector2_array';
+export * from 'engine/core/math/pool_vector2_array';
 export * from 'engine/core/math/rect2';
 export * from 'engine/core/math/aabb';
 export * from 'engine/core/math/transform_2d';

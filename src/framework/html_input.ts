@@ -1,6 +1,6 @@
 import * as v from 'engine/index';
 
-export class Input extends v.Node2D {
+export class HTMLInput extends v.Node2D {
     width = 100;
     height = 20;
 
@@ -88,4 +88,4 @@ export class Input extends v.Node2D {
     }
 }
 
-v.attach_script("res://scene/ui/input.tscn", Input);
+v.attach_script("res://scene/ui/input.tscn", HTMLInput);
