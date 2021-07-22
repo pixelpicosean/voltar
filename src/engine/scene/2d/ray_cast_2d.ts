@@ -41,8 +41,8 @@ export class RayCast2D extends Node2D {
         if (data.cast_to !== undefined) {
             this.cast_to.copy(data.cast_to);
         }
-        if (data.collide_with_ares !== undefined) {
-            this.collide_with_areas = data.collide_with_ares;
+        if (data.collide_with_areas !== undefined) {
+            this.collide_with_areas = data.collide_with_areas;
         }
         if (data.collide_with_bodies !== undefined) {
             this.collide_with_bodies = data.collide_with_bodies;
