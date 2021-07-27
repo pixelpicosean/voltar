@@ -211,8 +211,8 @@ export class Node2D extends CanvasItem {
     set_global_scale(value: Vector2Like) {
         this.set_global_scale_n(value.x, value.y);
     }
-    get_global_scale() {
-        return this.get_global_transform().get_scale();
+    get_global_scale(r_out?: Vector2) {
+        return this.get_global_transform().get_scale(r_out);
     }
 
     /**
@@ -411,7 +411,6 @@ export class Node2D extends CanvasItem {
         this._position.set(this._transform.tx, this._transform.ty);
         this._rotation = this._transform.get_rotation();
         this._transform.get_scale(this._scale);
-        this._skew = this._transform.get_skew();
         this._xform_dirty = false;
     }
 }

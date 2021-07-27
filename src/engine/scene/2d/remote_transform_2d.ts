@@ -5,6 +5,7 @@ import { NOTIFICATION_ENTER_TREE } from '../main/node';
 import { Node2D } from './node_2d';
 import { Vector2 } from 'engine/core/math/vector2';
 import { NOTIFICATION_TRANSFORM_CHANGED } from '../const';
+import { Transform2D } from 'engine/core/math/transform_2d';
 
 
 export class RemoteTransform2D extends Node2D {
@@ -19,6 +20,12 @@ export class RemoteTransform2D extends Node2D {
     use_global_coordinates = true;
 
     cache: Node2D = null;
+
+    constructor() {
+        super();
+
+        this.set_notify_transform(true);
+    }
 
     /* virtual */
 
@@ -128,21 +135,19 @@ export class RemoteTransform2D extends Node2D {
             } else {
                 const n_trans = n.get_global_transform();
                 const our_trans = this.get_global_transform();
-                const n_scale = n.scale;
+                const n_scale = vec_1.copy(n.scale);
 
                 if (!this.update_position) {
-                    const origin = our_trans.get_origin();
-                    n_trans.set_origin(origin);
-                    Vector2.free(origin);
+                    our_trans.set_origin(n_trans.get_origin(vec_2));
                 }
                 if (!this.update_rotation) {
-                    n_trans.set_rotation(our_trans.get_rotation());
+                    our_trans.set_rotation(n_trans.get_rotation());
                 }
 
                 n.set_global_transform(our_trans);
 
                 if (this.update_scale) {
-                    n.set_scale(this.get_global_scale());
+                    n.set_scale(this.get_global_scale(vec_3));
                 } else {
                     n.set_scale(n_scale);
                 }
@@ -151,17 +156,15 @@ export class RemoteTransform2D extends Node2D {
             if (this.update_position && this.update_rotation && this.update_scale) {
                 n.set_transform(this.get_transform());
             } else {
-                const n_trans = n.get_transform();
-                const our_trans = this.get_transform();
+                const n_trans = n.get_transform(transform_1);
+                const our_trans = this.get_transform(transform_2);
                 const n_scale = n.scale;
 
                 if (!this.update_position) {
-                    const origin = our_trans.get_origin();
-                    n_trans.set_origin(origin);
-                    Vector2.free(origin);
+                    our_trans.set_origin(n_trans.get_origin(vec_4));
                 }
                 if (!this.update_rotation) {
-                    n_trans.set_rotation(our_trans.get_rotation());
+                    our_trans.set_rotation(n_trans.get_rotation());
                 }
 
                 n.set_transform(our_trans);
@@ -189,3 +192,11 @@ export class RemoteTransform2D extends Node2D {
     }
 }
 node_class_map['RemoteTransform2D'] = GDCLASS(RemoteTransform2D, Node2D)
+
+const vec_1 = new Vector2;
+const vec_2 = new Vector2;
+const vec_3 = new Vector2;
+const vec_4 = new Vector2;
+
+const transform_1 = new Transform2D;
+const transform_2 = new Transform2D;
